@@ -1,0 +1,9 @@
+# requiremenrs.txt
+
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic
+pymysql
+alembic
+python-dotenv
