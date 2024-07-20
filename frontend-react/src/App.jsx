@@ -1,55 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.jsx
+import React, { useState } from 'react';
+import './App.css';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home/Home';
+import Login from './components/User/Login/Login';
+import SignUp from './components/User/SignUp/SignUp';
+import Subscription from './components/Subscription/Subscription';
+import Trending from './pages/Trending/Trending';
+import Settings from './components/User/Settings/Settings';
+import Header from './components/Header/Header';
+import Footer from './components/Footer/Footer';
 
-function App() {
-  const [count, setCount] = useState(0);
-  const [users, setUsers] = useState([]);
+const App = () => {
+  const [isSidebarVisible, setSidebarVisible] = useState(true);
+  const isLoggedIn = true;
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/users/'); // Replace with your API endpoint
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    }
+  const toggleSidebar = () => {
+    setSidebarVisible(!isSidebarVisible);
   };
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank" rel="noopener noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <div className="app-layout">
+        <Footer isSidebarVisible={isSidebarVisible} toggleSidebar={toggleSidebar} />
+        <div className="main-content">
+          <Header isLoggedIn={isLoggedIn} />
+          <div className="content">
+            <main>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/subscription" element={<Subscription />} />
+                <Route path="/Trending" element={<Trending />} />
+                <Route path="/settings" element={<Settings />} />
+              </Routes>
+            </main>
+          </div>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          Count is {count}
-        </button>
-        <button onClick={fetchUsers}>
-          Fetch Users
-        </button>
-        <h2>Users:</h2>
-        <ul>
-          {users.map((user) => (
-            <li key={user.id}>{user.username}</li>
-          ))}
-        </ul>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </Router>
   );
-}
+};
 
 export default App;

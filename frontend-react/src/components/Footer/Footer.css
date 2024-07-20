@@ -1,0 +1,92 @@
+/* src/components/Footer/Footer.css */
+.layout {
+    display: flex;
+}
+
+.layout__content {
+    display: flex;
+    align-items: flex-start;
+    width: 100%; /* Ensure content takes full width */
+}
+
+.sidebar-toggle {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.footer {
+    position: relative; /* Make footer part of the document flow */
+    width: 200px;
+    height: 100vh;
+    background-color: #f8f9fa;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    padding: 10px 0;
+    transition: width 0.3s ease, transform 0.3s ease; 
+}
+
+.footer.hidden {
+    width: 0; /* Hide the footer */
+    transform: translateX(-100%);
+}
+
+.footer__logo {
+    margin-bottom: 20px;
+}
+
+.footer__button {
+    background: none;
+    border: none;
+    font-size: 30px; /* Adjust font size as needed */
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.footer__links {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.footer__link {
+    text-decoration: none;
+    color: #007bff;
+    margin-left: 10px;
+    font-size: 20px;
+}
+
+.footer__link:hover {
+    text-decoration: underline;
+}
+
+.main-content {
+    flex: 1;
+    transition: margin-left 0.3s ease;
+}
+
+.main-content.with-sidebar {
+    margin-left: 200px;
+}
+
+.main-content.without-sidebar {
+    margin-left: 0;
+}
+
+.footer__links {
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer__links.hidden {
+    display: none; /* Hide the footer links */
+}
