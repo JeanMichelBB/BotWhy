@@ -4,6 +4,8 @@
     background-color: #f8f9fa;
     padding: 10px 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    
+
 }
 
 .header__content {
@@ -11,6 +13,7 @@
     justify-content: space-between;
     width: 100%;
     align-items: center;
+    height: 40px;
 }
 
 .header__logo {
@@ -94,4 +97,17 @@
 
 .overlay__link:hover {
     text-decoration: underline;
+}
+
+.header__link_login {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+    border: 1px solid #007bff;
+    padding: 5px 10px;
+    border-radius: 20px;
+
+    color: white;
+    background-color: #007bff;
+
 }

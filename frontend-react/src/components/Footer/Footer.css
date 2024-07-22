@@ -17,6 +17,7 @@
     padding: 10px 15px;
     font-size: 16px;
     cursor: pointer;
+    
 }
 
 .footer {
@@ -28,7 +29,6 @@
     display: flex;
     flex-direction: column;
     align-items: left;
-    padding: 10px 0;
     transition: width 0.3s ease, transform 0.3s ease; 
 }
 
@@ -47,6 +47,8 @@
     font-size: 30px; /* Adjust font size as needed */
     font-weight: bold;
     cursor: pointer;
+    padding-top: 10px;
+
 }
 
 .footer__links {
@@ -69,6 +71,8 @@
 .main-content {
     flex: 1;
     transition: margin-left 0.3s ease;
+    padding: 0;
+    height: 100vh;
 }
 
 .main-content.with-sidebar {

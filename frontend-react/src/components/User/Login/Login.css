@@ -1,1 +1,142 @@
 /* src/components/Users/Login/Login.css */
+
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+}
+
+.login-container {
+    background: white;
+    padding: 0 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px; /* Increased width for better alignment */
+    box-sizing: border-box;
+}
+
+.login-title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* Added gap for spacing between form elements */
+}
+
+.login-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.login-form-label {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #555;
+}
+
+.login-form-input {
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.2s;
+}
+
+.login-form-input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.login-form-button {
+    background-color: #007bff;
+    color: white;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%; /* Ensure button takes full width of the container */
+}
+
+.login-form-button:hover {
+    background-color: #0056b3;
+}
+
+.login-social {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem; /* Added margin bottom for spacing */
+}
+
+.login-social-button {
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%; /* Ensure social buttons take full width of the container */
+}
+
+.login-social-button.google {
+    background-color: #db4437;
+    color: white;
+}
+
+.login-social-button.google:hover {
+    background-color: #c23321;
+}
+
+.login-social-button.microsoft {
+    background-color: #0078d4;
+    color: white;
+}
+
+.login-social-button.microsoft:hover {
+    background-color: #005bb5;
+}
+
+.login-social-button.apple {
+    background-color: #000;
+    color: white;
+}
+
+.login-social-button.apple:hover {
+    background-color: #333;
+}
+
+.login-text {
+    text-align: center;
+    margin-top: 1rem;
+    color: #777;
+}
+
+.login-link {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.login-link:hover {
+    color: #0056b3;
+}
+
+.login-or {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    font-size: 1rem;
+    color: #555; /* Added color to the "or" text */
+}

@@ -27,4 +27,5 @@ app.include_router(chatbox.router)
 # Create the database tables
 Base.metadata.create_all(bind=engine)
 
+# Seed initial data
 seed_data()

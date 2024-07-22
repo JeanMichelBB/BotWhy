@@ -2,44 +2,89 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SignUp.css';
-const SignUp = () => {
 
+const SignUp = () => {
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: ''
+    });
+
+    const handleChange = (e) => {
+        const { id, value } = e.target;
+        setFormData({
+            ...formData,
+            [id]: value
+        });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // Handle form submission logic here
+
+        // Redirect to login page after successful sign-up
+        navigate('/login');
+    };
 
     return (
-        <div className="signup">
-            <div className="container">
-                <h1 className="signup__title">Sign Up</h1>
-                <form className="signup__form">
-                    <div className="signup__form-group">
-                        <label htmlFor="name" className="signup__form-label">Name</label>
+        <div className="signup-page">
+            <div className="signup-container">
+                <h1 className="signup-title">Sign Up</h1>
+                <form className="signup-form" onSubmit={handleSubmit}>
+                    <div className="signup-form-group">
+                        <label htmlFor="name" className="signup-form-label">Name</label>
                         <input
                             type="text"
                             id="name"
-                            className="signup__form-input"
+                            className="signup-form-input"
+                            value={formData.name}
+                            onChange={handleChange}
                         />
                     </div>
-                    <div className="signup__form-group">
-                        <label htmlFor="email" className="signup__form-label">Email</label>
+                    <div className="signup-form-group">
+                        <label htmlFor="email" className="signup-form-label">Email</label>
                         <input
                             type="email"
                             id="email"
-                            className="signup__form-input"
+                            className="signup-form-input"
+                            value={formData.email}
+                            onChange={handleChange}
                         />
                     </div>
-                    <div className="signup__form-group">
-                        <label htmlFor="password" className="signup__form-label">Password</label>
+                    <div className="signup-form-group">
+                        <label htmlFor="password" className="signup-form-label">Password</label>
                         <input
                             type="password"
                             id="password"
-                            className="signup__form-input"
+                            className="signup-form-input"
+                            value={formData.password}
+                            onChange={handleChange}
                         />
                     </div>
-                    <button type="submit" className="signup__form-button">Sign Up</button>
+                    <div className="signup-form-group">
+                        <label htmlFor="confirmPassword" className="signup-form-label">Confirm Password</label>
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            className="signup-form-input"
+                        />
+                    </div>
+                    <button type="submit" className="signup-form-button">Sign Up</button>
                 </form>
-                    <a href="/login" className="signup__link">Login</a>
+                <div className="signup-text">
+                    Already have an account? <a href="/login" className="signup-link">Login</a>
+                </div>
+                <div className="signup-or">OR</div>
+                <div className="signup-social">
+                    <button className="signup-social-button google">Sign Up with Google</button>
+                    <button className="signup-social-button microsoft">Sign Up with Microsoft</button>
+                    <button className="signup-social-button apple">Sign Up with Apple</button>
+                </div>
+
             </div>
         </div>
     );
-}
+};
 
 export default SignUp;

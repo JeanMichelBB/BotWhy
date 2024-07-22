@@ -25,8 +25,8 @@ const Header = ({ isLoggedIn }) => {
                             </div>
                         ) : (
                             <>
+                                <Link to="/login" className="header__link_login">Login</Link>
                                 <Link to="/signup" className="header__link">Sign Up</Link>
-                                <Link to="/login" className="header__link">Login</Link>
                             </>
                         )}
                     </div>
