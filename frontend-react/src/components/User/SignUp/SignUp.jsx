@@ -6,7 +6,7 @@ import './SignUp.css';
 const SignUp = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        name: '',
+        username: '',
         email: '',
         password: ''
     });
@@ -33,12 +33,12 @@ const SignUp = () => {
                 <h1 className="signup-title">Sign Up</h1>
                 <form className="signup-form" onSubmit={handleSubmit}>
                     <div className="signup-form-group">
-                        <label htmlFor="name" className="signup-form-label">Name</label>
+                        <label htmlFor="username" className="signup-form-label">Username</label>
                         <input
                             type="text"
-                            id="name"
+                            id="username"
                             className="signup-form-input"
-                            value={formData.name}
+                            value={formData.username}
                             onChange={handleChange}
                         />
                     </div>

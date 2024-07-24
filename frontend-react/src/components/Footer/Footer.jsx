@@ -10,10 +10,10 @@ const Footer = ({ isSidebarVisible, toggleSidebar }) => {
                 <button className="footer__button" onClick={toggleSidebar}>☰</button>
             </div>
             <div className={`footer__links ${isSidebarVisible ? 'visible' : 'hidden'}`}>
-                <Link to="/" className="footer__link">ChatBox</Link>
-                <Link to="/Trending" className="footer__link">Trending</Link>
-                <div className="footer__subscription">
-                <Link to="/subscription" className="footer__link">Subscription</Link>
+                <Link to="/" className="footer__link">Trending</Link>
+                <Link to="/chat" className="footer__link">ChatBox</Link>
+                <div className="footer__about">
+                <Link to="/about" className="footer__link">About</Link>
                 </div>
             </div>
         </aside>

@@ -9,6 +9,7 @@ import jwt
 from typing import Optional
 from app.models.schemas import UserCreate, UserResponse
 from app.models import models
+from fastapi.security import OAuth2PasswordBearer
 
 # Define the router
 router = APIRouter()
@@ -45,36 +46,6 @@ def get_db_session() -> Session:
     db = next(get_db())
     return db
 
-# Endpoint for user signup
-@router.post("/signup", response_model=UserResponse)
-def signup(user: UserCreate, db: Session = Depends(get_db)):
-    # Hash the password and create the user
-    hashed_password = hash_password(user.password)
-    db_user = models.User(
-        username=user.username,
-        email=user.email,
-        password_hash=hashed_password,
-        first_name=user.first_name,
-        last_name=user.last_name,
-    )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
-
-# Endpoint for user login
-@router.post("/login")
-def login(user: BaseModel):
-    db = get_db_session()
-    existing_user = db.query(User).filter(User.email == user.email).first()
-    if not existing_user or not verify_password(user.password, existing_user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-
-    token = create_jwt_token(existing_user.id)
-    return {"access_token": token, "token_type": "bearer"}
-
-from fastapi.security import OAuth2PasswordBearer
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # Protected route example
@@ -83,8 +54,15 @@ def protected_route(token: str = Depends(oauth2_scheme)):
     if not user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or missing token")
     return user_id
+# get_current_user
 
-# Example protected endpoint
-@router.get("/protected")
-def protected_endpoint(user_id: int = Depends(protected_route)):
-    return {"message": f"Hello user {user_id}"}
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    user_id = get_user_from_token(token)
+    if not user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or missing token")
+
+    db = get_db_session()
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return user

@@ -1,12 +1,19 @@
+// src/components/Header/Header.jsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 
 const Header = ({ isLoggedIn }) => {
     const [isOverlayVisible, setOverlayVisible] = useState(false);
+    const navigate = useNavigate();
 
     const toggleOverlay = () => {
         setOverlayVisible(!isOverlayVisible);
+    };
+
+    const handleSignOut = () => {
+        localStorage.removeItem('token'); // Remove the token from local storage
+        window.location.href = "/";
     };
 
     return (
@@ -35,7 +42,7 @@ const Header = ({ isLoggedIn }) => {
                     <div className="overlay" onClick={toggleOverlay}>
                         <div className="overlay__content" onClick={(e) => e.stopPropagation()}>
                             <Link to="/settings" className="overlay__link">Settings</Link>
-                            <Link to="/signout" className="overlay__link">Sign Out</Link>
+                            <span className="overlay__link" onClick={handleSignOut}>Sign Out</span>
                         </div>
                     </div>
                 )}

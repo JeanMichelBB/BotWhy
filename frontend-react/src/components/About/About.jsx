@@ -1,9 +1,9 @@
-// src/components/Subscription/Subscription.jsx
+// src/components/About/About.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Subscription.css';
+import './About.css';
 
-const Subscription = () => {
+const About = () => {
     const [subscribed, setSubscribed] = useState(false);
     const navigate = useNavigate();
     
@@ -14,15 +14,15 @@ const Subscription = () => {
     }, [subscribed, navigate]);
     
     return (
-        <div className="subscription">
+        <div className="about">
         <div className="container">
-            <div className="subscription__content">
-            <h1 className="subscription__title">Subscribe to our service</h1>
-            <p className="subscription__description">
+            <div className="about__content">
+            <h1 className="about__title">Subscribe to our service</h1>
+            <p className="about__description">
                 Subscribe to our service to get access to all the features we offer.
             </p>
             <button
-                className="subscription__button"
+                className="about__button"
                 onClick={() => setSubscribed(true)}
             >
                 Subscribe
@@ -33,4 +33,4 @@ const Subscription = () => {
     );
     }
 
-export default Subscription;
+export default About;

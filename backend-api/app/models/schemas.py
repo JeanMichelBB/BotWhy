@@ -1,15 +1,13 @@
 # app/models/schemas.py
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import Dict, List, Optional
+from pydantic import BaseModel, EmailStr
 from uuid import UUID
 from datetime import datetime
 
 class UserBase(BaseModel):
     id: UUID
-    username: str
-    email: str
-    first_name: str
-    last_name: str
+    email: EmailStr
+    name: str
     profile_picture: Optional[str] = None
     created_at: datetime
     updated_at: datetime
@@ -17,9 +15,7 @@ class UserBase(BaseModel):
     is_active: bool = True
     is_admin: bool = False
     preferences: Optional[dict] = None
-    subscription_level: Optional[str] = None
     social_logins: Optional[dict] = None
-    notification_settings: Optional[dict] = None
 
 class UserCreate(UserBase):
     password: str
@@ -57,22 +53,6 @@ class MessageCreate(BaseModel):
 class MessageResponse(MessageBase):
     pass
 
-class SubscriptionBase(BaseModel):
-    id: UUID
-    user_id: UUID
-    start_date: datetime
-    end_date: datetime
-    subscription_type: str
-
-class SubscriptionCreate(BaseModel):
-    user_id: UUID
-    start_date: datetime
-    end_date: datetime
-    subscription_type: str
-
-class SubscriptionResponse(SubscriptionBase):
-    pass
-
 class TrendingBase(BaseModel):
     id: UUID
     user_id: UUID
@@ -85,3 +65,32 @@ class TrendingCreate(BaseModel):
 
 class TrendingResponse(TrendingBase):
     pass
+
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+
+    class Config:
+        orm_mode = True
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+    
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+    first_name: str
+    last_name: str
+    profile_picture: Optional[str] = None
+    preferences: Optional[Dict] = None
+    subscription_level: Optional[str] = None
+    social_logins: Optional[Dict] = None
+    notification_settings: Optional[Dict] = None
