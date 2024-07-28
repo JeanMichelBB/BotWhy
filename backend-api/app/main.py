@@ -8,6 +8,8 @@ from app.core.database import engine, Base
 from dotenv import load_dotenv
 from app.core.seed import seed_data
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
+from app.api.endpoints.google_auth import login_with_google, auth_google_callback, auth_status, logout
 import os
 
 # Load environment variables from .env
@@ -20,6 +22,24 @@ app = FastAPI()
 SECRET_KEY = os.getenv("SECRET_KEY")  # , "your_secret_key"
 
 api_key_header = APIKeyHeader(name="access-token", auto_error=False)
+
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY"))
+
+@app.get("/auth/google")
+async def google_login(request: Request):
+    return await login_with_google(request)
+
+@app.get("/auth/google/callback")
+async def google_callback(request: Request):
+    return await auth_google_callback(request)
+
+@app.get("/auth/status")
+async def status(request: Request):
+    return await auth_status(request)
+
+@app.get("/auth/logout")
+async def auth_logout(request: Request):
+    return await logout(request)
 
 def get_api_key(api_key_header: str = Security(api_key_header)):
     if api_key_header == SECRET_KEY:
@@ -63,7 +83,7 @@ app.openapi = custom_openapi
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000"],  # Allow requests from this origin
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],  # Add methods you need
     allow_headers=["*"],

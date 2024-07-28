@@ -14,33 +14,27 @@ import Footer from './components/Footer/Footer';
 const App = () => {
   const [isSidebarVisible, setSidebarVisible] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
 
-  // Function to check if the token is valid
-  const checkTokenValidity = async (token) => {
+  const checkAuthStatus = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/user/protected', {
+      const response = await fetch('http://127.0.0.1:8000/auth/status', {
+        credentials: 'include', // include cookies in the request
         headers: {
-          Authorization: `Bearer ${token}`,
-          'access-token': 'mysecretkey'
+          'access-token': 'mysecretkey', // Add the custom header here
         },
       });
-
-      if (response.ok) {
-        setIsLoggedIn(true);
-      } else {
-        setIsLoggedIn(false);
-      }
+      const data = await response.json();
+      setIsLoggedIn(data.isLoggedIn);
+      setUser(data.user);
     } catch (error) {
       setIsLoggedIn(false);
+      setUser(null);
     }
   };
 
-  // Check if the user is logged in when the component mounts
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      checkTokenValidity(token);
-    }
+    checkAuthStatus();
   }, []);
 
   const toggleSidebar = () => {
@@ -56,7 +50,7 @@ const App = () => {
       <div className="app-layout">
         <Footer isSidebarVisible={isSidebarVisible} toggleSidebar={toggleSidebar} />
         <div className="main-content">
-          <Header isLoggedIn={isLoggedIn} />
+          <Header isLoggedIn={isLoggedIn} user={user} />
           <div className="content">
             <main>
               <Routes>

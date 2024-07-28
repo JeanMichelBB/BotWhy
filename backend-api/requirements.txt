@@ -7,3 +7,6 @@ pydantic
 pymysql
 alembic
 python-dotenv
+requests 
+oauthlib 
+starlette-authlib
