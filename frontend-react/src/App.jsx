@@ -3,11 +3,9 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Home from './pages/Home/Home';
-import Login from './components/User/Login/Login';
-import SignUp from './components/User/SignUp/SignUp';
 import About from './components/About/About';
 import Trending from './pages/Trending/Trending';
-import Settings from './components/User/Settings/Settings';
+import Settings from './components/Settings/Settings';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 
@@ -42,8 +40,10 @@ const App = () => {
   };
 
   const ProtectedRoute = ({ element }) => {
-    return isLoggedIn ? element : <Navigate to="/login" />;
-  };
+    if (isLoggedIn) {
+      return element;
+    }
+    };
 
   return (
     <Router>
@@ -55,15 +55,8 @@ const App = () => {
             <main>
               <Routes>
                 <Route path="/" element={<Trending />} />
-                <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
-                <Route path="/signup" element={<SignUp />} />
                 <Route path="/about" element={<About />} />
-                <Route
-                  path="/chat"
-                  element={
-                    <ProtectedRoute element={<Home />} />
-                  }
-                />
+                <Route path="/chat" element={<Home />} />
                 <Route
                   path="/settings"
                   element={
