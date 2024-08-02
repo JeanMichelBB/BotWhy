@@ -74,6 +74,24 @@
     background-color: #007bff;
 }
 
+/* New styles for the profile */
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile__image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.profile__name {
+    font-size: 16px;
+    font-weight: bold;
+}
+
 /* Overlay Styles */
 .overlay {
     position: fixed;
@@ -124,3 +142,31 @@
 .header__google-login-button:hover {
     background-color: #c23321;
 }
+
+.profile {
+    position: relative;
+  }
+  
+  .profile__image {
+    cursor: pointer;
+  }
+  
+  .profile__overlay {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    z-index: 10;
+  }
+  
+  .profile__name {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .profile__overlay button {
+    display: block;
+  }

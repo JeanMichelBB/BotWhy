@@ -1,15 +1,66 @@
 // src/components/Header/Header.jsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
+import Login from '../Login/Login';
+import Logout from '../Logout/Logout';
+import { gapi } from 'gapi-script';
 
-const Header = ({ isLoggedIn, user }) => {
-  const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8000/auth/google";
-  };
+const clientId = '';
 
-  const handleLogout = () => {
-    window.location.href = "http://localhost:8000/auth/logout";
+const Header = () => {
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [profile, setProfile] = useState({ name: '', imageUrl: '' });
+  const [isOverlayVisible, setIsOverlayVisible] = useState(false);
+
+  useEffect(() => {
+    function start() {
+      gapi.load('auth2', () => {
+        const auth2 = gapi.auth2.init({
+          client_id: clientId,
+          scope: 'profile',
+        });
+
+        auth2.then(() => {
+          const authInstance = gapi.auth2.getAuthInstance();
+          const isSignedIn = authInstance.isSignedIn.get();
+          setIsSignedIn(isSignedIn);
+
+          if (isSignedIn) {
+            const user = authInstance.currentUser.get();
+            const profile = user.getBasicProfile();
+            setProfile({
+              name: profile.getName(),
+              imageUrl: profile.getImageUrl(),
+            });
+          } else {
+            setProfile({ name: '', imageUrl: '' });
+          }
+
+          authInstance.isSignedIn.listen((isSignedIn) => {
+            setIsSignedIn(isSignedIn);
+            setIsOverlayVisible(false); // Hide overlay on sign-in status change
+
+            if (isSignedIn) {
+              const user = authInstance.currentUser.get();
+              const profile = user.getBasicProfile();
+              setProfile({
+                name: profile.getName(),
+                imageUrl: profile.getImageUrl(),
+              });
+            } else {
+              setProfile({ name: '', imageUrl: '' });
+            }
+          });
+        }).catch((err) => console.error('Error initializing Google Auth:', err));
+      });
+    }
+
+    start();
+  }, []);
+
+  const toggleOverlay = () => {
+    setIsOverlayVisible(!isOverlayVisible);
   };
 
   return (
@@ -22,15 +73,23 @@ const Header = ({ isLoggedIn, user }) => {
             </Link>
           </div>
           <div className="header__nav">
-            {isLoggedIn ? (
-              <>
-                <img src={user.picture} alt="Profile" className="header__profile-pic" />
-                <button onClick={handleLogout} className="header__link_login">Logout</button>
-              </>
+            {isSignedIn ? (
+              <div className="profile">
+                <img 
+                  src={profile.imageUrl} 
+                  alt="profile" 
+                  className="profile__image" 
+                  onClick={toggleOverlay}
+                />
+                {isOverlayVisible && (
+                  <div className="profile__overlay">
+                    <span className="profile__name">{profile.name}</span>
+                    <Logout setIsSignedIn={setIsSignedIn} />
+                  </div>
+                )}
+              </div>
             ) : (
-              <button onClick={handleGoogleLogin} className="header__google-login-button">
-                Login with Google
-              </button>
+              <Login />
             )}
           </div>
         </div>
