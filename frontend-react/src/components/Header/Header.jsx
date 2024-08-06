@@ -1,66 +1,35 @@
 // src/components/Header/Header.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
-import Login from '../Login/Login';
-import Logout from '../Logout/Logout';
-import { gapi } from 'gapi-script';
+import { GoogleLogin } from '@react-oauth/google';
 
-const clientId = '';
-
-const Header = () => {
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  const [profile, setProfile] = useState({ name: '', imageUrl: '' });
-  const [isOverlayVisible, setIsOverlayVisible] = useState(false);
+const Header = ({ onTokenUpdate }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    function start() {
-      gapi.load('auth2', () => {
-        const auth2 = gapi.auth2.init({
-          client_id: clientId,
-          scope: 'profile',
-        });
-
-        auth2.then(() => {
-          const authInstance = gapi.auth2.getAuthInstance();
-          const isSignedIn = authInstance.isSignedIn.get();
-          setIsSignedIn(isSignedIn);
-
-          if (isSignedIn) {
-            const user = authInstance.currentUser.get();
-            const profile = user.getBasicProfile();
-            setProfile({
-              name: profile.getName(),
-              imageUrl: profile.getImageUrl(),
-            });
-          } else {
-            setProfile({ name: '', imageUrl: '' });
-          }
-
-          authInstance.isSignedIn.listen((isSignedIn) => {
-            setIsSignedIn(isSignedIn);
-            setIsOverlayVisible(false); // Hide overlay on sign-in status change
-
-            if (isSignedIn) {
-              const user = authInstance.currentUser.get();
-              const profile = user.getBasicProfile();
-              setProfile({
-                name: profile.getName(),
-                imageUrl: profile.getImageUrl(),
-              });
-            } else {
-              setProfile({ name: '', imageUrl: '' });
-            }
-          });
-        }).catch((err) => console.error('Error initializing Google Auth:', err));
-      });
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      onTokenUpdate(token);
+      setIsAuthenticated(true);
     }
+  }, [onTokenUpdate]);
 
-    start();
-  }, []);
+  const handleLoginSuccess = (credentialResponse) => {
+    console.log('Login Success:', credentialResponse);
+    localStorage.setItem('authToken', credentialResponse.credential);
+    onTokenUpdate(credentialResponse.credential);
+    setIsAuthenticated(true);
+  };
 
-  const toggleOverlay = () => {
-    setIsOverlayVisible(!isOverlayVisible);
+  const handleLoginError = () => {
+    console.log('Login Failed');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    setIsAuthenticated(false);
+    onTokenUpdate(null);
   };
 
   return (
@@ -73,23 +42,20 @@ const Header = () => {
             </Link>
           </div>
           <div className="header__nav">
-            {isSignedIn ? (
-              <div className="profile">
-                <img 
-                  src={profile.imageUrl} 
-                  alt="profile" 
-                  className="profile__image" 
-                  onClick={toggleOverlay}
-                />
-                {isOverlayVisible && (
-                  <div className="profile__overlay">
-                    <span className="profile__name">{profile.name}</span>
-                    <Logout setIsSignedIn={setIsSignedIn} />
-                  </div>
-                )}
-              </div>
+            {!isAuthenticated ? (
+              <GoogleLogin
+                clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
+                text="Sign in with Google"
+                onSuccess={handleLoginSuccess}
+                onError={handleLoginError}
+                // ux_mode="redirect"
+                useOneTap
+                auto_select
+                containerProps={{ allow: "identity-credentials-get" }}
+                use_fedcm_for_prompt
+              />
             ) : (
-              <Login />
+              <button onClick={handleLogout}>Logout</button>
             )}
           </div>
         </div>
