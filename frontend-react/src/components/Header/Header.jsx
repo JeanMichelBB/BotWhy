@@ -3,9 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
 import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
+import axios from 'axios';
 
 const Header = ({ onTokenUpdate }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [email, setEmail] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -15,11 +18,29 @@ const Header = ({ onTokenUpdate }) => {
     }
   }, [onTokenUpdate]);
 
-  const handleLoginSuccess = (credentialResponse) => {
-    console.log('Login Success:', credentialResponse);
-    localStorage.setItem('authToken', credentialResponse.credential);
-    onTokenUpdate(credentialResponse.credential);
-    setIsAuthenticated(true);
+  const handleLoginSuccess = async (credentialResponse) => {
+    console.log('Login Success', credentialResponse);
+    const idToken = credentialResponse.credential;
+    localStorage.setItem('authToken', idToken);
+    const decoded = jwtDecode(idToken);
+    setEmail(decoded.email);
+    onTokenUpdate(idToken);
+
+    try {
+      const response = await axios.post('http://localhost:8000/user/login', {}, {
+        params: { token: idToken },
+        headers: { 'accept': 'application/json', 'access-token': 'mysecretkey' }
+      });
+
+      if (response.status === 200) {
+        setIsAuthenticated(true);
+        console.log('User ID:', response.data.user_id);
+        // save token to local storage
+        localStorage.setItem('userId', response.data.user_id);
+      }
+    } catch (error) {
+      console.error('Login failed:', error.response ? error.response.data : error.message);
+    }
   };
 
   const handleLoginError = () => {
@@ -41,21 +62,23 @@ const Header = ({ onTokenUpdate }) => {
               <span>ChatBox</span>
             </Link>
           </div>
+
           <div className="header__nav">
             {!isAuthenticated ? (
               <GoogleLogin
-                clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
-                text="Sign in with Google"
                 onSuccess={handleLoginSuccess}
                 onError={handleLoginError}
-                // ux_mode="redirect"
                 useOneTap
                 auto_select
+                clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
                 containerProps={{ allow: "identity-credentials-get" }}
                 use_fedcm_for_prompt
               />
             ) : (
-              <button onClick={handleLogout}>Logout</button>
+              <>
+                <Link to="/settings" className="header__settings-link">Settings</Link>
+                <button onClick={handleLogout} className="header__logout-button">Logout</button>
+              </>
             )}
           </div>
         </div>

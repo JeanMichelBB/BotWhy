@@ -1,6 +1,5 @@
 // src/App.jsx
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Home from './pages/Home/Home';
@@ -10,19 +9,35 @@ import Settings from './components/Settings/Settings';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import axios from 'axios';
 
 const App = () => {
   const [isSidebarVisible, setSidebarVisible] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [googleToken, setGoogleToken] = useState(null); // State to store Google token
+  const [idToken, setIdToken] = useState('');
 
   const toggleSidebar = () => {
     setSidebarVisible(!isSidebarVisible);
   };
 
   const handleTokenUpdate = (token) => {
-    console.log('Google Token:', token); // Log the token
-    setGoogleToken(token);
+    setIdToken(localStorage.getItem('authToken'));
+
+    // Perform the authentication check
+    axios.get('http://localhost:8000/user/protected', {
+      params: { token: idToken },
+      headers: { 'accept': 'application/json', 'access-token': 'mysecretkey' }
+    })
+      .then(response => {
+        if (response.status === 200) {
+          setIsLoggedIn(true);
+          console.log('Protected route access granted');
+        }
+      })
+      .catch(error => {
+        console.error('Protected route access failed:', error.response ? error.response.data : error.message);
+        setIsLoggedIn(false);
+      });
   };
 
   const ProtectedRoute = ({ element }) => {

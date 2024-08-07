@@ -10,3 +10,4 @@ python-dotenv
 requests 
 oauthlib 
 starlette-authlib
+google-auth

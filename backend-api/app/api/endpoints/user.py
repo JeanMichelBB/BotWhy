@@ -1,69 +1,73 @@
 # app/api/endpoints/user.py
-import uuid
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Request
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
-from passlib.context import CryptContext
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 from app.core.database import get_db
 from app.models.models import User
-import jwt
-from typing import Optional
-from app.models.schemas import UserCreate, UserResponse, UserLogin
-from app.auth.auth import (
-    hash_password,
-    verify_password,
-    create_jwt_token,
-    get_user_from_token,
-    get_db_session,
-    protected_route,
-    get_current_user
-)
+import hashlib
+import os
 
 # Define the router
 router = APIRouter()
 
-db: Session = Depends(get_db)
+CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+
+def hash_token(token: str) -> str:
+    """Hash the token for consistent storage and comparison."""
+    return hashlib.sha256(token.encode()).hexdigest()
 
 @router.post("/login")
-def login(email: str, password: str, db: Session = Depends(get_db)):
-    # Get the user from the database
-    existing_user = db.query(User).filter(User.email == email).first()
-    if not existing_user or not verify_password(password, existing_user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+def login(request: Request, token: str, db: Session = Depends(get_db)):
+    token = token.strip()
+    if not token:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token is required")
 
-    # Create a JWT token
-    token = create_jwt_token(existing_user.id)
-    return {"access_token": token, "token_type": "bearer"}
+    try:
+        # Verify the Google ID token
+        id_info = id_token.verify_oauth2_token(token, google_requests.Request(), CLIENT_ID)
 
-# Endpoint for user signup
-@router.post("/signup")
-def signup(username: str, email: str, password: str, db: Session = Depends(get_db)):
-    # Check if the user already exists
-    existing_user = db.query(User).filter(User.email == email).first()
-    if existing_user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists")
+        # Extract the user's email from the decoded token
+        email = id_info['email']
+        hashed_token = hash_token(token)
+        user = db.query(User).filter(User.email == email).first()
 
-    # Create a new user with default values for additional fields
-    new_user = User(
-        id=str(uuid.uuid4()),  # Generate a new UUID
-        username=username,
-        email=email,
-        password_hash=hash_password(password),
-        first_name="",  # Default or empty value
-        last_name="",   # Default or empty value
-        profile_picture=None,  # Default or empty value
-        preferences=None,      # Default or empty value
-        subscription_level=None,  # Default or empty value
-        social_logins=None,    # Default or empty value
-        notification_settings=None  # Default or empty value
-    )
+        if user:
+            user.token = hashed_token  # Update the existing user's token
+            db.commit()
+            return {"user_id": user.user_id}
+        else:
+            # Create a new user
+            new_user = User(email=email, token=hashed_token)
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            return {"user_id": new_user.user_id}
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    db.add(new_user)
-    db.commit()
+@router.get("/logout")
+def logout(email: str, db: Session = Depends(get_db)):
+    try:
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        user.token = None  # Clear the token on logout
+        db.commit()
+        return {"message": "User logged out successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    return {"message": "User created successfully"}
-
-# protected route
+# Protected route
 @router.get("/protected")
-async def protected_route(current_user: str = Depends(get_current_user)):
-    return {"message": f"Hello, {current_user}. You are logged in!"}
+def protected(token: str, db: Session = Depends(get_db)):
+    try:
+        hashed_token = hash_token(token)
+        user = db.query(User).filter(User.token == hashed_token).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        return {"user_id": user.user_id}
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
