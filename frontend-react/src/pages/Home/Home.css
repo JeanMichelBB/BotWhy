@@ -54,7 +54,8 @@
     padding: 10px;
     overflow-y: auto;
     display: flex;
-    flex-direction: column-reverse;
+    justify-content: flex-end; /* Aligns messages to the bottom */
+    flex-direction: column;
     gap: 10px;
 }
 .message-checkbox-container {
@@ -97,13 +98,7 @@
     word-wrap: break-word;
 }
 
-.message--machine {
-    background-color: #f1f1f1;
-}
 
-.message--user {
-    background-color: #d1ecf1;
-}
 
 /* Ensure this section is correctly aligned */
 .chatbox__input {
@@ -142,21 +137,21 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-
 }
 
 .chatbox__create {
-    padding: 5px 10px;
-    background-color: #007bff;
+    padding: 10px;
+    background-color: #db4437;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     width: 90px;
+    margin-left: 10px;
 }
 
 .chatbox__Edit {
-    padding: 5px 10px;
+    padding: 10px;
     background-color: #007bff;
     color: white;
     border: none;
@@ -164,6 +159,40 @@
     cursor: pointer;
     width: 90px;
     margin-left: 10px;
+    white-space: nowrap;
+}
+
+.title-input {
+    padding: 10px;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    margin-right: 10px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.chatbox__title {
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    margin-right: 10px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.snippet-input {
+    padding: 10px;
+    margin: 10px;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    margin-right: 10px;
+    width: 100%;
+
+
 }
 
 .chatbox__container {
