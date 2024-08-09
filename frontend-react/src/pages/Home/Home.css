@@ -1,4 +1,5 @@
 /* src/pages/Home/Home.css */
+
 .home {
     display: flex;
     flex-direction: column;
@@ -18,17 +19,34 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    flex: 1; /* Allow the content to grow and fill the remaining space */
+    flex: 1;
 }
 
 .chatbox {
     width: 100%;
     max-width: 600px;
-    border: none;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    height: calc(100vh - 100px); /* Adjust the height of the chatbox based on the viewport height */
+    height: calc(100vh - 100px);
+}
+
+.chatbox__messages__container {
+    display: grid;
+    grid-template-columns: auto 1fr; /* Two columns: one for checkboxes, one for messages */
+    gap: 10px;
+}
+
+.chatbox__messages__checkbox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px;
+}
+
+.checkbox-container {
+    margin-bottom: 10px;
 }
 
 .chatbox__messages {
@@ -36,41 +54,73 @@
     padding: 10px;
     overflow-y: auto;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     gap: 10px;
 }
+.message-checkbox-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+.message-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between
+
+}
+
+.message-container.message-container--user {
+    justify-content: flex-end;
+}
+
+.message-checkbox {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    /* style */
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid #007bff;
+    cursor: pointer;
+}
+
 
 .message {
     padding: 10px 15px;
     margin-bottom: 10px;
     border-radius: 15px;
-    max-width: 70%; /* Adjust the max-width as needed */
-    word-wrap: break-word; /* Ensure long words break properly */
+    max-width: 70%;
+    word-wrap: break-word;
 }
 
 .message--machine {
-    background-color: none;
-    align-self: flex-start;
+    background-color: #f1f1f1;
 }
 
 .message--user {
     background-color: #d1ecf1;
-    align-self: flex-end;
 }
 
+/* Ensure this section is correctly aligned */
 .chatbox__input {
     display: flex;
     border-top: none;
     padding: 10px; /* Ensure there's padding around the input and button */
     background-color: #f8f9fa;
     border-radius: 5px;
+    align-items: center; /* Align items vertically in the center */
 }
 
 .chatbox__input input {
-    flex: 1;
+    flex: 1; /* Take up remaining space */
     padding: 10px;
     border: none;
     outline: none;
+    border-radius: 5px 0 0 5px; /* Rounded corners for the left side */
 }
 
 .chatbox__input button {
@@ -79,9 +129,48 @@
     color: white;
     border: none;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 0 5px 5px 0; /* Rounded corners for the right side */
 }
 
-chatbox__input button:hover {
+.chatbox__input button:hover {
     background-color: #0056b3;
+}
+
+.chatbox__header {
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+}
+
+.chatbox__create {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 90px;
+}
+
+.chatbox__Edit {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 90px;
+    margin-left: 10px;
+}
+
+.chatbox__container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    height: 100%;
 }

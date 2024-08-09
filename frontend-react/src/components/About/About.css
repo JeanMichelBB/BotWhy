@@ -1,1 +1,44 @@
 /* src/components/About/About.css */
+/* src/components/About/About.css */
+.about {
+    padding: 20px;
+}
+
+.about .container {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.about__content {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.about__title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333333;
+}
+
+.about__description {
+    font-size: 16px;
+    margin-bottom: 30px;
+    color: #666666;
+}
+
+.about__button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.about__button:hover {
+    background-color: #0056b3;
+}

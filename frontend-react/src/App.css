@@ -7,6 +7,7 @@ body, html {
 .app-layout {
   display: flex;
   height: 100vh;
+  overflow: hidden;
 }
 
 footer {
@@ -23,13 +24,20 @@ footer {
   padding: 20px 0;
 }
 
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .content {
   flex: 1;
+  overflow-y: auto; /* Enable independent scrolling for the content area */
   box-sizing: border-box;
 }
 
-
-
 main {
   flex: 1;
+  padding: 20px; /* Add padding if necessary */
 }

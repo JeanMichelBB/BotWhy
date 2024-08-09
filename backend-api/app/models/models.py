@@ -48,7 +48,11 @@ class TrendingConversation(Base):
     user_id = Column(String(36), ForeignKey('users.user_id'), nullable=False)
     conversation_id = Column(String(36), ForeignKey('conversations.id'), nullable=False)
     title = Column(String(255), nullable=False)
+    content = Column(JSON, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
+    likes = Column(JSON, nullable=True)
+    comments = Column(JSON, nullable=True)
+    reports = Column(JSON, nullable=True)
     
     user = relationship("User", back_populates="trending_conversations")
     conversation = relationship("Conversation")

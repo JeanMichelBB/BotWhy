@@ -1,1 +1,289 @@
 /* src/pages/Trending/Trending.css */
+.trending {
+    padding: 20px;
+}
+
+.trending-container {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.trending__content {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.trending__title {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333333;
+}
+
+.trending__list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.conversation {
+    padding: 15px;
+    background-color: #fafafa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+.conversation.expanded {
+    padding-bottom: 20px;
+}
+
+.conversation__title {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    padding: 10px 0;
+}
+
+.conversation__snippet {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #666666;
+}
+
+.conversation__fullText {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.conversation.expanded .conversation__fullText {
+    max-height: 500px; /* Set a high enough value to cover your longest text */
+}
+
+.conversation__fullText p {
+    margin: 0;
+    font-size: 16px;
+    color: #333333;
+}
+
+.conversation__toggleButton {
+    font-size: 14px;
+    color: #007bff;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.conversation__toggleButton:hover {
+    text-decoration: none;
+}
+
+/* Conversation Messages */
+.conversation__messages {
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.message {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 15px;
+    max-width: 70%;
+    word-wrap: break-word;
+}
+
+.message--machine {
+    background-color: #e0e0e0;
+    align-self: flex-start;
+    text-align: left;
+}
+
+.message--user {
+    background-color: #c0c0c0;
+    align-self: flex-end;
+    text-align: right;
+}
+
+.conversation__toggleButton {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.conversation__toggleButton:hover {
+    background-color: #0056b3;
+}
+
+.like-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.conversation__likes {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px; 
+}
+
+.like-button,
+.comment-toggle-button {
+    transition: opacity 0.3s ease;
+    background-color: #007bff;
+}
+.comment-toggle-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+ .comment-input {
+    flex-grow: 1; /* Ensure the input field takes the available width */
+    margin-bottom: 10px; /* Space between input field and button */
+    padding: 5px;
+    border: none;
+    border-bottom: 1px solid #007bff;
+    outline: none;
+    background-color: #f0f0f0;
+
+}
+
+.add-comment-button {
+    align-self: flex-end; /* Align button to the right */
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.like-button:active,
+.comment-toggle-button:active {
+    opacity: 0.5;
+}
+
+.like-button:hover {
+    background-color: #0056b3;
+}
+
+.conversation__comments {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column; /* Stack comments vertically */
+    gap: 10px;
+}
+
+.add-comment-button:hover {
+    background-color: #0056b3;
+}
+
+.comment {
+    margin-bottom: 5px;
+    font-size: 14px;
+    background-color: #ffffff;
+    padding: 5px;
+    border-radius: 5px;
+    align-self: flex-start;
+}
+
+.test:after {
+    content: '\2807';
+    font-size: 25px;
+    }
+/* 3-dots button */
+.three-dots {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.three-dots-button {
+    background: none;
+    border: none;
+    font-size: 1em;
+    cursor: pointer;
+    color: #333;
+    margin-left: 10px;
+}
+
+
+.three-dots-button:hover {
+    color: #666;
+}
+
+/* Report overlay */
+.report-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.report-overlay-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.report-overlay-buttons {
+    margin-top: 20px;
+}
+
+.report-submit-button,
+.report-cancel-button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.report-submit-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.report-cancel-button {
+    background-color: #6c757d;
+    color: white;
+}
+
+.report-submit-button:hover {
+    background-color: #c82333;
+}
+
+.report-cancel-button:hover {
+    background-color: #5a6268;
+}
