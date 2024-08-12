@@ -2,17 +2,22 @@
 import React from 'react';
 import './Settings.css';
 
-const Settings = () => {
+const Settings = ({ decodedToken }) => {
     // Simulating user data for demonstration. Replace with your actual user data.
-    const user = {
-        name: 'Jean-Michel',
-        email: 'jmx117x@hotmail.com',
+    const user = decodedToken || {
+        name: decodedToken.name || 'John Doe',
+        email: decodedToken.email || 'example@example.com'
     };
 
     const deleteAllChats = () => {
         // Logic to delete all chats
         console.log('All chats have been deleted.');
     };
+
+    const deleteAccount = () => {
+        // Logic to delete account
+        console.log('Account has been deleted.');
+    }
 
     return (
         <div className="settings">
@@ -25,6 +30,9 @@ const Settings = () => {
                     </div>
                     <button className="settings__delete-button" onClick={deleteAllChats}>
                         Delete all chats
+                    </button>
+                    <button className="settings__delete-account-button" onClick={deleteAccount}>
+                        Delete account
                     </button>
                 </div>
             </div>

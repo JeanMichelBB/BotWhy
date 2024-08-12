@@ -1,10 +1,52 @@
 // src/pages/Home/Home.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Home.css';
+import axios from 'axios';
 
-const Home = () => {
+const Home = ({ user_id }) => {
     const [editMode, setEditMode] = useState(false);
     const [checkedItems, setCheckedItems] = useState([]);
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [conversation, setConversation] = useState(null); 
+    const [messages, setMessages] = useState([]); 
+
+    useEffect(() => {
+        if (!user_id) {
+            console.error('Invalid or missing user_id');
+            return;
+        }
+
+        const fetchConversation = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8000/chatbox/user/${user_id}/conversation`, {
+                    headers: {
+                        'accept': 'application/json',
+                        'access-token': 'mysecretkey' // Replace with your actual token
+                    }
+                });
+                const conversationData = response.data;
+                setConversation(conversationData);
+                console.log('Conversation:', conversationData);
+
+                // Fetch messages for the conversation
+                if (conversationData && conversationData.id) {
+                    const messagesResponse = await axios.get(`http://localhost:8000/chatbox/conversation/${conversationData.id}/messages`, {
+                        headers: {
+                            'accept': 'application/json',
+                            'access-token': 'mysecretkey' // Replace with your actual token
+                        }
+                    });
+                    setMessages(messagesResponse.data);
+                    console.log('Messages:', messagesResponse.data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch conversation or messages:', error);
+            }
+        };
+
+        fetchConversation();
+    }, [user_id]);
 
     const toggleEditMode = () => {
         setEditMode(!editMode);
@@ -12,39 +54,31 @@ const Home = () => {
 
     const handleCheckboxChange = (id) => {
         if (checkedItems.includes(id)) {
-            // Uncheck the box
             setCheckedItems(checkedItems.filter(item => item !== id));
         } else {
-            // Allow checking only if it's the next or previous consecutive checkbox
             if (
                 checkedItems.length === 0 ||
-                checkedItems.includes(id - 1) || // Check if it's the next one down
-                checkedItems.includes(id + 1)    // Check if it's the next one up
+                checkedItems.includes(id - 1) ||
+                checkedItems.includes(id + 1)
             ) {
-                setCheckedItems([...checkedItems, id].sort((a, b) => a - b)); // Sort to maintain order
+                setCheckedItems([...checkedItems, id].sort((a, b) => a - b));
             }
         }
     };
 
     const isDisabled = (id) => {
-        if (checkedItems.length === 0) return false; // No checkboxes selected
+        if (checkedItems.length === 0) return false;
         const minChecked = Math.min(...checkedItems);
         const maxChecked = Math.max(...checkedItems);
         return (
-            !checkedItems.includes(id) && // Only disable if it's not already checked
+            !checkedItems.includes(id) &&
             !(id === maxChecked + 1 || id === minChecked - 1)
         );
     };
 
-    const conversations = [
-        { id: 1, type: 'machine', text: 'Hello, how can I help you today?' },
-        { id: 2, type: 'user', text: 'I\'m looking for some information.' },
-        { id: 3, type: 'machine', text: 'Sure, what kind of information are you looking for?' },
-        { id: 4, type: 'user', text: 'Can you tell me more about your services?' },
-        { id: 5, type: 'machine', text: 'We offer a wide range of services, including web development, mobile app development, and more.' },
-        { id: 6, type: 'user', text: 'That sounds great! How can I get started?' },
-        { id: 7, type: 'machine', text: 'You can get started by contacting our sales team at...' },
-    ];
+    const createConversation = async () => {
+        // Function to create a new conversation
+    };
 
     return (
         <div className="home">
@@ -52,33 +86,49 @@ const Home = () => {
                 <div className="home__content">
                     <div className="chatbox">
                         <div className="chatbox__header">
-                            {editMode && <input className='title-input' type="text" placeholder="Enter title" />}
-                            
-                            {editMode && <button className="chatbox__create">Create</button>}
+                            {editMode && (
+                                <>
+                                    <input 
+                                        className='title-input' 
+                                        type="text" 
+                                        placeholder="Enter title" 
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                    />
+                                    <button className="chatbox__create" onClick={createConversation}>Create</button>
+                                </>
+                            )}
                             <button className="chatbox__Edit" onClick={toggleEditMode}>
-
                                 {editMode ? 'Cancel Edit' : 'Edit'}
                             </button>
                         </div>
-                        <div className="chatbox__title">
-                        {editMode && <input className='snippet-input' type="text" placeholder="Enter short description" />}
+                        <div className="chatbox__description">
+                            {editMode && (
+                                <input 
+                                    className='snippet-input' 
+                                    type="text" 
+                                    placeholder="Enter short description" 
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                />
+                            )}
                         </div>
                         <div className="chatbox__messages">
-                            {conversations.map((conversation) => (
+                            {messages.map((message) => (
                                 <div
-                                    key={conversation.id}
-                                    className={`message-container ${conversation.type === 'user' ? 'message-container--user' : ''}`}
+                                    key={message.id}
+                                    className={`message-container ${message.type === 'user' ? 'message-container--user' : 'message-container--receiver'}`}
                                 >
-                                    <div className={`message message--${conversation.type}`}>
-                                        {conversation.text}
+                                    <div className={`message message--${message.type}`}>
+                                        {message.content}
                                     </div>
                                     {editMode && (
                                         <input
                                             type="checkbox"
                                             className="message-checkbox"
-                                            checked={checkedItems.includes(conversation.id)}
-                                            onChange={() => handleCheckboxChange(conversation.id)}
-                                            disabled={isDisabled(conversation.id)}
+                                            checked={checkedItems.includes(message.id)}
+                                            onChange={() => handleCheckboxChange(message.id)}
+                                            disabled={isDisabled(message.id)}
                                         />
                                     )}
                                 </div>

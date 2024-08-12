@@ -203,3 +203,9 @@
     margin: 0 auto;
     height: 100%;
 }
+
+.chatbox__description {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}

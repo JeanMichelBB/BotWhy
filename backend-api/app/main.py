@@ -1,4 +1,5 @@
 # app/main.py
+
 from fastapi import Depends, FastAPI, Request, Security, HTTPException
 from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
 from fastapi.responses import JSONResponse
@@ -11,6 +12,7 @@ from starlette.middleware.sessions import SessionMiddleware
 import os
 from google.oauth2 import id_token
 from google.auth.transport import requests
+from app.models.seed import seed_database
 
 
 # Load environment variables from .env
@@ -18,8 +20,6 @@ load_dotenv()
 
 # Initialize FastAPI app
 app = FastAPI()
-
-
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -29,38 +29,6 @@ app.state.google_client_id = os.getenv("GOOGLE_CLIENT_ID")
 # Import and include your router
 from app.api.endpoints import user
 app.include_router(user.router)
-
-
-# @app.post("/auth/google")
-# async def auth_google(request: Request):
-#     try:
-#         body = await request.json()
-#         token = body.get("token")
-        
-#         if not token:
-#             raise HTTPException(status_code=400, detail="Token missing")
-
-#         # Verify the token
-#         id_info = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
-
-#         # ID token is valid. Get the user's Google Account ID from the decoded token.
-#         user_id = id_info["sub"]
-#         email = id_info["email"]
-
-#         # You can now use the user_id and email to create a session or JWT token for the user
-#         return {"user_id": user_id, "email": email}
-
-#     except ValueError:
-#         # Invalid token
-#         raise HTTPException(status_code=401, detail="Invalid token")
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-
-# @app.get("/protected")
-# async def protected_route(token: str = Depends(oauth2_scheme)):
-#     # This is where you would normally verify the token and get user information
-#     # For this example, we'll assume the token is valid and return a message
-#     return {"message": "Protected route", "token": token}
 
 # API Key setup
 SECRET_KEY = os.getenv("SECRET_KEY")  # , "your_secret_key"
@@ -117,9 +85,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers from your endpoints
-# app.include_router(chatbox.router)
+# Include the routers
 app.include_router(user.router, prefix="/user", tags=["user"])
+app.include_router(chatbox.router, prefix="/chatbox", tags=["chatbox"])
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
+
+seed_database()

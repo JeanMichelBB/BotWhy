@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
 
+# User Schema
 class UserBase(BaseModel):
     id: UUID
     email: str 
@@ -13,8 +14,13 @@ class UserBase(BaseModel):
     token: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True  
 
+class UserCreate(BaseModel):
+    email: str
+    token: Optional[str] = None
+
+# Conversation Schema
 class ConversationBase(BaseModel):
     id: UUID
     user_id: UUID
@@ -23,28 +29,37 @@ class ConversationBase(BaseModel):
     class Config:
         orm_mode = True
 
+class ConversationCreate(BaseModel):
+    user_id: UUID
+
+# Message Schema
 class MessageBase(BaseModel):
     id: UUID
     conversation_id: UUID
-    sender_google_token_hash: str
-    receiver_google_token_hash: str
     content: str
     timestamp: datetime
+    type: str  # Add this line to represent message type
 
     class Config:
         orm_mode = True
 
 class MessageCreate(BaseModel):
     conversation_id: UUID
-    sender_google_token_hash: str
-    receiver_google_token_hash: str
     content: str
+    type: str  # Add this line to represent message type
 
+# TrendingConversation Schema
 class TrendingBase(BaseModel):
     id: UUID
     user_id: UUID
-    conversation_id: UUID  
+    conversation_id: UUID
+    title: str
+    description: str
+    content: Dict
     created_at: datetime
+    likes: Optional[List[str]] = None
+    comments: Optional[List[str]] = None
+    reports: Optional[List[str]] = None
 
     class Config:
         orm_mode = True
@@ -52,12 +67,10 @@ class TrendingBase(BaseModel):
 class TrendingCreate(BaseModel):
     user_id: UUID
     conversation_id: UUID
+    title: str
+    description: str
+    content: Dict
 
+# UserLogin Schema
 class UserLogin(BaseModel):
     email: str
-
-class UserCreate(BaseModel):
-    email: str
-    created_at: Optional[datetime] = None
-    is_admin: Optional[bool] = False
-    preferences: Optional[Dict] = None

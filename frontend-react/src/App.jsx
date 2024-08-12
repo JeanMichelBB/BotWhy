@@ -1,4 +1,5 @@
 // src/App.jsx
+
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
@@ -9,43 +10,62 @@ import Settings from './components/Settings/Settings';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
 
 const App = () => {
   const [isSidebarVisible, setSidebarVisible] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [idToken, setIdToken] = useState('');
+  const [isDecoded, setIsDecoded] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-  const toggleSidebar = () => {
-    setSidebarVisible(!isSidebarVisible);
-  };
+  const toggleSidebar = () => setSidebarVisible(!isSidebarVisible);
 
-  const handleTokenUpdate = (token) => {
-    setIdToken(localStorage.getItem('authToken'));
+  const handleTokenUpdate = () => {
+    const storedToken = localStorage.getItem('authToken');
 
-    // Perform the authentication check
-    axios.get('http://localhost:8000/user/protected', {
-      params: { token: idToken },
-      headers: { 'accept': 'application/json', 'access-token': 'mysecretkey' }
-    })
-      .then(response => {
-        if (response.status === 200) {
-          setIsLoggedIn(true);
-          console.log('Protected route access granted');
-        }
+    if (!storedToken || storedToken.split('.').length !== 3) {
+      setIsLoggedIn(false);
+      console.log('Invalid or missing token, user is not logged in.');
+      return;
+    }
+
+    try {
+      const decodedToken = jwtDecode(storedToken);
+      setIdToken(storedToken);
+
+      if (!isDecoded) {
+        setIsDecoded(decodedToken);
+      }
+
+      axios.get('http://localhost:8000/user/protected', {
+        params: { token: storedToken },
+        headers: { 'accept': 'application/json', 'access-token': 'mysecretkey' }
       })
-      .catch(error => {
-        console.error('Protected route access failed:', error.response ? error.response.data : error.message);
-        setIsLoggedIn(false);
-      });
+        .then(response => {
+          setIsLoggedIn(response.status === 200);
+          console.log(response.status === 200 ? 'Protected route access granted' : 'Protected route access denied');
+          console.log('User ID:', response.data.user_id);
+          setUserId(response.data.user_id);
+        })
+        .catch(error => {
+          console.error('Protected route access failed:', error.response ? error.response.data : error.message);
+          setIsLoggedIn(false);
+        });
+    } catch (error) {
+      console.error('Error decoding token:', error.message);
+      setIsLoggedIn(false);
+    }
   };
 
   const ProtectedRoute = ({ element }) => {
-    if (isLoggedIn) {
-      return element;
-    }
-    return <Navigate to="/" />;
+    return isLoggedIn ? element : <Navigate to="/" />;
   };
+
+  useEffect(() => {
+    handleTokenUpdate();
+  }, []);
 
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
@@ -53,15 +73,15 @@ const App = () => {
         <div className="app-layout">
           <Footer isSidebarVisible={isSidebarVisible} toggleSidebar={toggleSidebar} />
           <div className="main-content">
-            <Header setIsLoggedIn={setIsLoggedIn} onTokenUpdate={handleTokenUpdate} />
+            <Header onTokenUpdate={handleTokenUpdate} />
             <div className="content">
               <main>
                 <Routes>
                   <Route path="/" element={<Trending />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/chat" element={<Home />} />
-                  <Route path="/settings" element={<ProtectedRoute element={<Settings />} />} />
-                </Routes>
+                  <Route path="/about" element={<About  />} />
+                  <Route path="/chat" element={<Home user_id={userId} />} />
+                  <Route path="/settings" element={<ProtectedRoute element={<Settings decodedToken={isDecoded} />} />} />
+                  </Routes>
               </main>
             </div>
           </div>

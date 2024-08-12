@@ -3,12 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
 import { GoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
 
 const Header = ({ onTokenUpdate }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [email, setEmail] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -22,8 +20,6 @@ const Header = ({ onTokenUpdate }) => {
     console.log('Login Success', credentialResponse);
     const idToken = credentialResponse.credential;
     localStorage.setItem('authToken', idToken);
-    const decoded = jwtDecode(idToken);
-    setEmail(decoded.email);
     onTokenUpdate(idToken);
 
     try {
@@ -35,8 +31,6 @@ const Header = ({ onTokenUpdate }) => {
       if (response.status === 200) {
         setIsAuthenticated(true);
         console.log('User ID:', response.data.user_id);
-        // save token to local storage
-        localStorage.setItem('userId', response.data.user_id);
       }
     } catch (error) {
       console.error('Login failed:', error.response ? error.response.data : error.message);
