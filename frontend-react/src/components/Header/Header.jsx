@@ -31,6 +31,7 @@ const Header = ({ onTokenUpdate }) => {
       if (response.status === 200) {
         setIsAuthenticated(true);
         console.log('User ID:', response.data.user_id);
+        window.location.reload();
       }
     } catch (error) {
       console.error('Login failed:', error.response ? error.response.data : error.message);
@@ -45,6 +46,7 @@ const Header = ({ onTokenUpdate }) => {
     localStorage.removeItem('authToken');
     setIsAuthenticated(false);
     onTokenUpdate(null);
+    window.location.reload();
   };
 
   return (

@@ -92,4 +92,4 @@ app.include_router(chatbox.router, prefix="/chatbox", tags=["chatbox"])
 # Create the database tables
 Base.metadata.create_all(bind=engine)
 
-seed_database()
+# seed_database()

@@ -1,5 +1,5 @@
 // src/pages/Trending/Trending.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Trending.css';
 
 const Trending = () => {
@@ -8,54 +8,44 @@ const Trending = () => {
     const [newComment, setNewComment] = useState('');
     const [reportOverlayVisible, setReportOverlayVisible] = useState(false);
     const [selectedConversationId, setSelectedConversationId] = useState(null);
+    const [conversations, setConversations] = useState([]);
+    const [messages, setMessages] = useState({});
 
-    const conversations = [
-        {
-            id: 1,
-            title: 'Conversation 1',
-            snippet: 'This is a short snippet of conversation 1...',
-            messages: [
-                { id: 1, sender: 'Machine', text: 'Hello, how can I help you today?' },
-                { id: 2, sender: 'User', text: 'I\'m looking for some information.' },
-                { id: 3, sender: 'Machine', text: 'Sure, what do you need?' },
-            ],
-            likes: 10,
-            comments: [
-                { user: 'Alice', text: 'This is so helpful!' },
-                { user: 'Bob', text: 'Great conversation.' }
-            ],
-            reports: [],
-        },
-        {
-            id: 2,
-            title: 'Conversation 2',
-            snippet: 'This is a short snippet of conversation 2...',
-            messages: [
-                { id: 1, sender: 'User', text: 'Can you help me with my account?' },
-                { id: 2, sender: 'Machine', text: 'Of course! What seems to be the problem?' },
-            ],
-            likes: 5,
-            comments: [
-                { user: 'Charlie', text: 'Thanks for the help!' }
-            ],
-            reports: [],
-        },
-        {
-            id: 3,
-            title: 'Conversation 3',
-            snippet: 'This is a short snippet of conversation 3...',
-            messages: [
-                { id: 1, sender: 'Machine', text: 'What can I assist you with today?' },
-                { id: 2, sender: 'User', text: 'I have a question about my subscription.' },
-            ],
-            likes: 8,
-            comments: [],
-            reports: [],
-        },
-    ];
+    // Fetch trending conversations
+    useEffect(() => {
+        fetch('http://localhost:8000/chatbox/trending_conversations', {
+            headers: {
+                'accept': 'application/json',
+                'access-token': 'mysecretkey',
+            },
+        })
+            .then(response => response.json())
+            .then(data => setConversations(data))
+            .catch(error => console.error('Error fetching conversations:', error));
+    }, []);
+
+    // Fetch messages for a specific conversation
+    const fetchMessages = (id) => {
+        fetch(`http://localhost:8000/chatbox/trending_conversation/${id}/messages`, {
+            headers: {
+                'accept': 'application/json',
+                'access-token': 'mysecretkey',
+            },
+        })
+            .then(response => response.json())
+            .then(data => setMessages(prevMessages => ({ ...prevMessages, [id]: data })))
+            .catch(error => console.error('Error fetching messages:', error));
+    };
 
     const toggleConversation = (id) => {
-        setExpandedConversationId(expandedConversationId === id ? null : id);
+        if (expandedConversationId === id) {
+            setExpandedConversationId(null);
+        } else {
+            setExpandedConversationId(id);
+            if (!messages[id]) {
+                fetchMessages(id);
+            }
+        }
         setCommentsVisible(null);
     };
 
@@ -112,25 +102,29 @@ const Trending = () => {
                                         <div className="test"></div>
                                     </button>
                                 </h2>
-                                <p className="conversation__snippet">{conversation.snippet}</p>
+                                <p className="conversation__snippet">{conversation.description}</p>
                                 <div className="conversation__fullText">
                                     {expandedConversationId === conversation.id && (
                                         <div className="conversation__messages">
-                                            {conversation.messages.map(message => (
-                                                <div
-                                                    key={message.id}
-                                                    className={`message message--${message.sender.toLowerCase()}`}
-                                                >
-                                                    {message.sender}: {message.text}
-                                                </div>
-                                            ))}
+                                            {(messages[conversation.id] && Array.isArray(messages[conversation.id])) ? (
+                                                messages[conversation.id].map(message => (
+                                                    <div
+                                                        key={message.id}
+                                                        className={`message message--${message.type}`}
+                                                    >
+                                                        {message.type === 'user' ? 'User' : 'Machine'}: {message.content}
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p>Loading messages...</p>
+                                            )}
                                             <div className="conversation__likes">
                                                 <button
                                                     id={`like-button-${conversation.id}`}
                                                     onClick={() => handleLike(conversation.id)}
                                                     className="like-button"
                                                 >
-                                                    👍 {conversation.likes} Likes
+                                                    👍 {conversation.likes.length} Likes
                                                 </button>
                                                 <button
                                                     id={`comment-button-${conversation.id}`}

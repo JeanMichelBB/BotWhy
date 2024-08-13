@@ -50,14 +50,14 @@
 }
 
 .chatbox__messages {
-    flex: 1;
+    flex: 1; /* Take up available space */
     padding: 10px;
-    overflow-y: auto;
+    overflow-y: auto; /* Allow vertical scrolling */
     display: flex;
-    justify-content: flex-end; /* Aligns messages to the bottom */
-    flex-direction: column;
+    flex-direction: column-reverse; /* New messages appear at the bottom */
     gap: 10px;
 }
+
 .message-checkbox-container {
     display: flex;
     align-items: center;
