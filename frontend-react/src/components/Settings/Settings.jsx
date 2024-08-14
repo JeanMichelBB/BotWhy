@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import './Settings.css';
 import ConfirmationOverlay from '../ConfirmationOverlay/ConfirmationOverlay';
 
-const Settings = ({ decodedToken, user_id }) => {
+const Settings = ({ decodedToken, user_id, onLogout }) => {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [confirmationMessage, setConfirmationMessage] = useState('');
     const [onConfirmAction, setOnConfirmAction] = useState(() => () => {});
@@ -58,6 +58,7 @@ const Settings = ({ decodedToken, user_id }) => {
                 console.error('Error:', error);
             } finally {
                 setShowConfirmation(false);
+                onLogout();
             }
         });
         setShowConfirmation(true);
@@ -107,7 +108,7 @@ const Settings = ({ decodedToken, user_id }) => {
                     <button className="settings__delete-account-button" onClick={deleteAllTrendingConversation}>
                         Delete all trending conversation
                     </button>
-                    <button className="settings__delete-account-button" onClick={deleteAccount}>
+                    <button className="settings__delete-account-button" onClick={deleteAccount} >
                         Delete account
                     </button>
                 </div>

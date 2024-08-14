@@ -57,3 +57,4 @@ def answer_question(question: str, user_id: str, db: Session = Depends(get_db)):
     db.commit()
     
     return {"answer": response.choices[0].message['content']}
+

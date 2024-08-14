@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
 import axios from 'axios';
+import { validateMessage, validateTrendingConversation } from '../../utils/validation';
 
 const Home = ({ user_id }) => {
     const [editMode, setEditMode] = useState(false);
@@ -11,12 +12,12 @@ const Home = ({ user_id }) => {
     const [conversation, setConversation] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [style, setStyle] = useState('');
 
     useEffect(() => {
-        if (!user_id) {
-            console.error('Invalid or missing user_id');
-            return;
-        }
+
 
         const fetchConversation = async () => {
             try {
@@ -66,8 +67,18 @@ const Home = ({ user_id }) => {
     };
 
     const createTrendingConversation = async () => {
-        if (checkedItems.length === 0) {
-            console.error('No messages selected to create a trending conversation.');
+        if (!user_id) {
+            setAlertMessage('Login to try the chatbox');
+            setStyle({ backgroundColor: 'rgb(130 130 130)' });
+            setShowAlert(true);
+            return;
+        }
+        const errorMessage = validateTrendingConversation(title, description);
+        if (errorMessage) {
+            console.error(errorMessage);
+            setAlertMessage(errorMessage); // Set the error message from validation
+            setStyle({ backgroundColor: '#ff4d4d' }); // Red for error
+            setShowAlert(true);
             return;
         }
     
@@ -94,6 +105,9 @@ const Home = ({ user_id }) => {
     
             // Handle the response as needed
             console.log('Trending Conversation created successfully:', response.data);
+            setAlertMessage('Trending Conversation created successfully');
+            setStyle({ backgroundColor: '#38c038' });
+            setShowAlert(true);
     
         } catch (error) {
             console.error('Failed to create trending conversation:', error);
@@ -106,7 +120,22 @@ const Home = ({ user_id }) => {
     };
 
     const sendMessage = async () => {
-        if (!newMessage.trim() || !conversation?.id) return;
+        if (!user_id) {
+            setAlertMessage('Login to try the chatbox');
+            setStyle({ backgroundColor: 'rgb(130 130 130)' });
+            setShowAlert(true);
+            return;
+        }
+
+    
+        const errorMessage = validateMessage(newMessage);
+        if (errorMessage) {
+            console.error(errorMessage);
+            setAlertMessage(errorMessage);
+            setStyle({ backgroundColor: '#ff4c4c' }); // Red for error
+            setShowAlert(true);
+            return;
+        }
     
         try {
             // Send the user's message to the conversation
@@ -196,6 +225,10 @@ const Home = ({ user_id }) => {
         }
     };
 
+    const closeAlert = () => {
+        setShowAlert(false);
+    };
+
     return (
         <div className="home">
             <div className="home-container">
@@ -251,6 +284,12 @@ const Home = ({ user_id }) => {
                                 </div>
                             ))}
                         </div>
+                        {showAlert && (
+                            <div className="chatbox__alert" style={style}>
+                                {alertMessage}
+                                <button className="chatbox__alert-close" onClick={closeAlert}>X</button>
+                            </div>
+                        )}
                         <div className="chatbox__input">
                             <input
                                 type="text"

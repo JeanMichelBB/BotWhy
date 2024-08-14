@@ -1,5 +1,4 @@
 // src/App.jsx
-
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
@@ -23,23 +22,25 @@ const App = () => {
 
   const toggleSidebar = () => setSidebarVisible(!isSidebarVisible);
 
+
+
   const handleTokenUpdate = () => {
     const storedToken = localStorage.getItem('authToken');
-
+  
     if (!storedToken || storedToken.split('.').length !== 3) {
       setIsLoggedIn(false);
       console.log('Invalid or missing token, user is not logged in.');
       return;
     }
-
+  
     try {
       const decodedToken = jwtDecode(storedToken);
       setIdToken(storedToken);
-
+  
       if (!isDecoded) {
         setIsDecoded(decodedToken);
       }
-
+  
       axios.get('http://localhost:8000/user/protected', {
         params: { token: storedToken },
         headers: { 'accept': 'application/json', 'access-token': 'mysecretkey' }
@@ -51,13 +52,34 @@ const App = () => {
           setUserId(response.data.user_id);
         })
         .catch(error => {
-          console.error('Protected route access failed:', error.response ? error.response.data : error.message);
+          if (error.response) {
+            const { status, data } = error.response;
+            
+            if (error === 404) {
+              console.error('404 Error:', data.detail); // Specifically logging the 404 error detail
+              handleLogout();
+            } else {
+              console.error(`Error ${status}:`, data.detail || error.message); // Log the error status and detail
+            }
+          } else {
+            console.error('Protected route access failed:', error.message); // Generic error handling
+          }
+  
           setIsLoggedIn(false);
         });
     } catch (error) {
       console.error('Error decoding token:', error.message);
       setIsLoggedIn(false);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    setIsLoggedIn(false);
+    setIdToken('');
+    setIsDecoded(null);
+    setUserId(null);
+    window.location.reload();
   };
 
   const ProtectedRoute = ({ element }) => {
@@ -74,16 +96,16 @@ const App = () => {
         <div className="app-layout">
           <Footer isSidebarVisible={isSidebarVisible} toggleSidebar={toggleSidebar} />
           <div className="main-content">
-            <Header onTokenUpdate={handleTokenUpdate} />
+            <Header onTokenUpdate={handleTokenUpdate} onLogout={handleLogout} />
             <div className="content">
               <main>
                 <Routes>
-                  <Route path="/" element={<Trending />} />
-                  <Route path="/about" element={<About  />} />
-                  <Route path="/chat" element={<Home user_id={userId} />} />
-                  <Route path="/settings" element={<ProtectedRoute element={<Settings decodedToken={isDecoded} user_id={userId} />} />} />
+                  <Route path="/" element={<Home user_id={userId} />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/trending" element={<Trending  />} />
+                  <Route path="/settings" element={<ProtectedRoute element={<Settings decodedToken={isDecoded} user_id={userId} onLogout={handleLogout} />} />} />
                   <Route path="*" element={<NotFound />} />
-                  </Routes>
+                </Routes>
               </main>
             </div>
           </div>

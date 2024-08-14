@@ -5,7 +5,7 @@ import './Header.css';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 
-const Header = ({ onTokenUpdate }) => {
+const Header = ({ onTokenUpdate, onLogout }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const Header = ({ onTokenUpdate }) => {
       if (response.status === 200) {
         setIsAuthenticated(true);
         console.log('User ID:', response.data.user_id);
-        window.location.reload();
+        // window.location.reload();
       }
     } catch (error) {
       console.error('Login failed:', error.response ? error.response.data : error.message);
@@ -40,13 +40,6 @@ const Header = ({ onTokenUpdate }) => {
 
   const handleLoginError = () => {
     console.log('Login Failed');
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    setIsAuthenticated(false);
-    onTokenUpdate(); // Clear the token state in the parent component (App.jsx)
-    window.location.reload();
   };
 
   return (
@@ -73,7 +66,7 @@ const Header = ({ onTokenUpdate }) => {
             ) : (
               <>
                 <Link to="/settings" className="header__settings-link">Settings</Link>
-                <button onClick={handleLogout} className="header__logout-button">Logout</button>
+                <button onClick={onLogout} className="header__logout-button">Logout</button>
               </>
             )}
           </div>
