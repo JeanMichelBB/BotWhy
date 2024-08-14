@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from app.core.database import get_db
-from app.models.models import User
+from app.models.models import User,Conversation, Message, TrendingConversation
 import hashlib
 import os
 
@@ -69,5 +69,52 @@ def protected(token: str, db: Session = Depends(get_db)):
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         return {"user_id": user.user_id}
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    
+# Delete user with all messages, conversations, and trending conversations
+@router.delete("/user/{user_id}")
+def delete_user(user_id: str, db: Session = Depends(get_db)):
+    try:
+        messages = db.query(Message).join(Conversation).filter(Conversation.user_id == user_id).all()
+        for message in messages:
+            db.delete(message)
+        conversations = db.query(Conversation).filter(Conversation.user_id == user_id).all()
+        for conversation in conversations:
+            db.delete(conversation)
+        trending_conversations = db.query(TrendingConversation).filter(TrendingConversation.user_id == user_id).all()
+        for trending_conversation in trending_conversations:
+            db.delete(trending_conversation)
+        user = db.query(User).filter(User.user_id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        db.delete(user)
+
+        db.commit()
+        return {"message": "User deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+# Delete only the user's messages
+@router.delete("/user/{user_id}/messages")
+def delete_user_messages(user_id: str, db: Session = Depends(get_db)):
+    try:
+        messages = db.query(Message).join(Conversation).filter(Conversation.user_id == user_id).all()
+        for message in messages:
+            db.delete(message)
+        db.commit()
+        return {"message": "User messages deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+# Delete only the user's trending conversations
+@router.delete("/user/{user_id}/trending_conversations")
+def delete_user_trending_conversations(user_id: str, db: Session = Depends(get_db)):
+    try:
+        trending_conversations = db.query(TrendingConversation).filter(TrendingConversation.user_id == user_id).all()
+        for trending_conversation in trending_conversations:
+            db.delete(trending_conversation)
+        db.commit()
+        return {"message": "User trending conversations deleted successfully"}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

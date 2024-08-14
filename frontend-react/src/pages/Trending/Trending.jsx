@@ -1,4 +1,5 @@
 // src/pages/Trending/Trending.jsx
+
 import React, { useState, useEffect } from 'react';
 import './Trending.css';
 
@@ -25,16 +26,29 @@ const Trending = () => {
     }, []);
 
     // Fetch messages for a specific conversation
-    const fetchMessages = (id) => {
-        fetch(`http://localhost:8000/chatbox/trending_conversation/${id}/messages`, {
-            headers: {
-                'accept': 'application/json',
-                'access-token': 'mysecretkey',
-            },
-        })
-            .then(response => response.json())
-            .then(data => setMessages(prevMessages => ({ ...prevMessages, [id]: data })))
-            .catch(error => console.error('Error fetching messages:', error));
+    const fetchMessages = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:8000/chatbox/trending_conversation/${id}/messages`, {
+                headers: {
+                    'accept': 'application/json',
+                    'access-token': 'mysecretkey', // Replace with your actual token
+                },
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to fetch messages');
+            }
+    
+            const data = await response.json();
+            console.log('Fetched messages:', data);
+            // Sort messages by timestamp in ascending order (oldest first)
+            const sortedMessages = data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    
+            setMessages(prevMessages => ({ ...prevMessages, [id]: sortedMessages }));
+            console.log('Messages:', sortedMessages);
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
     };
 
     const toggleConversation = (id) => {

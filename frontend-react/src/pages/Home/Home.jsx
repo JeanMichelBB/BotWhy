@@ -107,9 +107,10 @@ const Home = ({ user_id }) => {
 
     const sendMessage = async () => {
         if (!newMessage.trim() || !conversation?.id) return;
-
+    
         try {
-            const response = await axios.post(
+            // Send the user's message to the conversation
+            const messageResponse = await axios.post(
                 `http://localhost:8000/chatbox/conversation/${conversation.id}/message?message=${encodeURIComponent(newMessage)}`,
                 {},
                 {
@@ -119,13 +120,36 @@ const Home = ({ user_id }) => {
                     }
                 }
             );
-            console.log('Server response:', response.data);
-
-            // Clear the input and fetch the updated messages
+            console.log('Message sent:', messageResponse.data);
+    
+            // Clear the input field
             setNewMessage('');
-            await fetchMessages(conversation.id); // Fetch messages again to update the list
+    
+            // Fetch messages again to update the list with the user's message
+            await fetchMessages(conversation.id);
+    
+            // Fetch the bot's response after the user's message has been sent
+            const openAIResponse = await axios.post(
+                `http://localhost:8000/openai/answer`,
+                {}, // No request body needed, just URL parameters
+                {
+                    params: {
+                        question: newMessage,  // Use newMessage as the question
+                        user_id: conversation.user_id
+                    },
+                    headers: {
+                        'accept': 'application/json',
+                        'access-token': 'mysecretkey' // Replace with your actual token
+                    }
+                }
+            );
+            console.log('OpenAI response:', openAIResponse.data);
+    
+            // Fetch messages again to update the list with the bot's response
+            await fetchMessages(conversation.id);
+    
         } catch (error) {
-            console.error('Failed to send message:', error);
+            console.error('Failed to send message or fetch OpenAI response:', error);
         }
     };
 
@@ -211,7 +235,7 @@ const Home = ({ user_id }) => {
                             {messages.map((message, index) => (
                                 <div
                                     key={message.id}
-                                    className={`message-container ${message.type === 'user' ? 'message-container--user' : 'message-container--receiver'}`}
+                                    className={`message-container ${message.type === 'user' ? 'message-container--user' : 'message-container--machine'}`}
                                 >
                                     <div className={`message message--${message.type}`}>
                                         {message.content}

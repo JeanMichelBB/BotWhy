@@ -9,6 +9,7 @@ import Trending from './pages/Trending/Trending';
 import Settings from './components/Settings/Settings';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
+import NotFound from './pages/NotFound/NotFound';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
@@ -80,7 +81,8 @@ const App = () => {
                   <Route path="/" element={<Trending />} />
                   <Route path="/about" element={<About  />} />
                   <Route path="/chat" element={<Home user_id={userId} />} />
-                  <Route path="/settings" element={<ProtectedRoute element={<Settings decodedToken={isDecoded} />} />} />
+                  <Route path="/settings" element={<ProtectedRoute element={<Settings decodedToken={isDecoded} user_id={userId} />} />} />
+                  <Route path="*" element={<NotFound />} />
                   </Routes>
               </main>
             </div>

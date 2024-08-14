@@ -45,7 +45,7 @@ const Header = ({ onTokenUpdate }) => {
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     setIsAuthenticated(false);
-    onTokenUpdate(null);
+    onTokenUpdate(); // Clear the token state in the parent component (App.jsx)
     window.location.reload();
   };
 

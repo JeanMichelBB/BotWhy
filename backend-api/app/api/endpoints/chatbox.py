@@ -101,7 +101,8 @@ def create_trending_conversation(
             id=str(uuid.uuid4()),  # Ensure a new UUID for the message
             trending_conversation_id=new_trending_conversation.id,  # Associate with new trending conversation
             content=existing_message.content,
-            type=existing_message.type
+            type=existing_message.type,
+            timestamp=existing_message.timestamp
         )
         
         # Add the new message to the session

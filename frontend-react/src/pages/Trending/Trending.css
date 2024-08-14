@@ -94,6 +94,9 @@
     margin-top: 10px;
     display: flex;
     flex-direction: column;
+    /* scrollable messages */
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .message {

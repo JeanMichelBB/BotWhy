@@ -4,7 +4,7 @@ from fastapi import Depends, FastAPI, Request, Security, HTTPException
 from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
 from fastapi.responses import JSONResponse
 from fastapi.openapi.utils import get_openapi
-from app.api.endpoints import chatbox, user
+from app.api.endpoints import chatbox, user, openai
 from app.core.database import engine, Base
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
@@ -88,8 +88,10 @@ app.add_middleware(
 # Include the routers
 app.include_router(user.router, prefix="/user", tags=["user"])
 app.include_router(chatbox.router, prefix="/chatbox", tags=["chatbox"])
+app.include_router(openai.router, prefix="/openai", tags=["openai"])
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
+
 
 # seed_database()

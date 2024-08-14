@@ -1,23 +1,96 @@
 // src/components/Users/Settings/Settings.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import './Settings.css';
+import ConfirmationOverlay from '../ConfirmationOverlay/ConfirmationOverlay';
 
-const Settings = ({ decodedToken }) => {
-    // Simulating user data for demonstration. Replace with your actual user data.
+const Settings = ({ decodedToken, user_id }) => {
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [confirmationMessage, setConfirmationMessage] = useState('');
+    const [onConfirmAction, setOnConfirmAction] = useState(() => () => {});
+
     const user = decodedToken || {
         name: decodedToken.name || 'John Doe',
         email: decodedToken.email || 'example@example.com'
     };
 
     const deleteAllChats = () => {
-        // Logic to delete all chats
-        console.log('All chats have been deleted.');
+        setConfirmationMessage('Are you sure you want to delete all chats?');
+        setOnConfirmAction(() => async () => {
+            try {
+                const response = await fetch(`http://localhost:8000/user/user/${user_id}/messages`, {
+                    method: 'DELETE',
+                    headers: {
+                        'accept': 'application/json',
+                        'access-token': 'mysecretkey',
+                    },
+                });
+                if (response.ok) {
+                    console.log('All chats have been deleted.');
+                } else {
+                    console.error('Failed to delete chats.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                setShowConfirmation(false);
+            }
+        });
+        setShowConfirmation(true);
     };
 
     const deleteAccount = () => {
-        // Logic to delete account
-        console.log('Account has been deleted.');
-    }
+        setConfirmationMessage('Are you sure you want to delete your account? This action cannot be undone.');
+        setOnConfirmAction(() => async () => {
+            try {
+                const response = await fetch(`http://localhost:8000/user/user/${user_id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'accept': 'application/json',
+                        'access-token': 'mysecretkey',
+                    },
+                });
+                if (response.ok) {
+                    console.log('Account has been deleted.');
+                } else {
+                    console.error('Failed to delete account.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                setShowConfirmation(false);
+            }
+        });
+        setShowConfirmation(true);
+    };
+
+    const deleteAllTrendingConversation = () => {
+        setConfirmationMessage('Are you sure you want to delete all trending conversations?');
+        setOnConfirmAction(() => async () => {
+            try {
+                const response = await fetch(`http://localhost:8000/user/user/${user_id}/trending_conversations`, {
+                    method: 'DELETE',
+                    headers: {
+                        'accept': 'application/json',
+                        'access-token': 'mysecretkey',
+                    },
+                });
+                if (response.ok) {
+                    console.log('All trending conversations have been deleted.');
+                } else {
+                    console.error('Failed to delete trending conversations.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                setShowConfirmation(false);
+            }
+        });
+        setShowConfirmation(true);
+    };
+
+    const handleCancel = () => {
+        setShowConfirmation(false);
+    };
 
     return (
         <div className="settings">
@@ -31,13 +104,23 @@ const Settings = ({ decodedToken }) => {
                     <button className="settings__delete-button" onClick={deleteAllChats}>
                         Delete all chats
                     </button>
+                    <button className="settings__delete-account-button" onClick={deleteAllTrendingConversation}>
+                        Delete all trending conversation
+                    </button>
                     <button className="settings__delete-account-button" onClick={deleteAccount}>
                         Delete account
                     </button>
                 </div>
             </div>
+            {showConfirmation && (
+                <ConfirmationOverlay
+                    message={confirmationMessage}
+                    onConfirm={onConfirmAction}
+                    onCancel={handleCancel}
+                />
+            )}
         </div>
     );
-}
+};
 
 export default Settings;
