@@ -12,3 +12,4 @@ oauthlib
 starlette-authlib
 google-auth
 python-dotenv
+openai

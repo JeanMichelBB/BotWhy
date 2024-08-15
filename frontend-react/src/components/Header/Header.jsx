@@ -46,7 +46,7 @@ const Header = ({ onTokenUpdate, onLogout }) => {
         <div className="header__content">
           <div className="header__logo">
             <Link to="/" className="header__logo-link">
-              <span>ChatBox</span>
+              <span>BotWhy</span>
             </Link>
           </div>
 

@@ -1,4 +1,4 @@
-# chatbox
+# BotWhy
 
 
 ## Database Schema
