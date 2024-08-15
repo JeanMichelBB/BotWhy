@@ -11,7 +11,8 @@ class UserBase(BaseModel):
     is_admin: bool = False
     preferences: Optional[Dict] = None
     token: Optional[str] = None
-
+    message_count: Optional[int] = 0
+    trending_conversation_count: Optional[int] = 0
     class Config:
         orm_mode = True
 

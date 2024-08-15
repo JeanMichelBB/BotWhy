@@ -19,6 +19,9 @@ const App = () => {
   const [idToken, setIdToken] = useState('');
   const [isDecoded, setIsDecoded] = useState(null);
   const [userId, setUserId] = useState(null);
+  // inpport VITE_API_URL
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const apiKey = import.meta.env.VITE_API_KEY;
 
   const toggleSidebar = () => setSidebarVisible(!isSidebarVisible);
 
@@ -29,7 +32,6 @@ const App = () => {
   
     if (!storedToken || storedToken.split('.').length !== 3) {
       setIsLoggedIn(false);
-      console.log('Invalid or missing token, user is not logged in.');
       return;
     }
   
@@ -41,14 +43,12 @@ const App = () => {
         setIsDecoded(decodedToken);
       }
   
-      axios.get('http://localhost:8000/user/protected', {
+      axios.get(`${apiUrl}/user/protected`, {
         params: { token: storedToken },
-        headers: { 'accept': 'application/json', 'access-token': 'mysecretkey' }
+        headers: { 'accept': 'application/json', 'access-token': apiKey }
       })
         .then(response => {
           setIsLoggedIn(response.status === 200);
-          console.log(response.status === 200 ? 'Protected route access granted' : 'Protected route access denied');
-          console.log('User ID:', response.data.user_id);
           setUserId(response.data.user_id);
         })
         .catch(error => {

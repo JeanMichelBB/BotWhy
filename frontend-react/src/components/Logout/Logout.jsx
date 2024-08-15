@@ -6,7 +6,6 @@ const Logout = ({ setIsSignedIn = () => {} }) => {
   const clientId = '';
 
   const onSuccess = () => {
-    console.log('Logout made successfully');
     setIsSignedIn(false); // Call the default function to update the signed-in state
   };
 

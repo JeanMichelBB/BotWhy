@@ -15,21 +15,22 @@ const Home = ({ user_id }) => {
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [style, setStyle] = useState('');
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const apiKey = import.meta.env.VITE_API_KEY;
 
     useEffect(() => {
 
 
         const fetchConversation = async () => {
             try {
-                const response = await axios.get(`http://localhost:8000/chatbox/user/${user_id}/conversation`, {
+                const response = await axios.get(`${apiUrl}/chatbox/user/${user_id}/conversation`, {
                     headers: {
                         'accept': 'application/json',
-                        'access-token': 'mysecretkey' // Replace with your actual token
+                        'access-token': apiKey
                     }
                 });
                 const conversationData = response.data;
                 setConversation(conversationData);
-                console.log('Conversation:', conversationData);
 
                 // Fetch messages for the conversation
                 if (conversationData && conversationData.id) {
@@ -45,10 +46,10 @@ const Home = ({ user_id }) => {
 
     const fetchMessages = async (conversationId) => {
         try {
-            const messagesResponse = await axios.get(`http://localhost:8000/chatbox/conversation/${conversationId}/messages`, {
+            const messagesResponse = await axios.get(`${apiUrl}/chatbox/conversation/${conversationId}/messages`, {
                 headers: {
                     'accept': 'application/json',
-                    'access-token': 'mysecretkey' // Replace with your actual token
+                    'access-token': apiKey
                 }
             });
 
@@ -56,7 +57,6 @@ const Home = ({ user_id }) => {
             const sortedMessages = messagesResponse.data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
             setMessages(sortedMessages);
-            console.log('Messages:', sortedMessages);
         } catch (error) {
             console.error('Failed to fetch messages:', error);
         }
@@ -73,6 +73,7 @@ const Home = ({ user_id }) => {
             setShowAlert(true);
             return;
         }
+
         const errorMessage = validateTrendingConversation(title, description);
         if (errorMessage) {
             console.error(errorMessage);
@@ -81,19 +82,19 @@ const Home = ({ user_id }) => {
             setShowAlert(true);
             return;
         }
-    
+
         // Get the selected message IDs based on checkedItems
         const selectedMessageIds = checkedItems.map(index => messages[index].id);
-    
+
         try {
             // Send the POST request to create a trending conversation
             const response = await axios.post(
-                `http://localhost:8000/chatbox/user/${user_id}/trending_conversation`,
+                `${apiUrl}/chatbox/user/${user_id}/trending_conversation`,
                 selectedMessageIds, // Send message IDs in the request body
                 {
                     headers: {
                         'accept': 'application/json',
-                        'access-token': 'mysecretkey', // Replace with your actual token
+                        'access-token': apiKey,
                         'Content-Type': 'application/json'
                     },
                     params: { // Pass title and description as query parameters
@@ -102,17 +103,26 @@ const Home = ({ user_id }) => {
                     }
                 }
             );
-    
+
             // Handle the response as needed
-            console.log('Trending Conversation created successfully:', response.data);
             setAlertMessage('Trending Conversation created successfully');
             setStyle({ backgroundColor: '#38c038' });
             setShowAlert(true);
-    
+
         } catch (error) {
-            console.error('Failed to create trending conversation:', error);
+            if (error.response && error.response.status === 400 && error.response.data.detail === 'Trending conversation limit reached') {
+                // Handle the specific case where the trending conversation limit is reached
+                setAlertMessage('You have reached the maximum number of trending conversations.');
+                setStyle({ backgroundColor: '#ff4d4d' }); // Red for error
+            } else {
+                // Handle other errors
+                console.error('Failed to create trending conversation:', error);
+                setAlertMessage('Failed to create trending conversation');
+                setStyle({ backgroundColor: '#ff4d4d' });
+            }
+            setShowAlert(true);
         }
-    
+
         // Clear the selection and inputs after creation
         setCheckedItems([]);
         setTitle('');
@@ -127,7 +137,6 @@ const Home = ({ user_id }) => {
             return;
         }
 
-    
         const errorMessage = validateMessage(newMessage);
         if (errorMessage) {
             console.error(errorMessage);
@@ -136,30 +145,29 @@ const Home = ({ user_id }) => {
             setShowAlert(true);
             return;
         }
-    
+
         try {
             // Send the user's message to the conversation
             const messageResponse = await axios.post(
-                `http://localhost:8000/chatbox/conversation/${conversation.id}/message?message=${encodeURIComponent(newMessage)}`,
+                `${apiUrl}/chatbox/conversation/${conversation.id}/message?message=${encodeURIComponent(newMessage)}`,
                 {},
                 {
                     headers: {
                         'accept': 'application/json',
-                        'access-token': 'mysecretkey' // Replace with your actual token
+                        'access-token': apiKey
                     }
                 }
             );
-            console.log('Message sent:', messageResponse.data);
-    
+
             // Clear the input field
             setNewMessage('');
-    
+
             // Fetch messages again to update the list with the user's message
             await fetchMessages(conversation.id);
-    
+
             // Fetch the bot's response after the user's message has been sent
             const openAIResponse = await axios.post(
-                `http://localhost:8000/openai/answer`,
+                `${apiUrl}/openai/answer`,
                 {}, // No request body needed, just URL parameters
                 {
                     params: {
@@ -168,17 +176,32 @@ const Home = ({ user_id }) => {
                     },
                     headers: {
                         'accept': 'application/json',
-                        'access-token': 'mysecretkey' // Replace with your actual token
+                        'access-token': apiKey
                     }
                 }
             );
-            console.log('OpenAI response:', openAIResponse.data);
-    
+
             // Fetch messages again to update the list with the bot's response
             await fetchMessages(conversation.id);
-    
+
         } catch (error) {
             console.error('Failed to send message or fetch OpenAI response:', error);
+
+            // Check for specific error response
+            if (error.response) {
+                if (error.response.status === 400 && error.response.data.detail === 'Message limit reached') {
+                    setAlertMessage('You have reached the message limit.');
+                    setStyle({ backgroundColor: '#ff4c4c' }); // Red for error
+                } else {
+                    setAlertMessage('An error occurred while sending your message.');
+                    setStyle({ backgroundColor: '#ff4c4c' }); // Red for error
+                }
+            } else {
+                setAlertMessage('Network error. Please try again later.');
+                setStyle({ backgroundColor: '#ff4c4c' }); // Red for error
+            }
+
+            setShowAlert(true);
         }
     };
 

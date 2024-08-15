@@ -94,3 +94,10 @@
 .footer__links.hidden {
     display: none; /* Hide the footer links */
 }
+
+/* if screen it phone size, hide the sidebar */
+@media (max-width: 768px) {
+    .footer {
+        position: fixed; 
+    }
+}

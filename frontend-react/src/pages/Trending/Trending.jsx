@@ -11,13 +11,15 @@ const Trending = () => {
     const [selectedConversationId, setSelectedConversationId] = useState(null);
     const [conversations, setConversations] = useState([]);
     const [messages, setMessages] = useState({});
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const apiKey = import.meta.env.VITE_API_KEY;
 
     // Fetch trending conversations
     useEffect(() => {
-        fetch('http://localhost:8000/chatbox/trending_conversations', {
+        fetch(`${apiUrl}/chatbox/trending_conversations`, {
             headers: {
                 'accept': 'application/json',
-                'access-token': 'mysecretkey',
+                'access-token': apiKey,
             },
         })
             .then(response => response.json())
@@ -28,24 +30,22 @@ const Trending = () => {
     // Fetch messages for a specific conversation
     const fetchMessages = async (id) => {
         try {
-            const response = await fetch(`http://localhost:8000/chatbox/trending_conversation/${id}/messages`, {
+            const response = await fetch(`${apiUrl}/chatbox/trending_conversation/${id}/messages`, {
                 headers: {
                     'accept': 'application/json',
-                    'access-token': 'mysecretkey', // Replace with your actual token
+                    'access-token': apiKey,
                 },
             });
-    
+
             if (!response.ok) {
                 throw new Error('Failed to fetch messages');
             }
-    
+
             const data = await response.json();
-            console.log('Fetched messages:', data);
             // Sort messages by timestamp in ascending order (oldest first)
             const sortedMessages = data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    
+
             setMessages(prevMessages => ({ ...prevMessages, [id]: sortedMessages }));
-            console.log('Messages:', sortedMessages);
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
@@ -64,7 +64,6 @@ const Trending = () => {
     };
 
     const handleLike = (id) => {
-        console.log(`Liked conversation ${id}`);
         const likeButton = document.getElementById(`like-button-${id}`);
         likeButton.style.opacity = likeButton.style.opacity === '0.5' ? '1' : '0.5';
     };
@@ -80,7 +79,6 @@ const Trending = () => {
     };
 
     const handleAddComment = (id) => {
-        console.log(`Added comment to conversation ${id}`);
         setNewComment(''); // Clear the input field
     };
 
@@ -95,7 +93,6 @@ const Trending = () => {
     };
 
     const handleReportSubmit = () => {
-        console.log(`Reported conversation ${selectedConversationId}`);
         closeReportOverlay();
     };
 
@@ -105,6 +102,15 @@ const Trending = () => {
                 <div className="trending__content">
                     <h1 className="trending__title">Trending Conversations</h1>
                     <div className="trending__list">
+                        {conversations.length === 0 &&
+                            <div className="no-conversations">
+                                <p>No trending conversations available at the moment.</p>
+                                <p>It looks like the community is quiet right now. But don't worry, you can be the one to get things started!</p>
+                                <p>Consider sharing your thoughts or starting a discussion on a topic that interests you. Your conversation could be the next big thing that everyone talks about!</p>
+
+                                <p>Or, if you’re just browsing, check back later. New trending conversations are always just around the corner.</p>
+                            </div>
+                        }
                         {conversations.map(conversation => (
                             <div
                                 key={conversation.id}

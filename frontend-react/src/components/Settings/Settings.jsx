@@ -7,6 +7,8 @@ const Settings = ({ decodedToken, user_id, onLogout }) => {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [confirmationMessage, setConfirmationMessage] = useState('');
     const [onConfirmAction, setOnConfirmAction] = useState(() => () => {});
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const apiKey = import.meta.env.VITE_API_KEY;
 
     const user = decodedToken || {
         name: decodedToken.name || 'John Doe',
@@ -17,15 +19,14 @@ const Settings = ({ decodedToken, user_id, onLogout }) => {
         setConfirmationMessage('Are you sure you want to delete all chats?');
         setOnConfirmAction(() => async () => {
             try {
-                const response = await fetch(`http://localhost:8000/user/user/${user_id}/messages`, {
+                const response = await fetch(`${apiUrl}/user/user/${user_id}/messages`, {
                     method: 'DELETE',
                     headers: {
                         'accept': 'application/json',
-                        'access-token': 'mysecretkey',
+                        'access-token': apiKey,
                     },
                 });
                 if (response.ok) {
-                    console.log('All chats have been deleted.');
                 } else {
                     console.error('Failed to delete chats.');
                 }
@@ -42,11 +43,11 @@ const Settings = ({ decodedToken, user_id, onLogout }) => {
         setConfirmationMessage('Are you sure you want to delete your account? This action cannot be undone.');
         setOnConfirmAction(() => async () => {
             try {
-                const response = await fetch(`http://localhost:8000/user/user/${user_id}`, {
+                const response = await fetch(`${apiUrl}/user/user/${user_id}`, {
                     method: 'DELETE',
                     headers: {
                         'accept': 'application/json',
-                        'access-token': 'mysecretkey',
+                        'access-token': apiKey,
                     },
                 });
                 if (response.ok) {
@@ -68,11 +69,11 @@ const Settings = ({ decodedToken, user_id, onLogout }) => {
         setConfirmationMessage('Are you sure you want to delete all trending conversations?');
         setOnConfirmAction(() => async () => {
             try {
-                const response = await fetch(`http://localhost:8000/user/user/${user_id}/trending_conversations`, {
+                const response = await fetch(`${apiUrl}/user/user/${user_id}/trending_conversations`, {
                     method: 'DELETE',
                     headers: {
                         'accept': 'application/json',
-                        'access-token': 'mysecretkey',
+                        'access-token': apiKey,
                     },
                 });
                 if (response.ok) {

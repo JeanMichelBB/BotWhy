@@ -12,6 +12,8 @@ class User(Base):
     email = Column(String(255), nullable=False, unique=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
     token = Column(String(255), nullable=True)
+    message_count = Column(Integer, default=0, nullable=True)  # Correct usage of Integer for message count
+    trending_conversation_count = Column(Integer, default=0, nullable=True)  # Correct usage of Integer for trending conversation count
     
     # Define relationships
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")

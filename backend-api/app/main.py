@@ -31,7 +31,8 @@ from app.api.endpoints import user
 app.include_router(user.router)
 
 # API Key setup
-SECRET_KEY = os.getenv("SECRET_KEY")  # , "your_secret_key"
+SECRET_KEY = os.getenv("SECRET_KEY") 
+ALOW_ORIGINS = os.getenv("ALLOW_ORIGINS")
 
 api_key_header = APIKeyHeader(name="access-token", auto_error=False)
 
@@ -79,7 +80,7 @@ app.openapi = custom_openapi
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Allow requests from this origin
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],  # Add methods you need
     allow_headers=["*"],

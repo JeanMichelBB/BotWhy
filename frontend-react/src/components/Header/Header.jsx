@@ -7,6 +7,8 @@ import axios from 'axios';
 
 const Header = ({ onTokenUpdate, onLogout }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const apiKey = import.meta.env.VITE_API_KEY;
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -17,21 +19,18 @@ const Header = ({ onTokenUpdate, onLogout }) => {
   }, [onTokenUpdate]);
 
   const handleLoginSuccess = async (credentialResponse) => {
-    console.log('Login Success', credentialResponse);
     const idToken = credentialResponse.credential;
     localStorage.setItem('authToken', idToken);
     onTokenUpdate(idToken);
-
     try {
-      const response = await axios.post('http://localhost:8000/user/login', {}, {
+      const response = await axios.post(`${apiUrl}/user/login`, {}, {
         params: { token: idToken },
-        headers: { 'accept': 'application/json', 'access-token': 'mysecretkey' }
+        headers: { 'accept': 'application/json', 'access-token': apiKey }
       });
 
       if (response.status === 200) {
         setIsAuthenticated(true);
-        console.log('User ID:', response.data.user_id);
-        // window.location.reload();
+        window.location.reload();
       }
     } catch (error) {
       console.error('Login failed:', error.response ? error.response.data : error.message);
@@ -39,7 +38,6 @@ const Header = ({ onTokenUpdate, onLogout }) => {
   };
 
   const handleLoginError = () => {
-    console.log('Login Failed');
   };
 
   return (

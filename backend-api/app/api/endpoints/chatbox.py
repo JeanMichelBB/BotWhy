@@ -33,7 +33,7 @@ def get_user_conversation(user_id: str, db: Session = Depends(get_db)):
 def get_conversation_messages(conversation_id: str, db: Session = Depends(get_db)):
     # Query the messages for the conversation
     conversation_messages = db.query(models.Message).filter(models.Message.conversation_id == conversation_id).all()
-
+    
     # If no messages found, raise an exception
     if not conversation_messages:
         raise HTTPException(status_code=404, detail="No messages found for this conversation")
@@ -48,12 +48,21 @@ def create_message(conversation_id: str, message: str, db: Session = Depends(get
     if not existing_conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
     
+    # check if the user has reached the message limit
+    if existing_conversation.user.message_count >= 10:
+        raise HTTPException(status_code=400, detail="Message limit reached")
+    
     # Create a new message
     new_message = models.Message(
         conversation_id=conversation_id,
         content=message,
         type="user"  # Ensure this is a valid type in your application
     )
+    
+    # increment the message count for the user
+    existing_user = db.query(models.User).filter_by(user_id=existing_conversation.user_id).first()
+
+    existing_user.message_count += 1
     
     # Add the new message to the session
     db.add(new_message)
@@ -74,6 +83,9 @@ def create_trending_conversation(
     if not existing_user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    if existing_user.trending_conversation_count >= 5:
+        raise HTTPException(status_code=400, detail="Trending conversation limit reached")
+
     # Create a new trending conversation
     new_trending_conversation = models.TrendingConversation(
         user_id=user_id,
@@ -83,6 +95,9 @@ def create_trending_conversation(
         comments=[],  # Initialize comments as an empty list
         reports=[]  # Initialize reports as an empty list
     )
+    
+    # increment the trending conversation count for the user
+    existing_user.trending_conversation_count += 1
 
     # Add the new trending conversation to the session and commit to generate the ID
     db.add(new_trending_conversation)
@@ -107,7 +122,7 @@ def create_trending_conversation(
         
         # Add the new message to the session
         db.add(new_message)
-
+        
     # Commit the session to save the messages
     db.commit()
     

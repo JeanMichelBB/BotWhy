@@ -20,6 +20,7 @@
     font-size: 28px;
     margin-bottom: 20px;
     color: #333333;
+    text-align: center;
 }
 
 .trending__list {
@@ -42,7 +43,6 @@
 }
 
 .conversation__title {
-    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -289,4 +289,10 @@
 
 .report-cancel-button:hover {
     background-color: #5a6268;
+}
+
+.no-conversations {
+    text-align: center;
+    font-size: 15px;
+    color: #666666;
 }
