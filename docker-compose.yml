@@ -6,35 +6,35 @@ services:
       context: ./frontend-react
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"  # Map port 3000 of the host to port 3000 of the container
+      - "3004:3000"  
     depends_on:
       - backend
     environment:
-      - API_KEY=${OPENAI_API_KEY}  # Pass the OpenAI API key to the frontend
+      - API_KEY=${OPENAI_API_KEY}  
 
   backend:
     build:
       context: ./backend-api
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8002:8000"  
     environment:
-      - DB_USER=${DB_USER}  # Pass the database user to the backend
-      - DB_PASSWORD=${DB_PASSWORD}  # Pass the database password to the backend
-      - DB_HOST=${DB_HOST}  # Pass the database host to the backend
-      - DB_NAME=${DB_NAME}  # Pass the database name to the backend
-      - OPENAI_API_KEY=${OPENAI_API_KEY}  # Pass the OpenAI API key to the backend
-      - SECRET_KEY=${SECRET_KEY}  # Pass the secret key to the backend
+      - DB_USER=${DB_USER}  
+      - DB_PASSWORD=${DB_PASSWORD}  
+      - DB_HOST=${DB_HOST}  
+      - DB_NAME=${DB_NAME}  
+      - OPENAI_API_KEY=${OPENAI_API_KEY}  
+      - SECRET_KEY=${SECRET_KEY}  
     depends_on:
       - mysql
 
   mysql:
     image: mysql:8
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}  # Use the DB_PASSWORD from the .env file
-      MYSQL_DATABASE: ${DB_NAME}  # Use the DB_NAME from the .env file
-      MYSQL_USER: ${DB_USER}  # Use the DB_USER from the .env file
-      MYSQL_PASSWORD: ${DB_PASSWORD}  # Use the DB_PASSWORD from the .env file
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}  
+      MYSQL_DATABASE: ${DB_NAME}  
+      MYSQL_USER: ${DB_USER}  
+      MYSQL_PASSWORD: ${DB_PASSWORD}  
     volumes:
       - db_data:/var/lib/mysql
 
