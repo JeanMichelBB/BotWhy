@@ -1,6 +1,7 @@
 import openai
 import os
 from dotenv import load_dotenv
+from openai import OpenAI
 
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
@@ -13,8 +14,10 @@ from app.models import schemas  # Adjust the import according to your schemas st
 
 load_dotenv()
 
-api_key = os.getenv('OPENAI_API_KEY')
-openai.api_key = api_key
+client = OpenAI(
+    # This is the default and can be omitted
+    api_key=os.getenv('OPENAI_API_KEY'),
+)
 
 router = APIRouter()
 
@@ -30,31 +33,33 @@ def answer_question(question: str, user_id: str, db: Session = Depends(get_db)):
     # Get messages from the conversation
     conversation_messages = db.query(models.Message).filter(models.Message.conversation_id == user_conversation.id).all()
     
-        # Construct the context from the conversation messages, including the type
+    # Construct the context from the conversation messages
     context = ""
     for message in conversation_messages:
         context += f"[{message.type}] {message.content} "
         
-    # Using the newer chat completion API
-    response = openai.ChatCompletion.create(
-        model="gpt-4o-mini",
+    # Using the updated chat completion API
+    response = client.chat.completions.create(  # Ensure the model name is correct
         messages=[
             {"role": "system", "content": "You are a sarcastic and humorous assistant. Your responses should be short, witty, and not very helpful."},
             {"role": "user", "content": f"Context: {context}"},
             {"role": "user", "content": f"Question: {question}"}
         ],
-        temperature=0.2,
-        max_tokens=50
+        model="gpt-4o-mini",
+        # temperature=0.2,
+        # max_tokens=50
     )
     
-    # insert the response into the database
+    # Access the content using dot notation
+    message_content = response.choices[0].message.content
+    
+    # Insert the response into the database
     new_message = models.Message(
         conversation_id=user_conversation.id,
-        content=response.choices[0].message['content'],
+        content=message_content,
         type="Machine"
     )
     db.add(new_message)
     db.commit()
     
-    return {"answer": response.choices[0].message['content']}
-
+    return {"answer": message_content}

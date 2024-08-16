@@ -11,5 +11,5 @@ requests
 oauthlib 
 starlette-authlib
 google-auth
-python-dotenv
+itsdangerous
 openai

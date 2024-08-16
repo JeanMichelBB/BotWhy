@@ -18,10 +18,10 @@ const Home = ({ user_id }) => {
     const apiUrl = import.meta.env.VITE_API_URL;
     const apiKey = import.meta.env.VITE_API_KEY;
 
+
     useEffect(() => {
-
-
         const fetchConversation = async () => {
+            if (user_id) {
             try {
                 const response = await axios.get(`${apiUrl}/chatbox/user/${user_id}/conversation`, {
                     headers: {
@@ -39,6 +39,7 @@ const Home = ({ user_id }) => {
             } catch (error) {
                 console.error('Failed to fetch conversation or messages:', error);
             }
+        }
         };
 
         fetchConversation();
@@ -52,13 +53,19 @@ const Home = ({ user_id }) => {
                     'access-token': apiKey
                 }
             });
-
+    
             // Sort messages by timestamp in ascending order (oldest first)
             const sortedMessages = messagesResponse.data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
+    
             setMessages(sortedMessages);
         } catch (error) {
-            console.error('Failed to fetch messages:', error);
+            if (error.response && error.response.status === 404) {
+                setAlertMessage('Start a conversation to try the chatbox');
+                setStyle({ backgroundColor: 'rgb(130 130 130)' });
+                setShowAlert(true);
+            } else {
+                console.error('Failed to fetch messages:', error);
+            }
         }
     };
 

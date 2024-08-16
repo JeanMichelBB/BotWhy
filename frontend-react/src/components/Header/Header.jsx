@@ -56,10 +56,13 @@ const Header = ({ onTokenUpdate, onLogout }) => {
                 onSuccess={handleLoginSuccess}
                 onError={handleLoginError}
                 useOneTap
-                auto_select
                 clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
                 containerProps={{ allow: "identity-credentials-get" }}
                 use_fedcm_for_prompt
+                cookiePolicy={'single_host_origin'}
+                buttonText=""
+                mode="redirect"
+                redirectUri={"http://localhost:3000"}
               />
             ) : (
               <>
