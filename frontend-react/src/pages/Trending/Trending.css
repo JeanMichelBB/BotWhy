@@ -296,3 +296,14 @@
     font-size: 15px;
     color: #666666;
 }
+
+@media screen and (max-width: 600px) {
+    .trending-container
+    {
+        max-width: none;
+    }
+    .trending
+    {
+        padding: 0px;
+    }
+}

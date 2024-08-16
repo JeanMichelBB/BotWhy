@@ -99,5 +99,9 @@
 @media (max-width: 768px) {
     .footer {
         position: fixed; 
+        
+    }
+    .footer__button {
+        padding: 9px;
     }
 }
