@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   frontend:
+    image: ${{ secrets.DOCKER_USERNAME }}/botwhy_frontend:${{ github.sha }}
     build:
       context: ./frontend-react
       dockerfile: Dockerfile

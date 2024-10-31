@@ -1,3 +1,4 @@
+# frontend-react/dockerfile
 # Stage 1: Build the React app
 FROM node:16 as build
 
@@ -13,8 +14,8 @@ RUN npm install
 # Copy the rest of the application
 COPY . .
 
-# Build the React app
-RUN npm run build
+# Clear any existing build files and build the React app
+RUN rm -rf dist && npm run build
 
 # Stage 2: Serve the React app
 FROM nginx:1.21
@@ -22,7 +23,6 @@ FROM nginx:1.21
 # Copy the build files from the build stage to the nginx server
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy the /Users/jean-michelbeaulieuberube/Documents/Projects/twitterclone/frontend/default.conf configuration file
 COPY default.conf /etc/nginx/conf.d/default.conf
 
 # Pass environment variables (if needed)
