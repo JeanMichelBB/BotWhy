@@ -24,15 +24,13 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t myapp:latest .
-          docker tag botwhy:latest ${{ secrets.DOCKER_USERNAME }}/botwhy:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/botwhy:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/botwhy:${{ github.sha }} .
+          docker push ${{ secrets.DOCKER_USERNAME }}/botwhy:${{ github.sha }}
 
       - name: Build React App
         run: |
-          cd frontend-react
-          npm install
-          npm run build
+          npm ci --prefix project/BotWhy/frontend-react
+          npm run build --prefix project/BotWhy/frontend-react
 
       - name: Transfer React Build Files
         uses: appleboy/scp-action@v0.1.7
@@ -40,8 +38,8 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "frontend-react/dist/*"  
-          target: "/project/botwhy/frontend-react/dist"
+          source: "project/BotWhy/frontend-react/dist/*"  
+          target: "/project/BotWhy/frontend-react/dist"
 
       - name: SSH into server and run docker-compose
         uses: appleboy/ssh-action@v1.1.0
@@ -50,6 +48,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /project/botwhy
-            docker-compose down
-            docker-compose up -d
+            set -e
+            cd /project/BotWhy
+            docker-compose down || echo "docker-compose down failed"
+            docker-compose up -d || echo "docker-compose up failed"
