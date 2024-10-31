@@ -34,10 +34,10 @@ jobs:
 
       - name: Tag and push images
         run: |
-          docker tag botwhy_frontend botwhy_frontend:${{ github.sha }}
-          docker tag botwhy_backend botwhy_backend:${{ github.sha }}
-          docker tag botwhy_frontend botwhy_frontend:latest
-          docker tag botwhy_backend botwhy_backend:latest
+          docker tag ${{ secrets.DOCKER_USERNAME }}/botwhy_frontend botwhy_frontend:${{ github.sha }}
+          docker tag ${{ secrets.DOCKER_USERNAME }}/botwhy_backend botwhy_backend:${{ github.sha }}
+          docker tag ${{ secrets.DOCKER_USERNAME }}/botwhy_frontend botwhy_frontend:latest
+          docker tag ${{ secrets.DOCKER_USERNAME }}/botwhy_backend botwhy_backend:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/botwhy_frontend:${{ github.sha }}
           docker push ${{ secrets.DOCKER_USERNAME }}/botwhy_backend:${{ github.sha }}
           docker push ${{ secrets.DOCKER_USERNAME }}/botwhy_frontend:latest
