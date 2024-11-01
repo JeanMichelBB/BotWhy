@@ -39,6 +39,17 @@ jobs:
       #     docker push ${{ secrets.DOCKER_USERNAME }}/botwhy_frontend:latest
       #     docker push ${{ secrets.DOCKER_USERNAME }}/botwhy_backend:latest
 
+      - name: Print non-sensitive values
+        run: |
+          echo "Server IP: ${{ secrets.SERVER_IP }}"
+          echo "Server User: ${{ secrets.SERVER_USER }}"
+
+      - name: Check SSH_PRIVATE_KEY length
+        run: |
+          echo "SSH_PRIVATE_KEY length: ${#SSH_PRIVATE_KEY}"
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: SSH into server and run docker-compose
         uses: appleboy/ssh-action@v1.1.0
         with:
