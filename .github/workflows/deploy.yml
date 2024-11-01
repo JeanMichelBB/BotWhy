@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # - name: Checkout code
-      #   uses: actions/checkout@v4.2.2
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
 
       # - name: Set up Docker Buildx
       #   uses: docker/setup-buildx-action@v3.7.1
@@ -39,13 +39,11 @@ jobs:
       #     docker push ${{ secrets.DOCKER_USERNAME }}/botwhy_frontend:latest
       #     docker push ${{ secrets.DOCKER_USERNAME }}/botwhy_backend:latest
 
-      - name: Checkout code
-          uses: actions/checkout@v2
-
       - name: Add known hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
 
       - name: SSH into server and run docker-compose
         uses: appleboy/ssh-action@v1.1.0
@@ -56,6 +54,8 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           script: |
             echo "Deploying to the server..."
+            echo "Stopping and removing existing containers..."
+            set -e
             cd /project/BotWhy
             docker-compose down
             docker-compose pull
