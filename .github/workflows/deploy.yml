@@ -48,6 +48,7 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           script: |
             echo "Deploying to the server..."
+            echo "Stopping and removing existing containers..."
             set -e
             cd /project/BotWhy
             docker-compose down
