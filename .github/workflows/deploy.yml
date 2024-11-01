@@ -39,16 +39,13 @@ jobs:
       #     docker push ${{ secrets.DOCKER_USERNAME }}/botwhy_frontend:latest
       #     docker push ${{ secrets.DOCKER_USERNAME }}/botwhy_backend:latest
 
-      - name: Print non-sensitive values
-        run: |
-          echo "Server IP: ${{ secrets.SERVER_IP }}"
-          echo "Server User: ${{ secrets.SERVER_USER }}"
+      - name: Checkout code
+          uses: actions/checkout@v2
 
-      - name: Check SSH_PRIVATE_KEY length
+      - name: Add known hosts
         run: |
-          echo "SSH_PRIVATE_KEY length: ${#SSH_PRIVATE_KEY}"
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
       - name: SSH into server and run docker-compose
         uses: appleboy/ssh-action@v1.1.0
@@ -59,8 +56,6 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           script: |
             echo "Deploying to the server..."
-            echo "Stopping and removing existing containers..."
-            set -e
             cd /project/BotWhy
             docker-compose down
             docker-compose pull
