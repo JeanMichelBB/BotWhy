@@ -55,7 +55,5 @@ jobs:
           script: |
             cd ~/project/BotWhy
             docker-compose down
-            cd frontend-react
-            rm -rf dist/*
             docker-compose pull
             docker-compose up -d --build --force-recreate
