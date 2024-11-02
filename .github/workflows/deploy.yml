@@ -55,5 +55,6 @@ jobs:
           script: |
             cd ~/project/BotWhy
             docker-compose down
+            docker system prune -af 
             docker-compose pull
-            docker-compose up -d --build
+            docker-compose up -d --build --force-recreate
