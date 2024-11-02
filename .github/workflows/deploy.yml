@@ -55,8 +55,7 @@ jobs:
           script: |
             cd ~/project/BotWhy
             docker-compose down
+            cd frontend-react
+            rm -rf dist/*
             docker-compose pull
-            cd ~/project/BotWhy/frontend-react
-            npm run build
-            cd ~/project/BotWhy
             docker-compose up -d --build --force-recreate
