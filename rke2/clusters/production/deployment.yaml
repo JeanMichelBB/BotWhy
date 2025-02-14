@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bw-be
-  namespace: flux-system
 
 spec:
   replicas: 1
@@ -72,7 +71,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bw-fe
-  namespace: flux-system
 spec:
   replicas: 1
   selector:

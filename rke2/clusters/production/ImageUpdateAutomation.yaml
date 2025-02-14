@@ -2,7 +2,6 @@ apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImageUpdateAutomation
 metadata:
   name: update-bw-fe
-  namespace: flux-system
 spec:
   interval: 1m
   sourceRef:
@@ -20,7 +19,6 @@ apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImageUpdateAutomation
 metadata:
   name: update-bw-be
-  namespace: flux-system
 spec:
   interval: 1m
   sourceRef:
