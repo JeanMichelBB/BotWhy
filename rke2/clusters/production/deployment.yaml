@@ -33,13 +33,13 @@ spec:
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                name: app-secrets
-                key: DB_HOST
+                  name: app-secrets
+                  key: DB_HOST
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                name: app-secrets
-                key: DB_NAME 
+                  name: app-secrets
+                  key: DB_NAME
             - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
