@@ -2,7 +2,7 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: ImageRepository
 metadata:
   name: bw-fe
-  namespace: flux-system
+  namespace: botwhy
 spec:
   image: jeanmichelbb/bw-fe
   interval: 1m
@@ -11,7 +11,7 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: ImageRepository
 metadata:
   name: bw-fe
-  namespace: flux-system
+  namespace: botwhy
 spec:
   image: jeanmichelbb/bw-be
   interval: 1m

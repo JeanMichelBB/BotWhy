@@ -3,10 +3,11 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
   name: botwhy
-  namespace: flux-system
+  namespace: botwhy
 resources:
   - ./rke2/clusters/production
 patchesStrategicMerge:
+  - namespace.yaml
   - deployment.yaml
   - service.yaml
   - ImagePolicy.yaml
