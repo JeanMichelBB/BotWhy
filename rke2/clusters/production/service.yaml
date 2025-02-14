@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bw-be-service
+  namespace: flux-system
+spec:
+  selector:
+    app: bw-be
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: bw-fe-service
+  namespace: flux-system
+spec:
+  selector:
+    app: bw-fe
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP

@@ -1,0 +1,35 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageUpdateAutomation
+metadata:
+  name: update-bw-fe
+  namespace: flux-system
+spec:
+  interval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: my-repo
+  update:
+    strategy: Setters
+  commit:
+    author:
+      name: Flux Bot
+      email: flux@mydomain.com
+    messageTemplate: "Auto-updated bw-fe image to {{ .Values.image.tag }}"
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageUpdateAutomation
+metadata:
+  name: update-bw-be
+  namespace: flux-system
+spec:
+  interval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: my-repo
+  update:
+    strategy: Setters
+  commit:
+    author:
+      name: Flux Bot
+      email: flux@mydomain.com
+    messageTemplate: "Auto-updated bw-be image to {{ .Values.image.tag }}"
