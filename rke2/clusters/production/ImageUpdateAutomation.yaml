@@ -2,12 +2,12 @@ apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImageUpdateAutomation
 metadata:
   name: update-bw-fe
-  namespace: botwhy
+  namespace: flux-system
 spec:
   interval: 1m
   sourceRef:
     kind: GitRepository
-    name: my-repo
+    name: botwhy
   update:
     strategy: Setters
   commit:
@@ -20,12 +20,12 @@ apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImageUpdateAutomation
 metadata:
   name: update-bw-be
-  namespace: botwhy
+  namespace: flux-system
 spec:
   interval: 1m
   sourceRef:
     kind: GitRepository
-    name: my-repo
+    name: botwhy
   update:
     strategy: Setters
   commit:

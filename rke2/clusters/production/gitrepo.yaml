@@ -1,0 +1,11 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: botwhy
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/JeanMichelBB/BotWhy.git
+  ref:
+    branch: main
+  timeout: 60s

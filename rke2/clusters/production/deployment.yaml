@@ -2,7 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bw-be
-  namespace: botwhy
+  namespace: flux-system
+
 spec:
   replicas: 1
   selector:
@@ -71,7 +72,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bw-fe
-  namespace: botwhy
+  namespace: flux-system
 spec:
   replicas: 1
   selector:
