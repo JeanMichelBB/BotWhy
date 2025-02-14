@@ -14,7 +14,7 @@ load_dotenv()
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 
-SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@mysql/chatbox_db"
+SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://user:sysadm@mysql/chatbox_db"
 
 # Create the SQLAlchemy engine and session
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
