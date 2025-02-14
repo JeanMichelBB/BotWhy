@@ -1,16 +1,21 @@
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: botwhy
   namespace: flux-system
-resources:
-  - ./rke2/clusters/production
-patchesStrategicMerge:
-  - namespace.yaml
-  - deployment.yaml
-  - service.yaml
-  - ImagePolicy.yaml
-  - ImageUpdateAutomation.yaml
-  - ImageRepository.yaml
-  - secrets.yaml
-  - gitrepo.yaml
+spec:
+  interval: 10m0s
+  path: ./rke2/clusters/production
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: botwhy
+  patches:
+    - patch: ./namespace.yaml
+    - patch: ./deployment.yaml
+    - patch: ./service.yaml
+    - patch: ./ImagePolicy.yaml
+    - patch: ./ImageUpdateAutomation.yaml
+    - patch: ./ImageRepository.yaml
+    - patch: ./secrets.yaml
+    - patch: ./gitrepo.yaml
