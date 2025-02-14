@@ -62,7 +62,7 @@ const Header = ({ onTokenUpdate, onLogout }) => {
                 cookiePolicy={'single_host_origin'}
                 buttonText=""
                 mode="redirect"
-                redirectUri={`${apiUrl}/user/login`}
+                redirectUri={"http://localhost:3000"}
               />
             ) : (
               <>
