@@ -9,6 +9,7 @@ const Header = ({ onTokenUpdate, onLogout }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const apiUrl = import.meta.env.VITE_API_URL;
   const apiKey = import.meta.env.VITE_API_KEY;
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -56,13 +57,13 @@ const Header = ({ onTokenUpdate, onLogout }) => {
                 onSuccess={handleLoginSuccess}
                 onError={handleLoginError}
                 useOneTap
-                clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
+                clientId={googleClientId}
                 containerProps={{ allow: "identity-credentials-get" }}
                 use_fedcm_for_prompt
                 cookiePolicy={'single_host_origin'}
                 buttonText=""
                 mode="redirect"
-                redirectUri={"http://localhost:3000"}
+                redirectUri={window.location.origin}
               />
             ) : (
               <>
