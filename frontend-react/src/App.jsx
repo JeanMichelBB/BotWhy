@@ -22,6 +22,7 @@ const App = () => {
   // inpport VITE_API_URL
   const apiUrl = import.meta.env.VITE_API_URL;
   const apiKey = import.meta.env.VITE_API_KEY;
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   const toggleSidebar = () => setSidebarVisible(!isSidebarVisible);
 
@@ -91,7 +92,7 @@ const App = () => {
   }, []);
 
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId={googleClientId}>
       <Router>
         <div className="app-layout">
           <Footer isSidebarVisible={isSidebarVisible} toggleSidebar={toggleSidebar} />
