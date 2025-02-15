@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import './Settings.css';
 import ConfirmationOverlay from '../ConfirmationOverlay/ConfirmationOverlay';
-import { apiUrl, apiKey } from './api';
+import { apiUrl, apiKey } from '../../api';
 
 const Settings = ({ decodedToken, user_id, onLogout }) => {
     const [showConfirmation, setShowConfirmation] = useState(false);

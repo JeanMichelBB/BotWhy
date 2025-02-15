@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import './Home.css';
 import axios from 'axios';
 import { validateMessage, validateTrendingConversation } from '../../utils/validation';
-import { apiUrl, apiKey } from './api';
+import { apiUrl, apiKey } from '../../api';
 
 const Home = ({ user_id }) => {
     const [editMode, setEditMode] = useState(false);

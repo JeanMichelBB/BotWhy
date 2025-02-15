@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import './Trending.css';
-import { apiUrl, apiKey } from './api';
+import { apiUrl, apiKey } from '../../api';
 
 const Trending = () => {
     const [expandedConversationId, setExpandedConversationId] = useState(null);

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import './Header.css';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
-import { apiUrl, apiKey, googleClientId } from './api';
+import { apiUrl, apiKey, googleClientId } from '../../api';
 
 const Header = ({ onTokenUpdate, onLogout }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
