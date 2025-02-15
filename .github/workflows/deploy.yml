@@ -22,7 +22,11 @@ jobs:
 
       - name: Build and push frontend image
         run: |
-          docker build --platform linux/amd64 -t jeanmichelbb/bw-fe:latest ./frontend-react
+          docker build --platform linux/amd64 \
+            --build-arg VITE_APP_API_URL=${{ secrets.VITE_APP_API_URL }} \
+            --build-arg VITE_APP_GOOGLE_CLIENT_ID=${{ secrets.VITE_APP_GOOGLE_CLIENT_ID }} \
+            --build-arg VITE_APP_API_KEY=${{ secrets.VITE_APP_API_KEY }} \
+            -t jeanmichelbb/bw-fe:latest ./frontend-react
           docker push jeanmichelbb/bw-fe:latest
 
       - name: Build and push backend image
