@@ -4,12 +4,10 @@ import { Link } from 'react-router-dom';
 import './Header.css';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
+import { apiUrl, apiKey, googleClientId } from './api';
 
 const Header = ({ onTokenUpdate, onLogout }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const apiUrl = import.meta.env.VITE_API_URL;
-  const apiKey = import.meta.env.VITE_API_KEY;
-  const googleClientId = "1047061356868-t3oi24d1ckit51c7dne41i4fodfu9p1v.apps.googleusercontent.com";
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');

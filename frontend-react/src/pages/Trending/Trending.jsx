@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import './Trending.css';
+import { apiUrl, apiKey } from './api';
 
 const Trending = () => {
     const [expandedConversationId, setExpandedConversationId] = useState(null);
@@ -11,8 +12,7 @@ const Trending = () => {
     const [selectedConversationId, setSelectedConversationId] = useState(null);
     const [conversations, setConversations] = useState([]);
     const [messages, setMessages] = useState({});
-    const apiUrl = import.meta.env.VITE_API_URL;
-    const apiKey = import.meta.env.VITE_API_KEY;
+
 
     // Fetch trending conversations
     useEffect(() => {

@@ -12,6 +12,7 @@ import NotFound from './pages/NotFound/NotFound';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
+import { apiUrl, apiKey, googleClientId } from './api';
 
 const App = () => {
   const [isSidebarVisible, setSidebarVisible] = useState(true);
@@ -19,10 +20,7 @@ const App = () => {
   const [idToken, setIdToken] = useState('');
   const [isDecoded, setIsDecoded] = useState(null);
   const [userId, setUserId] = useState(null);
-  // inpport VITE_API_URL
-  const apiUrl = import.meta.env.VITE_API_URL;
-  const apiKey = import.meta.env.VITE_API_KEY;
-  const googleClientId = "1047061356868-t3oi24d1ckit51c7dne41i4fodfu9p1v.apps.googleusercontent.com";
+
 
   const toggleSidebar = () => setSidebarVisible(!isSidebarVisible);
 

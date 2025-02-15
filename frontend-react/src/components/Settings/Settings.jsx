@@ -2,13 +2,13 @@
 import React, { useState } from 'react';
 import './Settings.css';
 import ConfirmationOverlay from '../ConfirmationOverlay/ConfirmationOverlay';
+import { apiUrl, apiKey } from './api';
 
 const Settings = ({ decodedToken, user_id, onLogout }) => {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [confirmationMessage, setConfirmationMessage] = useState('');
     const [onConfirmAction, setOnConfirmAction] = useState(() => () => {});
-    const apiUrl = import.meta.env.VITE_API_URL;
-    const apiKey = import.meta.env.VITE_API_KEY;
+
 
     const user = decodedToken || {
         name: decodedToken.name || 'John Doe',
