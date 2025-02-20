@@ -80,9 +80,9 @@ app.openapi = custom_openapi
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://botwhy.sacenpapier.org"],
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],  # Add methods you need
+    allow_methods=["*"],  # Add methods you need
     allow_headers=["*"],
 )
 
