@@ -24,7 +24,7 @@ const App = () => {
 
   const toggleSidebar = () => setSidebarVisible(!isSidebarVisible);
 
-
+  
 
   const handleTokenUpdate = () => {
     const storedToken = localStorage.getItem('authToken');

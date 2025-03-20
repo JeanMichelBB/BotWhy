@@ -10,14 +10,12 @@ services:
     depends_on:
       - backend
     environment:
-      - API_KEY=${OPENAI_API_KEY}  
+      - API_KEY=${OPENAI_API_KEY}
 
   backend:
     build:
       context: ./backend-api
       dockerfile: Dockerfile
-    ports:
-      - "8002:8000"  
     environment:
       - DB_USER=${DB_USER}  
       - DB_PASSWORD=${DB_PASSWORD}  
