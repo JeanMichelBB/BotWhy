@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.3'
 
 services:
   frontend:
@@ -17,7 +17,7 @@ services:
       context: ./backend-api
       dockerfile: Dockerfile
     ports:
-      - "8002:8000"  
+      - "8000:8000"  
     environment:
       - DB_USER=${DB_USER}  
       - DB_PASSWORD=${DB_PASSWORD}  
