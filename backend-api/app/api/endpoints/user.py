@@ -12,6 +12,7 @@ import os
 # Define the router
 router = APIRouter()
 
+# Get the Google client ID and secret from the environment variables
 CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
