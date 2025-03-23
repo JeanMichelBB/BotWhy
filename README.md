@@ -11,6 +11,7 @@
 - **Backend:** Developed using FastAPI for high-performance API handling.
 - **Database:** MySQL for persistent data storage.
 - **Dockerized:** Uses Docker Compose for easy deployment and management.
+- **OCI:** Deployed on Oracle Cloud Infrastructure for scalability and reliability.
 
 ## Table of Contents
 
