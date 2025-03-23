@@ -77,4 +77,3 @@ jobs:
         uses: oracle-actions/run-oci-cli-command@v1.3.2
         with:
           command: "oci compute instance action --action SOFTRESET --instance-id ${{ env.INSTANCE_ID }} --region ${{ secrets.OCI_REGION }}"
-          silent: false         
