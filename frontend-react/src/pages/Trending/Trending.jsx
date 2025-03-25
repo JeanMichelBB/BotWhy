@@ -109,6 +109,7 @@ const Trending = () => {
                                 <p>Consider sharing your thoughts or starting a discussion on a topic that interests you. Your conversation could be the next big thing that everyone talks about!</p>
 
                                 <p>Or, if you’re just browsing, check back later. New trending conversations are always just around the corner.</p>
+                                <p>Happy chatting!</p>
                             </div>
                         }
                         {conversations.map(conversation => (
