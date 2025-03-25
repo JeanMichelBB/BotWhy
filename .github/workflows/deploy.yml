@@ -24,7 +24,10 @@ jobs:
         run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Build and push frontend image
+        env:
+          MY_SECRET: ${{ secrets.MY_SECRET }}
         run: |
+          echo "MY_SECRET=${MY_SECRET}" >> ./frontend-react/.env
           docker buildx build --platform linux/amd64 -t jeanmichelbb/oci-frontend:latest ./frontend-react --push
 
       - name: Build and push backend image
