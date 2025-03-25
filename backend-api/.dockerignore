@@ -1,0 +1,11 @@
+# .dockerignore fastapi project
+__pycache__
+.dockerignore
+.git
+.gitignore
+.vscode
+.idea
+__init__.py
+__main__.py
+__pycache__
+.env
