@@ -1,3 +1,3 @@
-export const apiKey = import.meta.env.VITE_APP_API_KEY;
-export const apiUrl = import.meta.env.VITE_APP_API_URL;
-export const googleClientId = import.meta.env.VITE_APP_GOOGLE_CLIENT_ID;
+export const apiKey = "KsnrjkfkwefmKlmkwejfnwef";
+export const apiUrl = "https://botwhy.sacenpapier.org/api";
+export const googleClientId = "1047061356868-t3oi24d1ckit51c7dne41i4fodfu9p1v.apps.googleusercontent.com"
