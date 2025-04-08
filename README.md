@@ -1,6 +1,8 @@
 
 # BotWhy
 
+![BotWhy Banner](botwhy.png)
+
 **BotWhy** is a chatbot application that leverages OpenAI’s GPT-4o Mini, Google Authentication, React with Vite, Python FastAPI, and MySQL. The application provides a conversational interface with authentication and secure interactions.
 
 ## Features
