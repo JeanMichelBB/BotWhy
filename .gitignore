@@ -1,13 +1,10 @@
-# Byte-compiled / optimized Python files
 __pycache__/
 *.py[cod]
 
-# C extensions
 *.so
 
 .DS_Store
 
-# Distribution / packaging
 .env
 .build/
 dist/
@@ -15,16 +12,13 @@ build/
 *.egg-info/
 *.egg
 
-# Virtual environment
 venv/
 env/
 ENV/
 
-# IDEs and editors
 .vscode/
 .idea/
 
-# Miscellaneous
 *.log
 *.pot
 *.po
@@ -34,9 +28,11 @@ ENV/
 *.sql
 *.sqlite
 
-# Ignore fastapi development server artifacts
 __pycache__/
 .pytest_cache/
 .claude/settings.local.json
 
 k3s/secrets/* 
+
+frontend-react/.env.development
+frontend-react/.env.production

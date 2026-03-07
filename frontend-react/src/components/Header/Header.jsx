@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import './Header.css';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
-import { apiUrl, googleClientId } from '../../api';
+import { apiUrl } from '../../api';
 
 const Header = ({ onTokenUpdate, onLogout }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -55,7 +55,7 @@ const Header = ({ onTokenUpdate, onLogout }) => {
                 onSuccess={handleLoginSuccess}
                 onError={handleLoginError}
                 useOneTap
-                clientId={googleClientId}
+                clientId={"1047061356868-t3oi24d1ckit51c7dne41i4fodfu9p1v.apps.googleusercontent.com"}
                 containerProps={{ allow: "identity-credentials-get" }}
                 use_fedcm_for_prompt
                 cookiePolicy={'single_host_origin'}

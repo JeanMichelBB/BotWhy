@@ -19,6 +19,7 @@ DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOST = os.getenv("DB_HOST")
 DB_NAME = os.getenv("DB_NAME")
+DB_ROOT_PASSWORD = os.getenv("DB_ROOT_PASSWORD")
 
 SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
 
@@ -35,7 +36,26 @@ def get_db():
     finally:
         db.close()
 
-#  insert logger.info("Database not ready, retrying...")
+def provision_db(max_retries=15, base_delay=2):
+    """Connect as root and create the database/user if they don't exist."""
+    from sqlalchemy import text
+    root_url = f"mysql+pymysql://root:{DB_ROOT_PASSWORD}@{DB_HOST}/"
+    root_engine = create_engine(root_url)
+    for attempt in range(max_retries):
+        try:
+            with root_engine.connect() as conn:
+                conn.execute(text(f"CREATE DATABASE IF NOT EXISTS `{DB_NAME}`"))
+                conn.execute(text(f"CREATE USER IF NOT EXISTS '{DB_USER}'@'%' IDENTIFIED BY '{DB_PASSWORD}'"))
+                conn.execute(text(f"GRANT ALL PRIVILEGES ON `{DB_NAME}`.* TO '{DB_USER}'@'%'"))
+                conn.execute(text("FLUSH PRIVILEGES"))
+                logger.info(f"Database '{DB_NAME}' and user '{DB_USER}' are ready.")
+                return
+        except OperationalError:
+            delay = base_delay * (2 ** attempt)
+            logger.info(f"MySQL not ready yet, retrying in {delay}s... (attempt {attempt + 1}/{max_retries})")
+            time.sleep(delay)
+    raise Exception("Could not connect to MySQL as root after several retries")
+
 # Function to wait for the database to be available
 def wait_for_db(max_retries=10, base_delay=1):
     for attempt in range(max_retries):
@@ -48,9 +68,6 @@ def wait_for_db(max_retries=10, base_delay=1):
             logger.info(f"Database not ready, retrying in {delay}s...")
             time.sleep(delay)
     raise Exception("Could not connect to the database after several retries")
-
-# Wait for the database before creating tables
-wait_for_db()
 
 # Create all tables
 def create_all_tables():

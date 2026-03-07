@@ -12,7 +12,12 @@ import os
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from app.models.seed import seed_database
-from app.core.database import wait_for_db, create_all_tables, get_db
+from app.core.database import wait_for_db, create_all_tables, get_db, provision_db
+import logging
+import subprocess
+import pathlib
+
+logger = logging.getLogger(__name__)
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import OperationalError
 
@@ -26,10 +31,28 @@ app = FastAPI(
     redoc_url=None if os.getenv("ENV") == "production" else "/redoc",
 )
 
+app.state.db_ready = False
+
 @app.on_event("startup")
 def startup_event():
-    wait_for_db()
-    create_all_tables()
+    dev_script = pathlib.Path(__file__).parent.parent / "dev.sh"
+    if dev_script.exists():
+        logger.info("Running dev.sh...")
+        subprocess.run(["bash", str(dev_script)], check=False)
+
+    try:
+        provision_db(max_retries=3, base_delay=1)
+        wait_for_db(max_retries=3, base_delay=1)
+        create_all_tables()
+        app.state.db_ready = True
+    except Exception as e:
+        logger.error(f"Database not available at startup: {e}")
+
+@app.get("/health", tags=["health"])
+def health():
+    if not app.state.db_ready:
+        raise HTTPException(status_code=503, detail="Database not ready")
+    return {"status": "ok"}
     
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -68,7 +91,6 @@ app.openapi = custom_openapi
 
 origins = os.getenv("ORIGIN_URLS")
 
-# Add CORS middleware for localhost and production
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -81,6 +103,3 @@ app.add_middleware(
 app.include_router(user.router, prefix="/user", tags=["user"])
 app.include_router(chatbox.router, prefix="/chatbox", tags=["chatbox"])
 app.include_router(openai.router, prefix="/openai", tags=["openai"])
-
-# Create the database tables
-Base.metadata.create_all(bind=engine)

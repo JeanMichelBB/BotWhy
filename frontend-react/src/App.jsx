@@ -12,7 +12,7 @@ import NotFound from './pages/NotFound/NotFound';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
-import { apiUrl, googleClientId } from './api';
+import { apiUrl } from './api';
 
 const App = () => {
   const [isSidebarVisible, setSidebarVisible] = useState(true);
@@ -89,7 +89,7 @@ const App = () => {
   }, []);
 
   return (
-    <GoogleOAuthProvider clientId={googleClientId}>
+    <GoogleOAuthProvider clientId={"1047061356868-t3oi24d1ckit51c7dne41i4fodfu9p1v.apps.googleusercontent.com"}>
       <Router>
         <div className="app-layout">
           <Footer isSidebarVisible={isSidebarVisible} toggleSidebar={toggleSidebar} />
