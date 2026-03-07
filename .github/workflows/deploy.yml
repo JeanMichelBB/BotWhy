@@ -43,8 +43,8 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            kubectl rollout restart deployment/botwhy-frontend
-            kubectl rollout status deployment/botwhy-frontend --timeout=120s
+            sudo kubectl rollout restart deployment/botwhy-frontend
+            sudo kubectl rollout status deployment/botwhy-frontend --timeout=120s
 
   build-backend:
     runs-on: ubuntu-latest
@@ -78,5 +78,5 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            kubectl rollout restart deployment/botwhy-backend
-            kubectl rollout status deployment/botwhy-backend --timeout=120s
+            sudo kubectl rollout restart deployment/botwhy-backend
+            sudo kubectl rollout status deployment/botwhy-backend --timeout=120s
