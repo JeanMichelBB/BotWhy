@@ -27,7 +27,7 @@ jobs:
         env:
           MY_SECRET: ${{ secrets.MY_SECRET }}
         run: |
-          echo "MY_SECRET=${MY_SECRET}" >> ./frontend-react/.env
+          sed -i 's|http://localhost:8000|https://botwhyapi.sacenpapier.org|g' ./frontend-react/src/api.jsx
           docker buildx build --platform linux/amd64 -t jeanmichelbb/oci-frontend:latest ./frontend-react --push
 
       - name: Build and push backend image
@@ -38,45 +38,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v4
-
-      - name: Set up OCI CLI
-        uses: oracle-actions/run-oci-cli-command@v1.3.2
-        with:
-          command: "oci -v"
-          silent: false
-
-      - name: Configure OCI CLI
-        env:
-          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
-          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
-          OCI_REGION: ${{ secrets.OCI_REGION }}
-          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
-          OCI_KEY_FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
+      - name: Configure kubectl
         run: |
-          mkdir -p ~/.oci
-          echo "[DEFAULT]" > ~/.oci/config
-          echo "user=${OCI_USER_OCID}" >> ~/.oci/config
-          echo "fingerprint=${OCI_KEY_FINGERPRINT}" >> ~/.oci/config
-          echo "tenancy=${OCI_TENANCY_OCID}" >> ~/.oci/config
-          echo "region=${OCI_REGION}" >> ~/.oci/config
-          echo "${OCI_PRIVATE_KEY}" > ~/.oci/oci_private_key.pem
-          chmod 600 ~/.oci/oci_private_key.pem
-          echo "key_file=~/.oci/oci_private_key.pem" >> ~/.oci/config
-          chmod 600 ~/.oci/config
-          echo "Config file created at ~/.oci/config"
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
 
-      - name: Get the instance ID of the running instance
+      - name: Restart pods
         run: |
-          INSTANCE_ID=$(oci compute instance list \
-            --compartment-id ${{ secrets.OCI_COMPARTMENT_ID }} \
-            --all \
-            --query "data[?\"lifecycle-state\"=='RUNNING'] | sort_by(@, &\"time-created\") | [0].\"id\"" \
-            --output json | jq -r '.')
-          echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
-      
-      - name: Restart the service
-        uses: oracle-actions/run-oci-cli-command@v1.3.2
-        with:
-          command: "oci compute instance action --action SOFTRESET --instance-id ${{ env.INSTANCE_ID }} --region ${{ secrets.OCI_REGION }}"
+          kubectl rollout restart deployment/botwhy-frontend
+          kubectl rollout restart deployment/botwhy-backend

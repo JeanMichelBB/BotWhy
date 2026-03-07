@@ -9,8 +9,9 @@ from sqlalchemy.orm import Session
 import uuid
 
 from app.core.database import get_db
-from app.models import models  # Adjust the import according to your models structure
-from app.models import schemas  # Adjust the import according to your schemas structure
+from app.models import models
+from app.models import schemas
+from app.api.dependencies import get_current_user
 
 load_dotenv()
 
@@ -22,7 +23,7 @@ client = OpenAI(
 router = APIRouter()
 
 @router.post("/answer")
-def answer_question(question: str, user_id: str, db: Session = Depends(get_db)):
+def answer_question(question: str, user_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     
     # Get the conversation id for the user
     user_conversation = db.query(models.Conversation).filter(models.Conversation.user_id == user_id).first()

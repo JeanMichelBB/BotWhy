@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import './Trending.css';
-import { apiUrl, apiKey } from '../../api';
+import { apiUrl } from '../../api';
 
 const Trending = () => {
     const [expandedConversationId, setExpandedConversationId] = useState(null);
@@ -16,12 +16,7 @@ const Trending = () => {
 
     // Fetch trending conversations
     useEffect(() => {
-        fetch(`${apiUrl}/chatbox/trending_conversations`, {
-            headers: {
-                'accept': 'application/json',
-                'access-token': apiKey,
-            },
-        })
+        fetch(`${apiUrl}/chatbox/trending_conversations`)
             .then(response => response.json())
             .then(data => setConversations(data))
             .catch(error => console.error('Error fetching conversations:', error));
@@ -30,12 +25,7 @@ const Trending = () => {
     // Fetch messages for a specific conversation
     const fetchMessages = async (id) => {
         try {
-            const response = await fetch(`${apiUrl}/chatbox/trending_conversation/${id}/messages`, {
-                headers: {
-                    'accept': 'application/json',
-                    'access-token': apiKey,
-                },
-            });
+            const response = await fetch(`${apiUrl}/chatbox/trending_conversation/${id}/messages`);
 
             if (!response.ok) {
                 throw new Error('Failed to fetch messages');

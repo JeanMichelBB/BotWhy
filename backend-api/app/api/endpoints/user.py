@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from app.core.database import get_db
-from app.models.models import User,Conversation, Message, TrendingConversation
-import hashlib
+from app.models.models import User, Conversation, Message, TrendingConversation
+from app.api.dependencies import get_current_user, hash_token
 import os
 
 # Define the router
@@ -15,10 +15,6 @@ router = APIRouter()
 # Get the Google client ID and secret from the environment variables
 CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-
-def hash_token(token: str) -> str:
-    """Hash the token for consistent storage and comparison."""
-    return hashlib.sha256(token.encode()).hexdigest()
 
 @router.post("/login")
 def login(request: Request, token: str, db: Session = Depends(get_db)):
@@ -52,43 +48,19 @@ def login(request: Request, token: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/logout")
-def logout(email: str, db: Session = Depends(get_db)):
-    try:
-        user = db.query(User).filter(User.email == email).first()
-        if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-        user.token = None  # Clear the token on logout
-        db.commit()
-        return {"message": "User logged out successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+def logout(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    current_user.token = None
+    db.commit()
+    return {"message": "User logged out successfully"}
 
 # Protected route
 @router.get("/protected")
-def protected(token: str, db: Session = Depends(get_db)):
-    try:
-        # Verify the Google ID token
-        id_info = id_token.verify_oauth2_token(token, google_requests.Request(), CLIENT_ID)
-
-        # Extract the user's email from the decoded token
-        email = id_info.get('email')
-        if not email:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token: No email found")
-
-        # Check if the user exists in the database
-        user = db.query(User).filter(User.email == email).first()
-        if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-
-        return {"user_id": user.user_id}
-    except ValueError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+def protected(current_user: User = Depends(get_current_user)):
+    return {"user_id": current_user.user_id}
     
 # Delete user with all messages, conversations, and trending conversations
 @router.delete("/user/{user_id}")
-def delete_user(user_id: str, db: Session = Depends(get_db)):
+def delete_user(user_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
         messages = db.query(Message).join(Conversation).filter(Conversation.user_id == user_id).all()
         for message in messages:
@@ -111,7 +83,7 @@ def delete_user(user_id: str, db: Session = Depends(get_db)):
 
 # Delete only the user's messages
 @router.delete("/user/{user_id}/messages")
-def delete_user_messages(user_id: str, db: Session = Depends(get_db)):
+def delete_user_messages(user_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
         messages = db.query(Message).join(Conversation).filter(Conversation.user_id == user_id).all()
         for message in messages:
@@ -123,7 +95,7 @@ def delete_user_messages(user_id: str, db: Session = Depends(get_db)):
 
 # Delete only the user's trending conversations
 @router.delete("/user/{user_id}/trending_conversations")
-def delete_user_trending_conversations(user_id: str, db: Session = Depends(get_db)):
+def delete_user_trending_conversations(user_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
         trending_conversations = db.query(TrendingConversation).filter(TrendingConversation.user_id == user_id).all()
         for trending_conversation in trending_conversations:

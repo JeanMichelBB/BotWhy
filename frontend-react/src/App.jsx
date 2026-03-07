@@ -12,7 +12,7 @@ import NotFound from './pages/NotFound/NotFound';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
-import { apiUrl, apiKey, googleClientId } from './api';
+import { apiUrl, googleClientId } from './api';
 
 const App = () => {
   const [isSidebarVisible, setSidebarVisible] = useState(true);
@@ -43,8 +43,7 @@ const App = () => {
       }
   
       axios.get(`${apiUrl}/user/protected`, {
-        params: { token: storedToken },
-        headers: { 'accept': 'application/json', 'access-token': apiKey }
+        headers: { 'accept': 'application/json', 'Authorization': `Bearer ${storedToken}` }
       })
         .then(response => {
           setIsLoggedIn(response.status === 200);

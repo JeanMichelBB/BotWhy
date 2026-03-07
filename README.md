@@ -129,7 +129,6 @@ DB_PASSWORD=your_mysql_password
 DB_HOST=mysql
 DB_NAME=your_database_name
 OPENAI_API_KEY=your_openai_api_key
-SECRET_KEY=your_secret_key
 ```
 
 In the `frontend-react` directory, you might also need to set up environment variables for Google authentication and API keys.

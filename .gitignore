@@ -37,3 +37,6 @@ ENV/
 # Ignore fastapi development server artifacts
 __pycache__/
 .pytest_cache/
+.claude/settings.local.json
+
+k3s/secrets/* 

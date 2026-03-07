@@ -1,0 +1,30 @@
+# Ingress — public via Cloudflare
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: botwhy-ingress
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+spec:
+  rules:
+    - host: botwhy.sacenpapier.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: botwhy-frontend
+                port:
+                  number: 80
+    - host: botwhyapi.sacenpapier.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: botwhy-backend
+                port:
+                  number: 8000

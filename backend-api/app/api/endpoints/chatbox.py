@@ -6,13 +6,14 @@ from sqlalchemy.orm import Session
 import uuid
 
 from app.core.database import get_db
-from app.models import models  # Adjust the import according to your models structure
-from app.models import schemas  # Adjust the import according to your schemas structure
+from app.models import models
+from app.models import schemas
+from app.api.dependencies import get_current_user
 
 router = APIRouter()
 
 @router.get("/user/{user_id}/conversation", response_model=schemas.ConversationBase)
-def get_user_conversation(user_id: str, db: Session = Depends(get_db)):
+def get_user_conversation(user_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     # Query the first conversation for the user
     user_conversation = db.query(models.Conversation).filter(models.Conversation.user_id == user_id).first()
 
@@ -30,7 +31,7 @@ def get_user_conversation(user_id: str, db: Session = Depends(get_db)):
 
 # get messages for a conversation
 @router.get("/conversation/{conversation_id}/messages", response_model=List[schemas.MessageBase])
-def get_conversation_messages(conversation_id: str, db: Session = Depends(get_db)):
+def get_conversation_messages(conversation_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     # Query the messages for the conversation
     conversation_messages = db.query(models.Message).filter(models.Message.conversation_id == conversation_id).all()
     
@@ -41,7 +42,7 @@ def get_conversation_messages(conversation_id: str, db: Session = Depends(get_db
     return conversation_messages
 
 @router.post("/conversation/{conversation_id}/message")
-def create_message(conversation_id: str, message: str, db: Session = Depends(get_db)):
+def create_message(conversation_id: str, message: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     # Check if the conversation exists
     existing_conversation = db.query(models.Conversation).filter_by(id=conversation_id).first()
     
@@ -76,7 +77,8 @@ def create_trending_conversation(
     title: str,
     description: str,
     message_ids: List[str],
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
 ):
     # Check if the user exists
     existing_user = db.query(models.User).filter_by(user_id=user_id).first()
@@ -150,18 +152,9 @@ def get_trending_conversation_messages(trending_conversation_id: str, db: Sessio
 
     return trending_conversation_messages
 
-
-#  get all messages
-@router.get("/messages", response_model=List[schemas.MessageBase])
-def get_all_messages(db: Session = Depends(get_db)):
-    # Query all messages
-    messages = db.query(models.Message).all()
-
-    return messages
-
 # Like a trending conversation
 @router.post("/trending_conversation/{trending_conversation_id}/like")
-def like_trending_conversation(trending_conversation_id: str, user_id: str, db: Session = Depends(get_db)):
+def like_trending_conversation(trending_conversation_id: str, user_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     # Check if the trending conversation exists
     existing_trending_conversation = db.query(models.TrendingConversation).filter_by(id=trending_conversation_id).first()
     if not existing_trending_conversation:
@@ -187,7 +180,7 @@ def like_trending_conversation(trending_conversation_id: str, user_id: str, db: 
 
 # Unlike a trending conversation
 @router.post("/trending_conversation/{trending_conversation_id}/unlike")
-def unlike_trending_conversation(trending_conversation_id: str, user_id: str, db: Session = Depends(get_db)):
+def unlike_trending_conversation(trending_conversation_id: str, user_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     # Check if the trending conversation exists
     existing_trending_conversation = db.query(models.TrendingConversation).filter_by(id=trending_conversation_id).first()
     if not existing_trending_conversation:

@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import './Home.css';
 import axios from 'axios';
 import { validateMessage, validateTrendingConversation } from '../../utils/validation';
-import { apiUrl, apiKey } from '../../api';
+import { apiUrl } from '../../api';
+
+const getAuthHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('authToken')}` });
 
 const Home = ({ user_id }) => {
     const [editMode, setEditMode] = useState(false);
@@ -26,7 +28,7 @@ const Home = ({ user_id }) => {
                 const response = await axios.get(`${apiUrl}/chatbox/user/${user_id}/conversation`, {
                     headers: {
                         'accept': 'application/json',
-                        'access-token': apiKey
+                        ...getAuthHeader()
                     }
                 });
                 const conversationData = response.data;
@@ -50,7 +52,7 @@ const Home = ({ user_id }) => {
             const messagesResponse = await axios.get(`${apiUrl}/chatbox/conversation/${conversationId}/messages`, {
                 headers: {
                     'accept': 'application/json',
-                    'access-token': apiKey
+                    ...getAuthHeader()
                 }
             });
     
@@ -101,7 +103,7 @@ const Home = ({ user_id }) => {
                 {
                     headers: {
                         'accept': 'application/json',
-                        'access-token': apiKey,
+                        ...getAuthHeader(),
                         'Content-Type': 'application/json'
                     },
                     params: { // Pass title and description as query parameters
@@ -161,7 +163,7 @@ const Home = ({ user_id }) => {
                 {
                     headers: {
                         'accept': 'application/json',
-                        'access-token': apiKey
+                        ...getAuthHeader()
                     }
                 }
             );
@@ -183,7 +185,7 @@ const Home = ({ user_id }) => {
                     },
                     headers: {
                         'accept': 'application/json',
-                        'access-token': apiKey
+                        ...getAuthHeader()
                     }
                 }
             );

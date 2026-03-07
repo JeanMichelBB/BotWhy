@@ -13,3 +13,4 @@ starlette-authlib
 google-auth
 itsdangerous
 openai
+logging

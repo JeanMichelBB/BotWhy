@@ -2,7 +2,9 @@
 import React, { useState } from 'react';
 import './Settings.css';
 import ConfirmationOverlay from '../ConfirmationOverlay/ConfirmationOverlay';
-import { apiUrl, apiKey } from '../../api';
+import { apiUrl } from '../../api';
+
+const getAuthHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('authToken')}` });
 
 const Settings = ({ decodedToken, user_id, onLogout }) => {
     const [showConfirmation, setShowConfirmation] = useState(false);
@@ -23,7 +25,7 @@ const Settings = ({ decodedToken, user_id, onLogout }) => {
                     method: 'DELETE',
                     headers: {
                         'accept': 'application/json',
-                        'access-token': apiKey,
+                        ...getAuthHeader(),
                     },
                 });
                 if (response.ok) {
@@ -47,7 +49,7 @@ const Settings = ({ decodedToken, user_id, onLogout }) => {
                     method: 'DELETE',
                     headers: {
                         'accept': 'application/json',
-                        'access-token': apiKey,
+                        ...getAuthHeader(),
                     },
                 });
                 if (response.ok) {
@@ -73,7 +75,7 @@ const Settings = ({ decodedToken, user_id, onLogout }) => {
                     method: 'DELETE',
                     headers: {
                         'accept': 'application/json',
-                        'access-token': apiKey,
+                        ...getAuthHeader(),
                     },
                 });
                 if (response.ok) {

@@ -24,7 +24,6 @@ services:
       - DB_HOST=${DB_HOST}  
       - DB_NAME=${DB_NAME}  
       - OPENAI_API_KEY=${OPENAI_API_KEY}  
-      - SECRET_KEY=${SECRET_KEY}  
     depends_on:
       - mysql
 

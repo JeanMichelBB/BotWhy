@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import './Header.css';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
-import { apiUrl, apiKey, googleClientId } from '../../api';
+import { apiUrl, googleClientId } from '../../api';
 
 const Header = ({ onTokenUpdate, onLogout }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -24,7 +24,7 @@ const Header = ({ onTokenUpdate, onLogout }) => {
     try {
       const response = await axios.post(`${apiUrl}/user/login`, {}, {
         params: { token: idToken },
-        headers: { 'accept': 'application/json', 'access-token': apiKey }
+        headers: { 'accept': 'application/json', 'Authorization': `Bearer ${idToken}` }
       });
 
       if (response.status === 200) {

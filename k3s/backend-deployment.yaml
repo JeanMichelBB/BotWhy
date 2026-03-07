@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: botwhy-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: botwhy-backend
+  template:
+    metadata:
+      labels:
+        app: botwhy-backend
+    spec:
+      containers:
+        - name: botwhy-backend
+          image: jeanmichelbb/oci-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: botwhy-backend-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: botwhy-backend
+spec:
+  selector:
+    app: botwhy-backend
+  ports:
+    - port: 8000
+      targetPort: 8000

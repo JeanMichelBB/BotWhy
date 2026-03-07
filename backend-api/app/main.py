@@ -1,8 +1,7 @@
 # app/main.py
 
-from fastapi import Depends, FastAPI, Request, Security, HTTPException
-from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI, Request, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from fastapi.openapi.utils import get_openapi
 from app.api.endpoints import chatbox, user, openai
 from app.core.database import engine, Base
@@ -13,14 +12,25 @@ import os
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from app.models.seed import seed_database
+from app.core.database import wait_for_db, create_all_tables, get_db
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import OperationalError
 
 
 # Load environment variables from .env
 load_dotenv()
 
 # Initialize FastAPI app
-app = FastAPI()
+app = FastAPI(
+    docs_url=None if os.getenv("ENV") == "production" else "/docs",
+    redoc_url=None if os.getenv("ENV") == "production" else "/redoc",
+)
 
+@app.on_event("startup")
+def startup_event():
+    wait_for_db()
+    create_all_tables()
+    
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # Set the Google client ID in the application state
@@ -30,28 +40,7 @@ app.state.google_client_id = os.getenv("GOOGLE_CLIENT_ID")
 from app.api.endpoints import user
 app.include_router(user.router)
 
-# API Key setup
-SECRET_KEY = os.getenv("SECRET_KEY") 
-ALOW_ORIGINS = os.getenv("ALLOW_ORIGINS")
-
-api_key_header = APIKeyHeader(name="access-token", auto_error=False)
-
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY"))
-
-def get_api_key(api_key_header: str = Security(api_key_header)):
-    if api_key_header == SECRET_KEY:
-        return api_key_header
-    else:
-        raise HTTPException(status_code=403, detail="Could not validate credentials")
-
-@app.middleware("http")
-async def api_key_middleware(request: Request, call_next):
-    if request.url.path not in ["/docs", "/openapi.json", "/login"]:
-        api_key = request.headers.get("access-token")
-        if api_key != SECRET_KEY:
-            return JSONResponse(status_code=403, content={"detail": "Could not validate credentials"})
-    response = await call_next(request)
-    return response
+ENV = os.getenv("ENV", "dev")
 
 # Custom OpenAPI schema
 def custom_openapi():
@@ -60,7 +49,7 @@ def custom_openapi():
     openapi_schema = get_openapi(
         title="FastAPI",
         version="1.0.0",
-        description="API for Twitter Clone",
+        description="API",
         routes=app.routes,
     )
     api_key_security_scheme = {
@@ -77,10 +66,12 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-# Add CORS middleware
+origins = os.getenv("ORIGIN_URLS")
+
+# Add CORS middleware for localhost and production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://botwhy.sacenpapier.org"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -93,6 +84,3 @@ app.include_router(openai.router, prefix="/openai", tags=["openai"])
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
-
-
-# seed_database()
