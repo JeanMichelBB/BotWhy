@@ -32,6 +32,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: jeanmichelbb/oci-frontend:latest
+          build-args: VITE_API_URL=${{ secrets.VITE_API_URL }}
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
 
