@@ -13,6 +13,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
 import { apiUrl } from './api';
+import CookieConsent from './components/CookieConsent/CookieConsent';
 
 const App = () => {
   const [isSidebarVisible, setSidebarVisible] = useState(true);
@@ -109,6 +110,7 @@ const App = () => {
           </div>
         </div>
       </Router>
+      <CookieConsent />
     </GoogleOAuthProvider>
   );
 };
