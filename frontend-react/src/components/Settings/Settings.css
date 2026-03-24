@@ -1,50 +1,57 @@
 /* src/components/Users/Settings/Settings.css */
 .settings {
-    padding: 20px;
+    padding: 32px;
 }
 
 .settings .container {
-    max-width: 600px;
+    max-width: 560px;
     margin: 0 auto;
 }
 
 .settings__title {
-    font-size: 24px;
-    margin-bottom: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-muted);
+    padding-bottom: 12px;
 }
 
 .settings__content {
     display: flex;
     flex-direction: column;
+    gap: 12px;
 }
 
 .settings__user-info {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--color-muted);
 }
 
 .settings__user-info p {
-    margin: 5px 0;
+    margin: 6px 0;
+    font-size: 13px;
+    color: var(--color-muted);
 }
 
-.settings__delete-button {
-    padding: 10px 20px;
-    background-color: #f44336;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.settings__delete-button:hover {
-    background-color: #d32f2f;
-}
-
+.settings__delete-button,
 .settings__delete-account-button {
-    padding: 10px 20px;
-    background-color: #f44336;
-    color: white;
-    border: none;
-    border-radius: 4px;
+    padding: 8px 18px;
+    background: transparent;
+    color: var(--color-text);
+    border: 1px solid var(--color-muted);
     cursor: pointer;
-    margin-top: 20px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: border-color 0.15s, color 0.15s;
+    align-self: flex-start;
+}
+
+.settings__delete-button:hover,
+.settings__delete-account-button:hover {
+    border-color: var(--color-text);
 }

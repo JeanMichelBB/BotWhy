@@ -1,0 +1,25 @@
+
+:root {
+
+  /* --- Base --- */
+  --color-bg:           #ffffff;   /* body background  — white              */
+  --color-surface:      #f5f5f5;   /* sidebar, header  — light gray         */
+
+  /* --- Text --- */
+  --color-text:         #0a0a0a;   /* primary text     — near black         */
+  --color-muted:        #999999;   /* secondary text   — mid gray           */
+
+  /* --- Actions --- */
+  --color-action:       rgba(0, 0, 0, 0.75);   /* buttons / borders — semi-transparent black */
+  --color-hover:        #444444;   /* hover            — dark gray          */
+
+  /* --- Components --- */
+  --color-conversation: #f0f0f0;   /* conversation card                     */
+
+  /* --- Overlays & Shadows --- */
+  --color-overlay:      rgba(0, 0, 0, 0.5);
+  --shadow-sm:          none;
+  --shadow-md:          none;
+  --shadow-sidebar:     none;
+
+}

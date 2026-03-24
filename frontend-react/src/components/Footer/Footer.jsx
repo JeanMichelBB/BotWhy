@@ -53,9 +53,7 @@ const Footer = ({ isSidebarVisible, toggleSidebar }) => {
             <div className={`footer__links ${isSidebarVisible ? 'visible' : 'hidden'}`}>
                 <Link to="/" className="footer__link" onClick={handleLinkClick}>BotWhy</Link>
                 <Link to="/trending" className="footer__link" onClick={handleLinkClick}>Trending</Link>
-                <div className="footer__about">
-                    <Link to="/about" className="footer__link" onClick={handleLinkClick}>About</Link>
-                </div>
+                <Link to="/about" className="footer__link" onClick={handleLinkClick}>About</Link>
             </div>
         </aside>
     );

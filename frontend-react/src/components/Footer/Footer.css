@@ -6,73 +6,88 @@
 .layout__content {
     display: flex;
     align-items: flex-start;
-    width: 100%; /* Ensure content takes full width */
+    width: 100%;
 }
 
 .sidebar-toggle {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    top: 14px;
+    left: 14px;
     z-index: 1000;
-    padding: 10px 15px;
-    font-size: 16px;
+    padding: 6px 10px;
+    font-size: 18px;
     cursor: pointer;
-    
+    background: none;
+    border: none;
+    color: var(--color-muted);
+    transition: color 0.15s;
+}
+
+.sidebar-toggle:hover {
+    color: var(--color-text);
 }
 
 .footer {
-    position: relative; /* Make footer part of the document flow */
+    position: relative;
     width: 200px;
     height: 100vh;
-    background-color: #f8f9fa;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    background-color: var(--color-surface);
+    border-right: 1px solid var(--color-muted);
     display: flex;
     flex-direction: column;
-    align-items: left;
-    transition: width 0.3s ease, transform 0.3s ease; 
+    transition: width 0.25s ease, transform 0.25s ease;
 }
 
 .footer.hidden {
-    width: 0; /* Hide the footer */
+    width: 0;
     transform: translateX(-100%);
 }
 
 .footer__logo {
-    margin-bottom: 20px;
+    padding: 0;
 }
 
 .footer__button {
     background: none;
     border: none;
-    font-size: 30px; /* Adjust font size as needed */
+    font-size: 20px;
     font-weight: bold;
     cursor: pointer;
-    padding-top: 10px;
-
+    height: 52px;
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
 }
 
 .footer__links {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 4px;
+    padding: 0 8px;
 }
 
 .footer__link {
     text-decoration: none;
-    color: #007bff;
-    margin-left: 10px;
-    font-size: 20px;
+    color: var(--color-muted);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 8px;
+    border-left: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
 }
 
 .footer__link:hover {
-    text-decoration: underline;
+    color: var(--color-text);
+    border-left-color: var(--color-text);
 }
 
 .main-content {
     flex: 1;
-    transition: margin-left 0.3s ease;
+    transition: margin-left 0.25s ease;
     padding: 0;
     height: 100vh;
+    overflow: hidden;
 }
 
 .main-content.with-sidebar {
@@ -83,23 +98,13 @@
     margin-left: 0;
 }
 
-.footer__links {
-    text-decoration: none;
-    color: #333;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
 .footer__links.hidden {
-    display: none; /* Hide the footer links */
+    display: none;
 }
 
-/* if screen it phone size, hide the sidebar */
 @media (max-width: 768px) {
     .footer {
-        position: fixed; 
-        
+        position: fixed;
     }
     .footer__button {
         padding: 9px;
