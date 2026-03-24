@@ -10,10 +10,11 @@ class User(Base):
 
     user_id = Column(CHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     email = Column(String(255), nullable=False, unique=True)
+    given_name = Column(String(255), nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
     token = Column(String(255), nullable=True)
-    message_count = Column(Integer, default=0, nullable=True)  # Correct usage of Integer for message count
-    trending_conversation_count = Column(Integer, default=0, nullable=True)  # Correct usage of Integer for trending conversation count
+    message_count = Column(Integer, default=0, nullable=True)
+    trending_conversation_count = Column(Integer, default=0, nullable=True)
     
     # Define relationships
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
@@ -38,7 +39,8 @@ class TrendingConversation(Base):
     title = Column(String(255), nullable=False)
     description = Column(String(255), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    likes = Column(Integer, default=0, nullable=True)  # Correct usage of Integer for likes
+    likes = Column(Integer, default=0, nullable=True)
+    liked_by = Column(JSON, nullable=True)
     comments = Column(JSON, nullable=True)
     reports = Column(JSON, nullable=True)
     

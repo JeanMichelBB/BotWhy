@@ -26,18 +26,18 @@ def login(request: Request, token: str, db: Session = Depends(get_db)):
         # Verify the Google ID token
         id_info = id_token.verify_oauth2_token(token, google_requests.Request(), CLIENT_ID)
 
-        # Extract the user's email from the decoded token
         email = id_info['email']
+        given_name = id_info.get('given_name')
         hashed_token = hash_token(token)
         user = db.query(User).filter(User.email == email).first()
 
         if user:
-            user.token = hashed_token  # Update the existing user's token
+            user.token = hashed_token
+            user.given_name = given_name
             db.commit()
             return {"user_id": user.user_id}
         else:
-            # Create a new user
-            new_user = User(email=email, token=hashed_token)
+            new_user = User(email=email, given_name=given_name, token=hashed_token)
             db.add(new_user)
             db.commit()
             db.refresh(new_user)

@@ -72,3 +72,16 @@ def wait_for_db(max_retries=10, base_delay=1):
 # Create all tables
 def create_all_tables():
     Base.metadata.create_all(bind=engine)
+    # Idempotent column additions for existing tables
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN given_name VARCHAR(255)"))
+            conn.commit()
+        except Exception:
+            pass
+        try:
+            conn.execute(text("ALTER TABLE trending_conversations ADD COLUMN liked_by JSON"))
+            conn.commit()
+        except Exception:
+            pass

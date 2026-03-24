@@ -35,6 +35,10 @@ class MessageBase(BaseModel):
     class Config:
         orm_mode = True
 
+class CommentBase(BaseModel):
+    user: str
+    text: str
+
 class TrendingConversationBase(BaseModel):
     id: UUID
     user_id: UUID
@@ -42,7 +46,8 @@ class TrendingConversationBase(BaseModel):
     description: str
     created_at: datetime
     likes: Optional[int] = 0
-    comments: Optional[List[str]] = []
+    liked_by: Optional[List[str]] = []
+    comments: Optional[List[CommentBase]] = []
     reports: Optional[List[str]] = []
     content: Optional[List[UUID]] = []  # Expecting UUIDs for content
 

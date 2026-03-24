@@ -101,7 +101,7 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={<Home user_id={userId} />} />
                   <Route path="/about" element={<About />} />
-                  <Route path="/trending" element={<Trending  />} />
+                  <Route path="/trending" element={<Trending user_id={userId} />} />
                   <Route path="/settings" element={<ProtectedRoute element={<Settings decodedToken={isDecoded} user_id={userId} onLogout={handleLogout} />} />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>

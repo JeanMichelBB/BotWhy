@@ -154,50 +154,83 @@ def get_trending_conversation_messages(trending_conversation_id: str, db: Sessio
 
 # Like a trending conversation
 @router.post("/trending_conversation/{trending_conversation_id}/like")
-def like_trending_conversation(trending_conversation_id: str, user_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    # Check if the trending conversation exists
-    existing_trending_conversation = db.query(models.TrendingConversation).filter_by(id=trending_conversation_id).first()
-    if not existing_trending_conversation:
+def like_trending_conversation(trending_conversation_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    existing = db.query(models.TrendingConversation).filter_by(id=trending_conversation_id).first()
+    if not existing:
         raise HTTPException(status_code=404, detail="Trending conversation not found")
 
-    # Check if the user exists
-    existing_user = db.query(models.User).filter_by(user_id=user_id).first()
-    if not existing_user:
-        raise HTTPException(status_code=404, detail="User not found")
+    liked_by = list(existing.liked_by or [])
+    if current_user.user_id in liked_by:
+        raise HTTPException(status_code=400, detail="Already liked")
 
-    # Check if the user has already liked the trending conversation
-    if existing_trending_conversation.likes and user_id in existing_trending_conversation.likes:
-        raise HTTPException(status_code=400, detail="User has already liked this trending conversation")
+    liked_by.append(current_user.user_id)
+    existing.liked_by = liked_by
+    existing.likes = len(liked_by)
 
-    # Increment the likes count
-    if existing_trending_conversation.likes is None:
-        existing_trending_conversation.likes = 0
-    existing_trending_conversation.likes += 1
+    from sqlalchemy.orm.attributes import flag_modified
+    flag_modified(existing, "liked_by")
     db.commit()
 
-    # Return total likes
-    return {"total_likes": existing_trending_conversation.likes}
+    return {"total_likes": existing.likes}
 
 # Unlike a trending conversation
 @router.post("/trending_conversation/{trending_conversation_id}/unlike")
-def unlike_trending_conversation(trending_conversation_id: str, user_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    # Check if the trending conversation exists
+def unlike_trending_conversation(trending_conversation_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    existing = db.query(models.TrendingConversation).filter_by(id=trending_conversation_id).first()
+    if not existing:
+        raise HTTPException(status_code=404, detail="Trending conversation not found")
+
+    liked_by = list(existing.liked_by or [])
+    if current_user.user_id not in liked_by:
+        raise HTTPException(status_code=400, detail="Not liked yet")
+
+    liked_by.remove(current_user.user_id)
+    existing.liked_by = liked_by
+    existing.likes = len(liked_by)
+
+    from sqlalchemy.orm.attributes import flag_modified
+    flag_modified(existing, "liked_by")
+    db.commit()
+
+    return {"total_likes": existing.likes}
+
+# Add a comment to a trending conversation
+@router.post("/trending_conversation/{trending_conversation_id}/comment")
+def add_comment(trending_conversation_id: str, text: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     existing_trending_conversation = db.query(models.TrendingConversation).filter_by(id=trending_conversation_id).first()
     if not existing_trending_conversation:
         raise HTTPException(status_code=404, detail="Trending conversation not found")
 
-    # Check if the user exists
-    existing_user = db.query(models.User).filter_by(user_id=user_id).first()
-    if not existing_user:
-        raise HTTPException(status_code=404, detail="User not found")
+    comment = {"user": current_user.given_name or current_user.email, "text": text}
+    comments = list(existing_trending_conversation.comments or [])
+    comments.append(comment)
+    existing_trending_conversation.comments = comments
 
-    # Check if the user has liked the trending conversation
-    if existing_trending_conversation.likes is None or existing_trending_conversation.likes <= 0:
-        raise HTTPException(status_code=400, detail="User has not liked this trending conversation")
-
-    # Decrement the likes count
-    existing_trending_conversation.likes -= 1
+    from sqlalchemy.orm.attributes import flag_modified
+    flag_modified(existing_trending_conversation, "comments")
     db.commit()
 
-    # Return total likes
-    return {"total_likes": existing_trending_conversation.likes}
+    return {"comments": existing_trending_conversation.comments}
+
+# Delete a comment from a trending conversation
+@router.delete("/trending_conversation/{trending_conversation_id}/comment")
+def delete_comment(trending_conversation_id: str, index: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    existing_trending_conversation = db.query(models.TrendingConversation).filter_by(id=trending_conversation_id).first()
+    if not existing_trending_conversation:
+        raise HTTPException(status_code=404, detail="Trending conversation not found")
+
+    comments = list(existing_trending_conversation.comments or [])
+    if index < 0 or index >= len(comments):
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    if comments[index].get("user") != (current_user.given_name or current_user.email):
+        raise HTTPException(status_code=403, detail="Not authorized to delete this comment")
+
+    comments.pop(index)
+    existing_trending_conversation.comments = comments
+
+    from sqlalchemy.orm.attributes import flag_modified
+    flag_modified(existing_trending_conversation, "comments")
+    db.commit()
+
+    return {"comments": existing_trending_conversation.comments}
