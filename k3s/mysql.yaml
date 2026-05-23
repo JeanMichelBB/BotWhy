@@ -26,6 +26,8 @@ spec:
       labels:
         app: mysql
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: elitedesk
       containers:
         - name: mysql
           image: mysql:8
