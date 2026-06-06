@@ -111,24 +111,44 @@ User never touches card data. Stripe Elements collects it directly in the browse
 
 ```
 User → POST /credits/checkout {pack_id}
-Backend → Stripe: create PaymentIntent {amount, currency, metadata}
-Backend → return {client_secret} to frontend
-Frontend → Stripe Elements renders card UI → user pays
+Backend → calculate base_cents + stripe_fee_cents → total_cents
+Backend → Stripe: create PaymentIntent {amount: total_cents, currency, metadata}
+Backend → return {client_secret, base_cents, stripe_fee_cents, total_cents}
+Frontend → shows fee breakdown: "$10.00 + $0.59 processing fee = $10.59"
+Frontend → Stripe Elements renders card UI → user pays total_cents
 Stripe → POST /credits/webhook (server-to-server, signed)
 Backend → verify Stripe signature
-  → payment_intent.succeeded → top up balance + insert 'purchase' row
+  → payment_intent.succeeded → top up balance by base_cents (not total_cents)
+  → insert 'purchase' row with amount_cents=base_cents
   → idempotent: check stripe_payment_id not already in credit_transactions
+```
+
+### Stripe Fee Calculation
+
+Stripe charges 2.9% + $0.30 per transaction. Fee is passed to the user transparently.
+
+```python
+def calculate_stripe_fee(base_cents: int) -> int:
+    return round(base_cents * 0.029 + 30)  # 30 = $0.30 flat fee in cents
+
+# Example: $10 pack
+# base_cents = 1000
+# stripe_fee_cents = round(1000 * 0.029 + 30) = round(59) = 59
+# total_cents = 1059  → user charged $10.59
+# credits granted = 1000 (base only)
 ```
 
 ### Credit Packs
 
-| Pack ID  | Price  | Credits |
-|----------|--------|---------|
-| starter  | $5.00  | 500     |
-| standard | $10.00 | 1000    |
-| pro      | $25.00 | 2500    |
+| Pack ID  | Base Price | Credits | Stripe Fee | User Pays |
+|----------|------------|---------|------------|-----------|
+| starter  | $5.00      | 500     | ~$0.45     | ~$5.45    |
+| standard | $10.00     | 1000    | ~$0.59     | ~$10.59   |
+| pro      | $25.00     | 2500    | ~$1.03     | ~$26.03   |
 
 Configurable in code, not DB (no dynamic pricing needed).
+
+**Key rule:** Credits granted = `base_cents` only. The fee covers payment processing and is never converted to credits.
 
 ### New Endpoints
 
@@ -189,8 +209,8 @@ user.deleted_at = func.now()
 - **Tests:** user with 0 credits → 402, user with 1 credit → passes, balance check happens before OpenRouter call (no API call made when credits=0)
 
 ### Ticket 6 — Stripe checkout endpoint
-- `POST /credits/checkout {pack_id}` → create PaymentIntent → return `{client_secret}`
-- **Tests:** mock Stripe SDK, valid pack_id → correct amount in PaymentIntent, unknown pack_id → 400
+- `POST /credits/checkout {pack_id}` → calculate fee → create PaymentIntent for `total_cents` → return `{client_secret, base_cents, stripe_fee_cents, total_cents}`
+- **Tests:** mock Stripe SDK, valid pack_id → PaymentIntent charged `total_cents` (not `base_cents`), response includes fee breakdown, unknown pack_id → 400, assert `calculate_stripe_fee(1000)` = 59, assert webhook only grants `base_cents` credits (not `total_cents`)
 
 ### Ticket 7 — Stripe webhook handler
 - `POST /credits/webhook` → verify signature → top up balance
