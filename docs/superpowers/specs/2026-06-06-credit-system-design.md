@@ -228,8 +228,50 @@ user.deleted_at = func.now()
 
 ---
 
+## OpenRouter Funding (Automatic)
+
+OpenRouter bills **you** (the developer), not your users. Your app uses one shared OpenRouter API key. Users' credits track consumption of your OpenRouter balance.
+
+**Money flow:**
+```
+User pays Stripe → your bank account
+OpenRouter charges your card → your OpenRouter balance stays funded
+Net: Stripe income covers OpenRouter card charges → break even (passthrough)
+```
+
+**Setup (one-time, no code):**
+- Enable OpenRouter auto-recharge in dashboard
+- Set threshold: e.g. balance < $10 → recharge $50
+- Save credit card on OpenRouter
+
+Fully automatic. No API integration needed.
+
+---
+
+## Receipts
+
+Use **Stripe's built-in receipt emails**. One toggle in Stripe dashboard → Stripe emails the user a payment confirmation after every successful charge. Zero code required.
+
+No billing address needed for basic receipts.
+
+---
+
+## Taxes
+
+Out of scope for now. Add `automatic_tax={"enabled": True}` to PaymentIntent when revenue thresholds are hit:
+- Canada: $30k CAD/year
+- US: $100k USD or 200 transactions per state
+- EU: €10k/year across EU
+
+Stripe Tax handles calculation automatically when enabled.
+
+---
+
 ## Out of Scope
 - Subscription/recurring billing
 - Per-model credit pricing tiers
 - Admin credit override UI
 - Refunds
+- Billing address storage
+- VAT invoices (enable Stripe Invoicing when needed)
+- Stripe Tax (enable when revenue thresholds hit)
