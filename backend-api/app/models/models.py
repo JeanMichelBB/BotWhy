@@ -15,10 +15,14 @@ class User(Base):
     token = Column(String(255), nullable=True)
     message_count = Column(Integer, default=0, nullable=True)
     trending_conversation_count = Column(Integer, default=0, nullable=True)
-    
+    credit_balance_cents = Column(Integer, nullable=False, default=0)
+    is_deleted = Column(Boolean, nullable=False, default=False)
+    deleted_at = Column(TIMESTAMP, nullable=True)
+
     # Define relationships
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
     trending_conversations = relationship("TrendingConversation", back_populates="user", cascade="all, delete-orphan")
+    credit_transactions = relationship("CreditTransaction", back_populates="user")
 
 class Conversation(Base):
     __tablename__ = "conversations"
@@ -62,3 +66,16 @@ class Message(Base):
     # Define relationships
     conversation = relationship("Conversation", back_populates="messages")
     trending_conversation = relationship("TrendingConversation", back_populates="messages")
+
+class CreditTransaction(Base):
+    __tablename__ = "credit_transactions"
+
+    id = Column(CHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(CHAR(36), ForeignKey('users.user_id'), nullable=False)
+    amount_cents = Column(Integer, nullable=False)
+    type = Column(String(20), nullable=False)  # 'purchase' | 'spend' | 'free_grant'
+    description = Column(String(255), nullable=True)
+    stripe_payment_id = Column(String(255), nullable=True)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+    user = relationship("User", back_populates="credit_transactions")
