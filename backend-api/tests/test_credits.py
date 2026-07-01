@@ -99,3 +99,47 @@ def test_require_credits_raises_402_when_zero(db, make_user):
     with pytest.raises(HTTPException) as exc:
         require_credits(current_user=user, db=db)
     assert exc.value.status_code == 402
+
+
+def test_deduct_credits_after_ai_call(db, make_user, monkeypatch):
+    from app.models.models import CreditTransaction, Conversation
+    import app.utils.ai as ai_module
+
+    user = make_user(balance=100)
+
+    monkeypatch.setattr(
+        ai_module,
+        "call_openrouter",
+        lambda messages: ("Witty answer", 3),
+    )
+
+    conv = Conversation(user_id=user.user_id)
+    db.add(conv)
+    db.commit()
+
+    from app.api.endpoints.openai import answer_question
+    result = answer_question(question="Why?", user_id=user.user_id, db=db, current_user=user)
+
+    db.refresh(user)
+    assert user.credit_balance_cents == 97  # 100 - 3
+    txn = db.query(CreditTransaction).filter_by(user_id=user.user_id, type="spend").first()
+    assert txn is not None
+    assert txn.amount_cents == -3
+
+
+def test_zero_cost_inserts_no_spend_row(db, make_user, monkeypatch):
+    from app.models.models import CreditTransaction, Conversation
+    import app.utils.ai as ai_module
+
+    user = make_user(balance=100)
+    monkeypatch.setattr(ai_module, "call_openrouter", lambda messages: ("answer", 0))
+
+    conv = Conversation(user_id=user.user_id)
+    db.add(conv)
+    db.commit()
+
+    from app.api.endpoints.openai import answer_question
+    answer_question(question="hi", user_id=user.user_id, db=db, current_user=user)
+
+    spend_txns = db.query(CreditTransaction).filter_by(user_id=user.user_id, type="spend").all()
+    assert len(spend_txns) == 0
