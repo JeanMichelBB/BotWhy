@@ -162,3 +162,78 @@ def test_balance_endpoint_returns_balance(client, db, make_user):
     assert data["balance_cents"] == 750
     assert data["balance_display"] == "$7.50"
     assert len(data["transactions"]) == 1
+
+
+def test_stripe_fee_calculation():
+    from app.api.endpoints.credits import calculate_stripe_fee
+    assert calculate_stripe_fee(1000) == 59   # 1000 * 0.029 + 30 = 59
+    assert calculate_stripe_fee(500) == 45    # 500 * 0.029 + 30 = 44.5 → 45
+    assert calculate_stripe_fee(2500) == 103  # 2500 * 0.029 + 30 = 102.5 → 103
+
+
+def test_checkout_unknown_pack(client, make_user):
+    user = make_user()
+    response = client.post(
+        "/credits/checkout?pack_id=nonexistent",
+        headers={"Authorization": f"Bearer {user._raw_token}"},
+    )
+    assert response.status_code == 400
+
+
+def test_webhook_idempotent(db, make_user, monkeypatch):
+    from app.models.models import CreditTransaction
+    from app.api.endpoints import credits as credits_module
+    import asyncio
+
+    user = make_user(balance=0)
+
+    fake_event = {
+        "type": "payment_intent.succeeded",
+        "data": {
+            "object": {
+                "id": "pi_test_123",
+                "metadata": {
+                    "user_id": user.user_id,
+                    "pack_id": "starter",
+                    "base_cents": "500",
+                },
+            }
+        },
+    }
+
+    monkeypatch.setattr(
+        credits_module.stripe.Webhook,
+        "construct_event",
+        lambda payload, sig, secret: fake_event,
+    )
+
+    from unittest.mock import AsyncMock, MagicMock
+    mock_request = MagicMock()
+    mock_request.body = AsyncMock(return_value=b"payload")
+    mock_request.headers = {"stripe-signature": "sig"}
+
+    asyncio.run(credits_module.stripe_webhook(mock_request, db))
+    asyncio.run(credits_module.stripe_webhook(mock_request, db))  # second call
+
+    db.refresh(user)
+    assert user.credit_balance_cents == 500  # credited once, not twice
+    txns = db.query(CreditTransaction).filter_by(user_id=user.user_id, type="purchase").all()
+    assert len(txns) == 1
+
+
+def test_webhook_invalid_signature(client, monkeypatch):
+    import stripe as stripe_module
+    from app.api.endpoints import credits as credits_module
+
+    monkeypatch.setattr(
+        credits_module.stripe.Webhook,
+        "construct_event",
+        lambda payload, sig, secret: (_ for _ in ()).throw(stripe_module.SignatureVerificationError("bad", "sig")),
+    )
+
+    response = client.post(
+        "/credits/webhook",
+        content=b"payload",
+        headers={"stripe-signature": "badsig"},
+    )
+    assert response.status_code == 400

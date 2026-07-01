@@ -20,7 +20,8 @@ CREDIT_PACKS = {
 
 
 def calculate_stripe_fee(base_cents: int) -> int:
-    return round(base_cents * 0.029 + 30)
+    import math
+    return math.ceil(base_cents * 0.029 + 30)
 
 
 @router.get("/balance")
