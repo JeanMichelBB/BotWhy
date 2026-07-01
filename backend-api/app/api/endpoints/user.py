@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, Depends, status, Request
 from sqlalchemy.orm import Session
+from sqlalchemy import func as sqlfunc
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from app.core.database import get_db
@@ -49,6 +50,13 @@ def _reactivate_user(db: Session, user: User, given_name: str, token_hash: str) 
     return user
 
 
+def _soft_delete_user(db: Session, user: User) -> None:
+    user.is_deleted = True
+    user.deleted_at = sqlfunc.now()
+    user.token = None
+    db.commit()
+
+
 @router.post("/login")
 def login(request: Request, token: str, db: Session = Depends(get_db)):
     token = token.strip()
@@ -91,28 +99,16 @@ def logout(current_user: User = Depends(get_current_user), db: Session = Depends
 def protected(current_user: User = Depends(get_current_user)):
     return {"user_id": current_user.user_id}
     
-# Delete user with all messages, conversations, and trending conversations
+# Delete user (soft delete — preserves row and balance)
 @router.delete("/user/{user_id}")
 def delete_user(user_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    try:
-        messages = db.query(Message).join(Conversation).filter(Conversation.user_id == user_id).all()
-        for message in messages:
-            db.delete(message)
-        conversations = db.query(Conversation).filter(Conversation.user_id == user_id).all()
-        for conversation in conversations:
-            db.delete(conversation)
-        trending_conversations = db.query(TrendingConversation).filter(TrendingConversation.user_id == user_id).all()
-        for trending_conversation in trending_conversations:
-            db.delete(trending_conversation)
-        user = db.query(User).filter(User.user_id == user_id).first()
-        if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-        db.delete(user)
-
-        db.commit()
-        return {"message": "User deleted successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    if current_user.user_id != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
+    _soft_delete_user(db, user)
+    return {"message": "User deleted successfully"}
 
 # Delete only the user's messages
 @router.delete("/user/{user_id}/messages")

@@ -61,3 +61,25 @@ def test_reactivated_user_gets_no_second_grant(db):
     grant_txns = [t for t in txns if t.type == "free_grant"]
     assert len(grant_txns) == 1
     assert user.is_deleted is False
+
+
+def test_delete_user_soft_deletes(db, make_user):
+    from app.models.models import User
+    user = make_user()
+
+    from app.api.endpoints.user import _soft_delete_user
+    _soft_delete_user(db, user)
+
+    db.refresh(user)
+    assert user.is_deleted is True
+    assert user.deleted_at is not None
+    # row must still exist
+    assert db.query(User).filter_by(user_id=user.user_id).first() is not None
+
+
+def test_delete_preserves_balance(db, make_user):
+    user = make_user(balance=300)
+    from app.api.endpoints.user import _soft_delete_user
+    _soft_delete_user(db, user)
+    db.refresh(user)
+    assert user.credit_balance_cents == 300
