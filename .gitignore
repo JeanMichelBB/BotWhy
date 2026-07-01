@@ -36,3 +36,7 @@ k3s/secrets/*
 
 frontend-react/.env.development
 frontend-react/.env.production
+
+graphify-out/
+
+docs*

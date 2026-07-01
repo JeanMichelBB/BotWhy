@@ -20,7 +20,6 @@ const Header = ({ onTokenUpdate, onLogout }) => {
   const handleLoginSuccess = async (credentialResponse) => {
     const idToken = credentialResponse.credential;
     localStorage.setItem('authToken', idToken);
-    onTokenUpdate(idToken);
     try {
       const response = await axios.post(`${apiUrl}/user/login`, {}, {
         params: { token: idToken },

@@ -53,18 +53,17 @@ const App = () => {
         .catch(error => {
           if (error.response) {
             const { status, data } = error.response;
-            
-            if (error === 404) {
-              console.error('404 Error:', data.detail); // Specifically logging the 404 error detail
+            if (status === 401 && localStorage.getItem('authToken')) {
+              sessionStorage.setItem('sessionExpired', 'Session expired. Please log in again.');
               handleLogout();
             } else {
-              console.error(`Error ${status}:`, data.detail || error.message); // Log the error status and detail
+              console.error(`Error ${status}:`, data?.detail || error.message);
+              setIsLoggedIn(false);
             }
           } else {
-            console.error('Protected route access failed:', error.message); // Generic error handling
+            console.error('Protected route access failed:', error.message);
+            setIsLoggedIn(false);
           }
-  
-          setIsLoggedIn(false);
         });
     } catch (error) {
       console.error('Error decoding token:', error.message);

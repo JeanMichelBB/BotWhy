@@ -3,6 +3,7 @@
 import hashlib
 import base64
 import json
+import time
 from fastapi import Header, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.core.database import get_db
@@ -27,13 +28,18 @@ def get_current_user(authorization: str = Header(...), db: Session = Depends(get
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Invalid authorization header")
     token = authorization[7:]
+
+    payload = _decode_jwt_payload(token)
+    exp = payload.get('exp')
+    if exp and time.time() > exp:
+        raise HTTPException(status_code=401, detail="Session expired")
+
     hashed = hash_token(token)
     user = db.query(User).filter(User.token == hashed).first()
     if not user:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
     if not user.given_name:
-        payload = _decode_jwt_payload(token)
         given_name = payload.get('given_name')
         if given_name:
             user.given_name = given_name

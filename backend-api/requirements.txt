@@ -1,6 +1,7 @@
 # requiremenrs.txt
 
-fastapi
+fastapi==0.115.6
+starlette==0.41.3
 uvicorn[standard]
 sqlalchemy
 pydantic

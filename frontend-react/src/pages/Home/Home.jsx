@@ -21,7 +21,21 @@ const Home = ({ user_id }) => {
 
 
 
+    const handleSessionExpired = () => {
+        sessionStorage.setItem('sessionExpired', 'Session expired. Please log in again.');
+        localStorage.removeItem('authToken');
+        window.location.reload();
+    };
+
     useEffect(() => {
+        const expired = sessionStorage.getItem('sessionExpired');
+        if (expired) {
+            sessionStorage.removeItem('sessionExpired');
+            setAlertMessage(expired);
+            setStyle({ backgroundColor: 'rgb(130 130 130)' });
+            setShowAlert(true);
+        }
+
         const fetchConversation = async () => {
             if (user_id) {
             try {
@@ -39,7 +53,11 @@ const Home = ({ user_id }) => {
                     await fetchMessages(conversationData.id);
                 }
             } catch (error) {
-                console.error('Failed to fetch conversation or messages:', error);
+                if (error.response?.status === 401) {
+                    handleSessionExpired();
+                } else {
+                    console.error('Failed to fetch conversation or messages:', error);
+                }
             }
         }
         };
