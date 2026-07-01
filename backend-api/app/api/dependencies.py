@@ -46,3 +46,9 @@ def get_current_user(authorization: str = Header(...), db: Session = Depends(get
             db.commit()
 
     return user
+
+
+def require_credits(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> User:
+    if current_user.credit_balance_cents <= 0:
+        raise HTTPException(status_code=402, detail="Insufficient credits")
+    return current_user

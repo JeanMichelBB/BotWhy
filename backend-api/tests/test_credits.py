@@ -83,3 +83,19 @@ def test_delete_preserves_balance(db, make_user):
     _soft_delete_user(db, user)
     db.refresh(user)
     assert user.credit_balance_cents == 300
+
+
+def test_require_credits_passes_with_balance(db, make_user):
+    from app.api.dependencies import require_credits
+    user = make_user(balance=10)
+    result = require_credits(current_user=user, db=db)
+    assert result.user_id == user.user_id
+
+
+def test_require_credits_raises_402_when_zero(db, make_user):
+    from app.api.dependencies import require_credits
+    from fastapi import HTTPException
+    user = make_user(balance=0)
+    with pytest.raises(HTTPException) as exc:
+        require_credits(current_user=user, db=db)
+    assert exc.value.status_code == 402

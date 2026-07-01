@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.models import models
-from app.api.dependencies import get_current_user
+from app.api.dependencies import get_current_user, require_credits
 from app.utils.ai import call_openrouter
 
 router = APIRouter()
@@ -15,7 +15,7 @@ def answer_question(
     question: str,
     user_id: str,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(require_credits),
 ):
     user_conversation = db.query(models.Conversation).filter(
         models.Conversation.user_id == user_id
