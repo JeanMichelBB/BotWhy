@@ -17,7 +17,7 @@ config.set_section_option(config.config_ini_section, "DB_NAME", os.getenv("DB_NA
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from app.models.models import Base
+from app.core.database import Base
 target_metadata = Base.metadata
 
 
