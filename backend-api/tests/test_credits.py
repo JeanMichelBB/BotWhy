@@ -143,3 +143,22 @@ def test_zero_cost_inserts_no_spend_row(db, make_user, monkeypatch):
 
     spend_txns = db.query(CreditTransaction).filter_by(user_id=user.user_id, type="spend").all()
     assert len(spend_txns) == 0
+
+
+def test_balance_endpoint_returns_balance(client, db, make_user):
+    from app.models.models import CreditTransaction
+    user = make_user(balance=750)
+
+    txn = CreditTransaction(user_id=user.user_id, amount_cents=-10, type="spend", description="test")
+    db.add(txn)
+    db.commit()
+
+    response = client.get(
+        "/credits/balance",
+        headers={"Authorization": f"Bearer {user._raw_token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["balance_cents"] == 750
+    assert data["balance_display"] == "$7.50"
+    assert len(data["transactions"]) == 1
