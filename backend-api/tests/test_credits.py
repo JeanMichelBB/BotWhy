@@ -28,3 +28,36 @@ def test_call_openrouter_returns_content_and_cost(monkeypatch):
     content, cost_cents = call_openrouter(messages=[{"role": "user", "content": "hi"}])
     assert content == "Hello"
     assert cost_cents == 1
+
+
+def test_new_user_gets_free_credits(db):
+    from app.models.models import User, CreditTransaction
+    import os
+    os.environ["FREE_CREDITS_CENTS"] = "500"
+
+    from app.api.endpoints.user import _create_user_with_grant
+    user = _create_user_with_grant(db, email="new@example.com", given_name="Alice", token_hash="abc123")
+
+    assert user.credit_balance_cents == 500
+    txn = db.query(CreditTransaction).filter_by(user_id=user.user_id).first()
+    assert txn is not None
+    assert txn.type == "free_grant"
+    assert txn.amount_cents == 500
+
+
+def test_reactivated_user_gets_no_second_grant(db):
+    from app.models.models import User, CreditTransaction
+    import os
+    os.environ["FREE_CREDITS_CENTS"] = "500"
+
+    from app.api.endpoints.user import _create_user_with_grant, _reactivate_user
+    user = _create_user_with_grant(db, email="old@example.com", given_name="Bob", token_hash="hash1")
+    user.is_deleted = True
+    db.commit()
+
+    _reactivate_user(db, user, given_name="Bob", token_hash="hash2")
+
+    txns = db.query(CreditTransaction).filter_by(user_id=user.user_id).all()
+    grant_txns = [t for t in txns if t.type == "free_grant"]
+    assert len(grant_txns) == 1
+    assert user.is_deleted is False

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from app.core.database import get_db
-from app.models.models import User, Conversation, Message, TrendingConversation
+from app.models.models import User, Conversation, Message, TrendingConversation, CreditTransaction
 from app.api.dependencies import get_current_user, hash_token
 import os
 
@@ -16,6 +16,39 @@ router = APIRouter()
 CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
+FREE_CREDITS_CENTS = int(os.getenv("FREE_CREDITS_CENTS", "500"))
+
+
+def _create_user_with_grant(db: Session, email: str, given_name: str, token_hash: str) -> User:
+    new_user = User(
+        email=email,
+        given_name=given_name,
+        token=token_hash,
+        credit_balance_cents=FREE_CREDITS_CENTS,
+    )
+    db.add(new_user)
+    db.flush()  # get new_user.user_id before inserting transaction
+    txn = CreditTransaction(
+        user_id=new_user.user_id,
+        amount_cents=FREE_CREDITS_CENTS,
+        type="free_grant",
+        description="Welcome credits",
+    )
+    db.add(txn)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
+
+def _reactivate_user(db: Session, user: User, given_name: str, token_hash: str) -> User:
+    user.is_deleted = False
+    user.deleted_at = None
+    user.token = token_hash
+    user.given_name = given_name
+    db.commit()
+    return user
+
+
 @router.post("/login")
 def login(request: Request, token: str, db: Session = Depends(get_db)):
     token = token.strip()
@@ -23,25 +56,25 @@ def login(request: Request, token: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token is required")
 
     try:
-        # Verify the Google ID token
         id_info = id_token.verify_oauth2_token(token, google_requests.Request(), CLIENT_ID)
-
-        email = id_info['email']
-        given_name = id_info.get('given_name')
+        email = id_info["email"]
+        given_name = id_info.get("given_name")
         hashed_token = hash_token(token)
+
         user = db.query(User).filter(User.email == email).first()
 
         if user:
-            user.token = hashed_token
-            user.given_name = given_name
-            db.commit()
+            if user.is_deleted:
+                _reactivate_user(db, user, given_name=given_name, token_hash=hashed_token)
+            else:
+                user.token = hashed_token
+                user.given_name = given_name
+                db.commit()
             return {"user_id": user.user_id}
         else:
-            new_user = User(email=email, given_name=given_name, token=hashed_token)
-            db.add(new_user)
-            db.commit()
-            db.refresh(new_user)
+            new_user = _create_user_with_grant(db, email=email, given_name=given_name, token_hash=hashed_token)
             return {"user_id": new_user.user_id}
+
     except ValueError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     except Exception as e:
