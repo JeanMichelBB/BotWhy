@@ -96,8 +96,17 @@ def logout(current_user: User = Depends(get_current_user), db: Session = Depends
 
 # Protected route
 @router.get("/protected")
-def protected(current_user: User = Depends(get_current_user)):
-    return {"user_id": current_user.user_id}
+def protected(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    has_purchased = db.query(CreditTransaction).filter_by(
+        user_id=current_user.user_id, type="purchase"
+    ).count() > 0
+    is_free_tier = not has_purchased
+    free_messages_remaining = max(0, 10 - (current_user.message_count or 0))
+    return {
+        "user_id": current_user.user_id,
+        "is_free_tier": is_free_tier,
+        "free_messages_remaining": free_messages_remaining,
+    }
     
 # Delete user (soft delete — preserves row and balance)
 @router.delete("/user/{user_id}")
