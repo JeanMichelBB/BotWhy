@@ -13,4 +13,5 @@ google-auth
 itsdangerous
 openai
 stripe
+slowapi
 logging

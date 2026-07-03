@@ -8,6 +8,9 @@ from app.core.database import engine, Base
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import os
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -25,12 +28,16 @@ from sqlalchemy.exc import OperationalError
 # Load environment variables from .env
 load_dotenv()
 
+limiter = Limiter(key_func=get_remote_address)
+
 # Initialize FastAPI app
 app = FastAPI(
     docs_url=None if os.getenv("ENV") == "production" else "/docs",
     redoc_url=None if os.getenv("ENV") == "production" else "/redoc",
 )
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.state.db_ready = False
 
 @app.on_event("startup")

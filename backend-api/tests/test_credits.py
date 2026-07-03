@@ -120,6 +120,7 @@ def test_require_credits_raises_402_when_free_trial_exhausted(db, make_user):
 def test_deduct_credits_after_ai_call(db, make_user, monkeypatch):
     from app.models.models import CreditTransaction, Conversation
     import app.utils.ai as ai_module
+    from slowapi import Limiter
 
     user = make_user(balance=100)
     # make paid-tier so deduction applies
@@ -132,13 +133,16 @@ def test_deduct_credits_after_ai_call(db, make_user, monkeypatch):
         "call_openrouter",
         lambda messages, model=None: ("Witty answer", 3),
     )
+    monkeypatch.setattr(Limiter, "_check_request_limit", lambda self, req, *a, **kw: setattr(req.state, "view_rate_limit", None))
 
     conv = Conversation(user_id=user.user_id)
     db.add(conv)
     db.commit()
 
     from app.api.endpoints.openai import answer_question
-    result = answer_question(question="Why?", user_id=user.user_id, db=db, current_user=user)
+    from starlette.requests import Request as StarletteRequest
+    mock_request = StarletteRequest({"type": "http", "method": "POST", "headers": [], "client": ("127.0.0.1", 0)})
+    result = answer_question(request=mock_request, question="Why?", user_id=user.user_id, db=db, current_user=user)
 
     db.refresh(user)
     assert user.credit_balance_cents == 97  # 100 - 3
@@ -150,16 +154,20 @@ def test_deduct_credits_after_ai_call(db, make_user, monkeypatch):
 def test_zero_cost_inserts_no_spend_row(db, make_user, monkeypatch):
     from app.models.models import CreditTransaction, Conversation
     import app.utils.ai as ai_module
+    from slowapi import Limiter
 
     user = make_user(balance=100)
     monkeypatch.setattr(ai_module, "call_openrouter", lambda messages, model=None: ("answer", 0))
+    monkeypatch.setattr(Limiter, "_check_request_limit", lambda self, req, *a, **kw: setattr(req.state, "view_rate_limit", None))
 
     conv = Conversation(user_id=user.user_id)
     db.add(conv)
     db.commit()
 
     from app.api.endpoints.openai import answer_question
-    answer_question(question="hi", user_id=user.user_id, db=db, current_user=user)
+    from starlette.requests import Request as StarletteRequest
+    mock_request = StarletteRequest({"type": "http", "method": "POST", "headers": [], "client": ("127.0.0.1", 0)})
+    answer_question(request=mock_request, question="hi", user_id=user.user_id, db=db, current_user=user)
 
     spend_txns = db.query(CreditTransaction).filter_by(user_id=user.user_id, type="spend").all()
     assert len(spend_txns) == 0

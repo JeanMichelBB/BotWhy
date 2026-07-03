@@ -1,5 +1,7 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -8,16 +10,22 @@ from app.api.dependencies import get_current_user, require_credits
 import app.utils.ai as ai_module
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/answer")
+@limiter.limit("20/minute")
 def answer_question(
+    request: Request,
     question: str,
     user_id: str,
     model: str | None = None,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_credits),
 ):
+    if len(question) > 500:
+        raise HTTPException(status_code=400, detail="Message too long. Maximum 500 characters.")
+
     # Free-tier enforcement: no purchase transactions → must use gpt-4o-mini
     has_purchased = db.query(models.CreditTransaction).filter_by(
         user_id=current_user.user_id, type="purchase"
