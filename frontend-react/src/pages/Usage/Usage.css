@@ -1,0 +1,168 @@
+.usage {
+    padding: 32px;
+}
+
+.usage .container {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.usage__back {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 24px;
+    transition: color 0.15s;
+}
+
+.usage__back:hover {
+    color: var(--color-text);
+}
+
+.usage__title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-muted);
+    padding-bottom: 12px;
+    margin: 0 0 24px 0;
+}
+
+.usage__summary {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 28px;
+}
+
+.usage__summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.usage__summary-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+}
+
+.usage__summary-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.usage__filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.usage__filter {
+    padding: 5px 12px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid var(--color-muted);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.usage__filter:hover {
+    color: var(--color-text);
+    border-color: var(--color-text);
+}
+
+.usage__filter--active {
+    background: var(--color-action);
+    color: var(--color-bg);
+    border-color: var(--color-action);
+}
+
+.usage__empty {
+    font-size: 13px;
+    color: var(--color-muted);
+    margin: 0;
+}
+
+.usage__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.usage__table th {
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-muted);
+    font-weight: 400;
+}
+
+.usage__table td {
+    padding: 10px 0;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-surface);
+    padding-right: 16px;
+}
+
+.usage__table tr:last-child td {
+    border-bottom: none;
+}
+
+.usage__date {
+    white-space: nowrap;
+    color: var(--color-muted) !important;
+    font-size: 11px !important;
+}
+
+.usage__time {
+    white-space: nowrap;
+    color: var(--color-muted) !important;
+    font-size: 11px !important;
+}
+
+.usage__col-amount {
+    text-align: right;
+    padding-right: 0 !important;
+    white-space: nowrap;
+}
+
+.usage__amount--positive {
+    color: #38c038 !important;
+}
+
+.usage__amount--negative {
+    color: var(--color-muted) !important;
+}
+
+.usage__badge {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border: 1px solid currentColor;
+}
+
+.usage__badge--spend {
+    color: var(--color-muted);
+}
+
+.usage__badge--purchase {
+    color: #38c038;
+}
+
+.usage__badge--free_grant {
+    color: var(--color-muted);
+}

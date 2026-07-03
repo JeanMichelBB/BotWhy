@@ -40,3 +40,5 @@ frontend-react/.env.production
 graphify-out/
 
 docs*
+test.db
+backend-api/test.db
