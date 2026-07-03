@@ -120,10 +120,12 @@
     align-items: stretch;
     flex-shrink: 0;
     position: relative;
+    width: 100%;
 }
 
 .chatbox__input input {
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
     padding: 8px 16px;
     border: none;
     outline: none;
@@ -460,10 +462,34 @@
     opacity: 1;
 }
 
+.chatbox__send-arrow {
+    display: none;
+}
+
 @media screen and (max-width: 600px) {
     .chatbox {
         height: calc(100dvh - 100px);
         border: none;
+    }
+
+    .chatbox__send-btn {
+        width: 44px;
+        min-width: 44px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .chatbox__send-text {
+        display: none;
+    }
+
+    .chatbox__send-arrow {
+        display: block !important;
+        font-size: 20px;
+        line-height: 1;
     }
 }
 

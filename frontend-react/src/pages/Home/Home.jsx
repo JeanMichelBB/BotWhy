@@ -483,7 +483,10 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
                                     }
                                 </button>
                             </div>
-                            <button onClick={sendMessage}>Send</button>
+                            <button className="chatbox__send-btn" onClick={sendMessage}>
+                                <span className="chatbox__send-text">Send</span>
+                                <span className="chatbox__send-arrow">&#8629;</span>
+                            </button>
                         </div>
                     </div>
                 </div>
