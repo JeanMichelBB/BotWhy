@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -95,8 +95,11 @@ const Credits = () => {
   const { balanceDisplay, transactions, loading, refetch } = useCredits();
   const [selectedPack, setSelectedPack] = useState(PACKS[1]);
   const [stripePromise, setStripePromise] = useState(null);
+  const stripeLoaded = useRef(false);
 
   useEffect(() => {
+    if (stripeLoaded.current) return;
+    stripeLoaded.current = true;
     axios.get(`${apiUrl}/config`).then((res) => {
       setStripePromise(loadStripe(res.data.stripe_publishable_key));
     });
