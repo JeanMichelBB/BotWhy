@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import './Settings.css';
 import ConfirmationOverlay from '../ConfirmationOverlay/ConfirmationOverlay';
 import { apiUrl } from '../../api';
+import { Link } from 'react-router-dom';
+import { useCredits } from '../../hooks/useCredits';
 
 const getAuthHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('authToken')}` });
 
@@ -10,6 +12,7 @@ const Settings = ({ decodedToken, user_id, onLogout }) => {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [confirmationMessage, setConfirmationMessage] = useState('');
     const [onConfirmAction, setOnConfirmAction] = useState(() => () => {});
+    const { balanceDisplay, loading: creditsLoading } = useCredits();
 
 
     const user = decodedToken || {
@@ -104,6 +107,15 @@ const Settings = ({ decodedToken, user_id, onLogout }) => {
                     <div className="settings__user-info">
                         <p><strong>Name:</strong> {user.name}</p>
                         <p><strong>Email:</strong> {user.email}</p>
+                    </div>
+                    <div className="settings__credits">
+                      <p className="settings__credits-label">Credits</p>
+                      <p className="settings__credits-balance">
+                        {creditsLoading ? '...' : balanceDisplay}
+                      </p>
+                      <Link to="/credits" className="settings__credits-link">
+                        Buy Credits →
+                      </Link>
                     </div>
                     <button className="settings__delete-button" onClick={deleteAllChats}>
                         Delete all chats
