@@ -1,0 +1,75 @@
+.insufficient-credits-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.insufficient-credits-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-muted);
+  padding: 32px;
+  text-align: center;
+  min-width: 300px;
+  font-size: 14px;
+}
+
+.insufficient-credits-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  margin-bottom: 12px;
+}
+
+.insufficient-credits-message {
+  font-size: 13px;
+  color: var(--color-muted);
+  margin-bottom: 0;
+}
+
+.insufficient-credits-buttons {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.insufficient-credits-buy-button,
+.insufficient-credits-cancel-button {
+  padding: 8px 20px;
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-muted);
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.insufficient-credits-buy-button {
+  background: var(--color-action);
+  color: var(--color-bg);
+  border-color: var(--color-text);
+}
+
+.insufficient-credits-buy-button:hover {
+  background: transparent;
+  color: var(--color-text);
+}
+
+.insufficient-credits-cancel-button {
+  background: transparent;
+  color: var(--color-muted);
+}
+
+.insufficient-credits-cancel-button:hover {
+  border-color: var(--color-text);
+  color: var(--color-text);
+}
