@@ -1,14 +1,26 @@
 // src/pages/Home/Home.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './Home.css';
 import axios from 'axios';
 import { validateMessage, validateTrendingConversation } from '../../utils/validation';
 import { apiUrl } from '../../api';
 import InsufficientCreditsModal from '../../components/InsufficientCreditsModal/InsufficientCreditsModal';
+import { useCredits } from '../../hooks/useCredits';
 
 const getAuthHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('authToken')}` });
 
-const Home = ({ user_id }) => {
+const MODELS = [
+    { id: 'openai/gpt-4o-mini',                  label: 'gpt-4o-mini',        tier: 1, price: '$0.15 / 1M' },
+    { id: 'openai/gpt-4o',                       label: 'gpt-4o',             tier: 2, price: '$2.50 / 1M' },
+    { id: 'anthropic/claude-3-haiku',            label: 'claude-3-haiku',     tier: 1, price: '$0.25 / 1M' },
+    { id: 'anthropic/claude-sonnet-4.5',         label: 'claude-sonnet-4.5',  tier: 2, price: '$3.00 / 1M' },
+    { id: 'anthropic/claude-opus-4.5',           label: 'claude-opus-4.5',    tier: 3, price: '$15.00 / 1M' },
+    { id: 'google/gemini-2.5-flash',             label: 'gemini-2.5-flash',   tier: 1, price: '$0.15 / 1M' },
+    { id: 'google/gemini-2.5-pro',               label: 'gemini-2.5-pro',     tier: 2, price: '$1.25 / 1M' },
+    { id: 'meta-llama/llama-3.3-70b-instruct',   label: 'llama-3.3-70b',      tier: 1, price: '$0.59 / 1M' },
+];
+
+const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) => {
     const [editMode, setEditMode] = useState(false);
     const [checkedItems, setCheckedItems] = useState([]);
     const [title, setTitle] = useState('');
@@ -20,13 +32,27 @@ const Home = ({ user_id }) => {
     const [alertMessage, setAlertMessage] = useState('');
     const [style, setStyle] = useState('');
     const [showCreditsModal, setShowCreditsModal] = useState(false);
-    const [currentModel, setCurrentModel] = useState('');
+    const [currentModel, setCurrentModel] = useState('openai/gpt-4o-mini');
+    const [modelTier, setModelTier] = useState(1);
+    const [showModelPicker, setShowModelPicker] = useState(false);
+    const modelPickerRef = useRef(null);
+    const { balanceDisplay } = useCredits();
 
-
+    useEffect(() => {
+        if (!showModelPicker) return;
+        const handler = (e) => {
+            if (modelPickerRef.current && !modelPickerRef.current.contains(e.target)) {
+                setShowModelPicker(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [showModelPicker]);
 
     useEffect(() => {
         axios.get(`${apiUrl}/config`).then((res) => {
             setCurrentModel(res.data.model || '');
+            setModelTier(res.data.model_tier || null);
         });
     }, []);
 
@@ -207,8 +233,9 @@ const Home = ({ user_id }) => {
                 {}, // No request body needed, just URL parameters
                 {
                     params: {
-                        question: newMessage,  // Use newMessage as the question
-                        user_id: conversation.user_id
+                        question: newMessage,
+                        user_id: conversation.user_id,
+                        model: currentModel,
                     },
                     headers: {
                         'accept': 'application/json',
@@ -365,8 +392,79 @@ const Home = ({ user_id }) => {
                                     }
                                 }}
                             />
-                            {currentModel && <span className="chatbox__model-label">{currentModel.split('/').pop()}</span>}
-                            <button className="chatbox__model-btn" onClick={() => {}}><span className="chatbox__model-dot" /></button>
+                            <div className="chatbox__model-controls" ref={modelPickerRef}>
+                                <div className={`chatbox__model-picker${showModelPicker ? ' chatbox__model-picker--open' : ''}`}>
+                                    <div className="chatbox__model-picker-header">
+                                        <span className="chatbox__model-picker-balance">Balance: {balanceDisplay}</span>
+                                        <button className="chatbox__model-picker-close" onClick={() => setShowModelPicker(false)}>×</button>
+                                    </div>
+                                    {is_free_tier && (
+                                        <div className="chatbox__model-picker-free-notice">
+                                            Free trial · {free_messages_remaining} message{free_messages_remaining !== 1 ? 's' : ''} left.{' '}
+                                            <a href="/credits" className="chatbox__model-picker-free-link">Buy credits</a> to unlock all models.
+                                        </div>
+                                    )}
+                                    <div className="chatbox__model-picker-list">
+                                        {MODELS.map(m => {
+                                            const locked = is_free_tier && m.id !== 'openai/gpt-4o-mini';
+                                            return (
+                                                <button
+                                                    key={m.id}
+                                                    className={`chatbox__model-option${currentModel === m.id ? ' chatbox__model-option--active' : ''}${locked ? ' chatbox__model-option--locked' : ''}`}
+                                                    onClick={() => {
+                                                        if (locked) return;
+                                                        setCurrentModel(m.id);
+                                                        setModelTier(m.tier);
+                                                        setShowModelPicker(false);
+                                                    }}
+                                                    disabled={locked}
+                                                >
+                                                    <span className="chatbox__model-option-check">{currentModel === m.id ? '✓' : ''}</span>
+                                                    <span className="chatbox__model-option-label">
+                                                        {m.label}
+                                                        {m.id === 'openai/gpt-4o-mini' && is_free_tier && (
+                                                            <span className="chatbox__model-option-free-badge">Free</span>
+                                                        )}
+                                                    </span>
+                                                    <span className="chatbox__model-option-meta">
+                                                        {locked ? (
+                                                            <span className="chatbox__model-option-locked-label">🔒 Upgrade</span>
+                                                        ) : (
+                                                            <>
+                                                                <span className="chatbox__model-tier">
+                                                                    {[1,2,3].map(i => (
+                                                                        <span key={i} className={`chatbox__model-tier-dot ${i <= m.tier ? 'chatbox__model-tier-dot--on' : ''}`} />
+                                                                    ))}
+                                                                </span>
+                                                                <span className="chatbox__model-option-price">{m.price}</span>
+                                                            </>
+                                                        )}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                                {currentModel && (
+                                    <span className="chatbox__model-info">
+                                        <span className="chatbox__model-label">{currentModel.split('/').pop()}</span>
+                                        <span className="chatbox__model-tier">
+                                            {[1,2,3].map(i => (
+                                                <span key={i} className={`chatbox__model-tier-dot ${modelTier && i <= modelTier ? 'chatbox__model-tier-dot--on' : ''}`} />
+                                            ))}
+                                        </span>
+                                    </span>
+                                )}
+                                <button
+                                    className={`chatbox__model-btn${is_free_tier ? ' chatbox__model-btn--free' : ''}`}
+                                    onClick={() => setShowModelPicker(v => !v)}
+                                >
+                                    {is_free_tier
+                                        ? <span className="chatbox__model-btn-count">{free_messages_remaining}</span>
+                                        : <span className="chatbox__model-dot" />
+                                    }
+                                </button>
+                            </div>
                             <button onClick={sendMessage}>Send</button>
                         </div>
                     </div>
