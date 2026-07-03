@@ -161,6 +161,8 @@
     padding: 0 !important;
     margin: auto 8px;
     border-left: none !important;
+    background-color: var(--color-action) !important;
+    color: var(--color-bg) !important;
     font-size: 12px !important;
     font-weight: 700;
     display: flex;
