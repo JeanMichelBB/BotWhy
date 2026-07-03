@@ -19,6 +19,7 @@ import CookieConsent from './components/CookieConsent/CookieConsent';
 const App = () => {
   const [isSidebarVisible, setSidebarVisible] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const [idToken, setIdToken] = useState('');
   const [isDecoded, setIsDecoded] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -33,6 +34,7 @@ const App = () => {
   
     if (!storedToken || storedToken.split('.').length !== 3) {
       setIsLoggedIn(false);
+      setAuthChecked(true);
       return;
     }
   
@@ -50,6 +52,7 @@ const App = () => {
         .then(response => {
           setIsLoggedIn(response.status === 200);
           setUserId(response.data.user_id);
+          setAuthChecked(true);
         })
         .catch(error => {
           if (error.response) {
@@ -65,6 +68,7 @@ const App = () => {
             console.error('Protected route access failed:', error.message);
             setIsLoggedIn(false);
           }
+          setAuthChecked(true);
         });
     } catch (error) {
       console.error('Error decoding token:', error.message);
@@ -82,6 +86,7 @@ const App = () => {
   };
 
   const ProtectedRoute = ({ element }) => {
+    if (!authChecked) return null;
     return isLoggedIn ? element : <Navigate to="/" />;
   };
 
