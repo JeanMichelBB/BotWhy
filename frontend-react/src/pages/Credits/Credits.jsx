@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -6,8 +6,6 @@ import axios from 'axios';
 import { apiUrl } from '../../api';
 import { useCredits } from '../../hooks/useCredits';
 import './Credits.css';
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const getAuthHeader = () => ({ Authorization: `Bearer ${localStorage.getItem('authToken')}` });
 
@@ -96,6 +94,13 @@ function CheckoutForm({ selectedPack, onSuccess }) {
 const Credits = () => {
   const { balanceDisplay, transactions, loading, refetch } = useCredits();
   const [selectedPack, setSelectedPack] = useState(PACKS[1]);
+  const [stripePromise, setStripePromise] = useState(null);
+
+  useEffect(() => {
+    axios.get(`${apiUrl}/config`).then((res) => {
+      setStripePromise(loadStripe(res.data.stripe_publishable_key));
+    });
+  }, []);
 
   const formatDate = (isoString) => {
     if (!isoString) return '—';
@@ -130,9 +135,13 @@ const Credits = () => {
             ))}
           </div>
 
-          <Elements stripe={stripePromise}>
-            <CheckoutForm selectedPack={selectedPack} onSuccess={refetch} />
-          </Elements>
+          {stripePromise ? (
+            <Elements stripe={stripePromise}>
+              <CheckoutForm selectedPack={selectedPack} onSuccess={refetch} />
+            </Elements>
+          ) : (
+            <p className="credits__loading">Loading payment form...</p>
+          )}
         </div>
 
         <div className="credits__section">

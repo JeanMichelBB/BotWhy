@@ -3,7 +3,7 @@
 from fastapi import Depends, FastAPI, Request, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.openapi.utils import get_openapi
-from app.api.endpoints import chatbox, user, openai, credits
+from app.api.endpoints import chatbox, user, openai, credits, config
 from app.core.database import engine, Base
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
@@ -104,3 +104,4 @@ app.include_router(user.router, prefix="/user", tags=["user"])
 app.include_router(chatbox.router, prefix="/chatbox", tags=["chatbox"])
 app.include_router(openai.router, prefix="/openai", tags=["openai"])
 app.include_router(credits.router, prefix="/credits", tags=["credits"])
+app.include_router(config.router, prefix="/config", tags=["config"])
