@@ -61,7 +61,10 @@ function CheckoutForm({ selectedPack, onSuccess }) {
         setError(result.error.message);
       } else {
         setSuccess(true);
+        // Webhook may take a moment — refetch a few times to catch the update
         onSuccess();
+        setTimeout(onSuccess, 1500);
+        setTimeout(onSuccess, 3500);
       }
     } catch (err) {
       setError(err.response?.data?.detail || 'Payment failed. Please try again.');
@@ -101,8 +104,9 @@ const Credits = () => {
     if (stripeLoaded.current) return;
     stripeLoaded.current = true;
     axios.get(`${apiUrl}/config`).then((res) => {
-      setStripePromise(loadStripe(res.data.stripe_publishable_key));
-    });
+      const key = res.data.stripe_publishable_key;
+      if (key) setStripePromise(loadStripe(key));
+    }).catch((err) => console.error('Failed to load Stripe config:', err));
   }, []);
 
   const formatDate = (isoString) => {
