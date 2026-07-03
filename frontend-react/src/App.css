@@ -2,14 +2,11 @@ body, html {
   height: 100%;
   margin: 0;
   font-family: Arial, sans-serif;
-  overflow: hidden;
 }
 
 .app-layout {
   display: flex;
-  flex-direction: column;
   height: 100vh;
-  height: 100dvh;
   overflow: hidden;
 }
 
@@ -29,7 +26,6 @@ footer {
 
 .main-content {
   flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -37,17 +33,11 @@ footer {
 
 .content {
   flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto; /* Enable independent scrolling for the content area */
   box-sizing: border-box;
 }
 
 main {
   flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  padding: 20px; /* Add padding if necessary */
 }
