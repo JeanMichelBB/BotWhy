@@ -14,9 +14,20 @@ router = APIRouter()
 def answer_question(
     question: str,
     user_id: str,
+    model: str | None = None,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_credits),
 ):
+    # Free-tier enforcement: no purchase transactions → must use gpt-4o-mini
+    has_purchased = db.query(models.CreditTransaction).filter_by(
+        user_id=current_user.user_id, type="purchase"
+    ).count() > 0
+    if not has_purchased and model and model != "openai/gpt-4o-mini":
+        raise HTTPException(
+            status_code=403,
+            detail="Free tier is limited to gpt-4o-mini. Buy credits to unlock all models.",
+        )
+
     user_conversation = db.query(models.Conversation).filter(
         models.Conversation.user_id == user_id
     ).first()
@@ -28,15 +39,15 @@ def answer_question(
         models.Message.conversation_id == user_conversation.id
     ).all()
 
-    context = "".join(f"[{m.type}] {m.content} " for m in conversation_messages)
-
     messages = [
         {"role": "system", "content": "You are a sarcastic and humorous assistant. Your responses should be short, witty, and not very helpful."},
-        {"role": "user", "content": f"Context: {context}"},
-        {"role": "user", "content": f"Question: {question}"},
     ]
+    for m in conversation_messages:
+        role = "user" if m.type == "user" else "assistant"
+        messages.append({"role": role, "content": m.content})
+    messages.append({"role": "user", "content": question})
 
-    message_content, cost_cents = ai_module.call_openrouter(messages=messages)
+    message_content, cost_cents = ai_module.call_openrouter(messages=messages, model=model)
 
     new_message = models.Message(
         conversation_id=user_conversation.id,
