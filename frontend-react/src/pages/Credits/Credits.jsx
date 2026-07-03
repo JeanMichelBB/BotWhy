@@ -163,7 +163,8 @@ const Credits = () => {
                 <tr>
                   <th>Date</th>
                   <th>Type</th>
-                  <th>Amount</th>
+                  <th>Credits</th>
+                  <th>Charged</th>
                 </tr>
               </thead>
               <tbody>
@@ -173,6 +174,9 @@ const Credits = () => {
                     <td>{t.type}</td>
                     <td className={t.amount_cents > 0 ? 'credits__amount--positive' : 'credits__amount--negative'}>
                       {t.amount_cents > 0 ? '+' : ''}{centsToDisplay(t.amount_cents)}
+                    </td>
+                    <td className="credits__amount--muted">
+                      {t.amount_cents > 0 ? centsToDisplay(t.amount_cents + calculateFee(t.amount_cents)) : '—'}
                     </td>
                   </tr>
                 ))}

@@ -206,3 +206,8 @@
 .credits__amount--negative {
   color: var(--color-muted);
 }
+
+.credits__amount--muted {
+  color: var(--color-muted);
+  font-size: 11px;
+}
