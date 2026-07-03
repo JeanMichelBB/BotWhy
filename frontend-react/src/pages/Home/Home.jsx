@@ -20,8 +20,15 @@ const Home = ({ user_id }) => {
     const [alertMessage, setAlertMessage] = useState('');
     const [style, setStyle] = useState('');
     const [showCreditsModal, setShowCreditsModal] = useState(false);
+    const [currentModel, setCurrentModel] = useState('');
 
 
+
+    useEffect(() => {
+        axios.get(`${apiUrl}/config`).then((res) => {
+            setCurrentModel(res.data.model || '');
+        });
+    }, []);
 
     const handleSessionExpired = () => {
         sessionStorage.setItem('sessionExpired', 'Session expired. Please log in again.');
@@ -358,6 +365,7 @@ const Home = ({ user_id }) => {
                                     }
                                 }}
                             />
+                            {currentModel && <span className="chatbox__model-label">{currentModel.split('/').pop()}</span>}
                             <button className="chatbox__model-btn" onClick={() => {}}><span className="chatbox__model-dot" /></button>
                             <button onClick={sendMessage}>Send</button>
                         </div>

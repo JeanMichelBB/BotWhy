@@ -152,6 +152,14 @@
     background-color: var(--color-hover);
 }
 
+.chatbox__model-label {
+    font-size: 11px;
+    color: var(--color-muted);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    padding-left: 8px;
+}
+
 .chatbox__model-btn {
     width: 30px;
     height: 30px;
