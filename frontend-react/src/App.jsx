@@ -6,6 +6,7 @@ import Home from './pages/Home/Home';
 import About from './components/About/About';
 import Trending from './pages/Trending/Trending';
 import Settings from './components/Settings/Settings';
+import Credits from './pages/Credits/Credits';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import NotFound from './pages/NotFound/NotFound';
@@ -102,6 +103,7 @@ const App = () => {
                   <Route path="/about" element={<About />} />
                   <Route path="/trending" element={<Trending user_id={userId} />} />
                   <Route path="/settings" element={<ProtectedRoute element={<Settings decodedToken={isDecoded} user_id={userId} onLogout={handleLogout} />} />} />
+                  <Route path="/credits" element={<ProtectedRoute element={<Credits />} />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
