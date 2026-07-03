@@ -7,6 +7,7 @@ import About from './components/About/About';
 import Trending from './pages/Trending/Trending';
 import Settings from './components/Settings/Settings';
 import Credits from './pages/Credits/Credits';
+import Usage from './pages/Usage/Usage';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import NotFound from './pages/NotFound/NotFound';
@@ -23,6 +24,8 @@ const App = () => {
   const [idToken, setIdToken] = useState('');
   const [isDecoded, setIsDecoded] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [isFreeTier, setIsFreeTier] = useState(false);
+  const [freeMessagesRemaining, setFreeMessagesRemaining] = useState(10);
 
 
   const toggleSidebar = () => setSidebarVisible(!isSidebarVisible);
@@ -52,6 +55,8 @@ const App = () => {
         .then(response => {
           setIsLoggedIn(response.status === 200);
           setUserId(response.data.user_id);
+          setIsFreeTier(response.data.is_free_tier ?? false);
+          setFreeMessagesRemaining(response.data.free_messages_remaining ?? 10);
           setAuthChecked(true);
         })
         .catch(error => {
@@ -104,11 +109,12 @@ const App = () => {
             <div className="content">
               <main>
                 <Routes>
-                  <Route path="/" element={<Home user_id={userId} />} />
+                  <Route path="/" element={<Home user_id={userId} is_free_tier={isFreeTier} free_messages_remaining={freeMessagesRemaining} />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/trending" element={<Trending user_id={userId} />} />
                   <Route path="/settings" element={<ProtectedRoute element={<Settings decodedToken={isDecoded} user_id={userId} onLogout={handleLogout} />} />} />
                   <Route path="/credits" element={<ProtectedRoute element={<Credits />} />} />
+                  <Route path="/usage" element={<ProtectedRoute element={<Usage />} />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
