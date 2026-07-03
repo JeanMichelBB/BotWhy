@@ -358,6 +358,7 @@ const Home = ({ user_id }) => {
                                     }
                                 }}
                             />
+                            <button className="chatbox__model-btn" onClick={() => {}}>M</button>
                             <button onClick={sendMessage}>Send</button>
                         </div>
                     </div>
