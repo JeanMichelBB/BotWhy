@@ -116,6 +116,9 @@ const Settings = ({ decodedToken, user_id, onLogout }) => {
                       <Link to="/credits" className="settings__credits-link">
                         Buy Credits →
                       </Link>
+                      <Link to="/usage" className="settings__credits-link">
+                        View Usage →
+                      </Link>
                     </div>
                     <button className="settings__delete-button" onClick={deleteAllChats}>
                         Delete all chats

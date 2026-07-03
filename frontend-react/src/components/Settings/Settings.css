@@ -84,11 +84,11 @@
   text-transform: uppercase;
   color: var(--color-text);
   text-decoration: none;
-  border-bottom: 1px solid var(--color-muted);
-  padding-bottom: 1px;
-  transition: border-color 0.15s;
+  display: block;
+  margin-top: 10px;
+  transition: color 0.15s;
 }
 
 .settings__credits-link:hover {
-  border-color: var(--color-text);
+  color: var(--color-muted);
 }

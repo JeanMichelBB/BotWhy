@@ -1,5 +1,5 @@
 # app/models/models.py
-from sqlalchemy import Integer, String, JSON, TIMESTAMP, Column, ForeignKey, Text, func, Boolean
+from sqlalchemy import Integer, Float, String, JSON, TIMESTAMP, Column, ForeignKey, Text, func, Boolean
 from sqlalchemy.dialects.mysql import CHAR  # Import CHAR for MySQL compatibility
 from sqlalchemy.orm import relationship
 import uuid
@@ -15,7 +15,7 @@ class User(Base):
     token = Column(String(255), nullable=True)
     message_count = Column(Integer, default=0, nullable=True)
     trending_conversation_count = Column(Integer, default=0, nullable=True)
-    credit_balance_cents = Column(Integer, nullable=False, default=0)
+    credit_balance_cents = Column(Float, nullable=False, default=0.0)
     is_deleted = Column(Boolean, nullable=False, default=False)
     deleted_at = Column(TIMESTAMP, nullable=True)
 
@@ -72,7 +72,7 @@ class CreditTransaction(Base):
 
     id = Column(CHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(CHAR(36), ForeignKey('users.user_id'), nullable=False)
-    amount_cents = Column(Integer, nullable=False)
+    amount_cents = Column(Float, nullable=False)
     type = Column(String(20), nullable=False)  # 'purchase' | 'spend' | 'free_grant'
     description = Column(String(255), nullable=True)
     stripe_payment_id = Column(String(255), nullable=True)

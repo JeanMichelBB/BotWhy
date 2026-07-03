@@ -17,23 +17,38 @@ const About = () => {
         <div className="about">
             <div className="container">
                 <div className="about__content">
-                    <h1 className="about__title">About</h1>
+                    <h1 className="about__title">About BotWhy</h1>
                     <p className="about__description">
-                        Welcome to our innovative chat application, where the focus is on delivering entertainment rather than utility. Built with the latest technologies, our app combines the power of <strong>FastAPI</strong>, <strong>React Vite</strong>, <strong>MySQL</strong>, <strong>Google Authentication</strong>, and <strong>OpenAI</strong> to create a unique and engaging experience.
+                        BotWhy is a chat app powered by real AI models — but don't expect helpful answers. The bot is sarcastic, witty, and intentionally useless. That's the point.
                     </p>
-                    <p className="about__description">
-                        <strong>Key Features:</strong>
-                    </p>
+
+                    <p className="about__description"><strong>Free Trial</strong></p>
                     <ul className="about__features">
-                        <li><strong>Useless Chat Responses:</strong> Powered by OpenAI, our chatbot provides humorous, sarcastic, and intentionally unhelpful responses, designed to amuse and entertain rather than inform. This quirky approach ensures that every interaction is light-hearted and fun.</li>
-                        <li><strong>Trending Conversations:</strong> Keep track of what's buzzing! Our application allows users to view and interact with trending conversations, showcasing popular chat topics and exchanges. See what's trending and join the conversation in a playful environment.</li>
-                        <li><strong>Seamless Authentication:</strong> With Google Authentication integrated, logging in is quick and secure. Enjoy a streamlined user experience without the hassle of remembering multiple passwords.</li>
-                        <li><strong>Robust Backend:</strong> Leveraging FastAPI for fast and efficient API development, our application ensures quick responses and smooth operation. The backend is built on MySQL, offering reliable data management and storage.</li>
-                        <li><strong>Modern Frontend:</strong> Developed with React Vite, our frontend delivers a responsive and dynamic user interface. Experience a sleek and user-friendly design optimized for performance and ease of use.</li>
+                        <li>New users get <strong>10 free messages</strong> with no credit card required.</li>
+                        <li>Free trial is limited to <strong>gpt-4o-mini</strong>.</li>
+                        <li>Once your 10 messages are used, you need to buy credits to continue.</li>
                     </ul>
-                    <p className="about__description">
-                        Join us to explore a chat experience that's as entertaining as it is unique. Whether you're here to enjoy witty banter or see the latest trending topics, our app offers a refreshing twist on traditional chat applications.
-                    </p>
+
+                    <p className="about__description"><strong>Credits & Pricing</strong></p>
+                    <ul className="about__features">
+                        <li>Credits are purchased once — <strong>no subscription, no recurring charges</strong>.</li>
+                        <li>You are charged only for what you use. Each AI response deducts a small amount based on the model and message length.</li>
+                        <li>Cheaper models (like gpt-4o-mini) cost fractions of a cent per message. Premium models cost more.</li>
+                        <li>Your balance is displayed in real time. You can check your usage history in <strong>Settings → Credits</strong>.</li>
+                    </ul>
+
+                    <p className="about__description"><strong>AI Models</strong></p>
+                    <ul className="about__features">
+                        <li>Paid users can choose from multiple models: GPT-4o, Claude, Gemini, Llama, and more.</li>
+                        <li>Each model has a different cost per message, shown in the model picker.</li>
+                        <li>Your last selected model is remembered across sessions.</li>
+                    </ul>
+
+                    <p className="about__description"><strong>Other Features</strong></p>
+                    <ul className="about__features">
+                        <li><strong>Trending Conversations:</strong> Browse and share funny exchanges with the community.</li>
+                        <li><strong>Google Login:</strong> Sign in securely with your Google account — no passwords to remember.</li>
+                    </ul>
                 </div>
             </div>
         </div>

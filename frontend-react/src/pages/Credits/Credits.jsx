@@ -143,7 +143,7 @@ const Credits = () => {
           </div>
 
           {stripePromise ? (
-            <Elements stripe={stripePromise}>
+            <Elements stripe={stripePromise} options={{ locale: 'en' }}>
               <CheckoutForm selectedPack={selectedPack} onSuccess={refetch} />
             </Elements>
           ) : (

@@ -21,6 +21,8 @@ const MODELS = [
 ];
 
 const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) => {
+    const [messagesLeft, setMessagesLeft] = useState(free_messages_remaining);
+    useEffect(() => { setMessagesLeft(free_messages_remaining); }, [free_messages_remaining]);
     const [editMode, setEditMode] = useState(false);
     const [checkedItems, setCheckedItems] = useState([]);
     const [title, setTitle] = useState('');
@@ -32,8 +34,11 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
     const [alertMessage, setAlertMessage] = useState('');
     const [style, setStyle] = useState('');
     const [showCreditsModal, setShowCreditsModal] = useState(false);
-    const [currentModel, setCurrentModel] = useState('openai/gpt-4o-mini');
-    const [modelTier, setModelTier] = useState(1);
+    const savedModel = !is_free_tier && localStorage.getItem('selectedModel');
+    const [currentModel, setCurrentModel] = useState(savedModel || 'openai/gpt-4o-mini');
+    const [modelTier, setModelTier] = useState(
+        MODELS.find(m => m.id === (savedModel || 'openai/gpt-4o-mini'))?.tier || 1
+    );
     const [showModelPicker, setShowModelPicker] = useState(false);
     const modelPickerRef = useRef(null);
     const { balanceDisplay } = useCredits();
@@ -51,8 +56,11 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
 
     useEffect(() => {
         axios.get(`${apiUrl}/config`).then((res) => {
-            setCurrentModel(res.data.model || '');
-            setModelTier(res.data.model_tier || null);
+            const stored = !is_free_tier && localStorage.getItem('selectedModel');
+            if (!stored) {
+                setCurrentModel(res.data.model || '');
+                setModelTier(res.data.model_tier || null);
+            }
         });
     }, []);
 
@@ -247,6 +255,10 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
             // Fetch messages again to update the list with the bot's response
             await fetchMessages(conversation.id);
 
+            if (is_free_tier) {
+                setMessagesLeft(prev => Math.max(0, prev - 1));
+            }
+
         } catch (error) {
             console.error('Failed to send message or fetch OpenAI response:', error);
 
@@ -398,15 +410,20 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
                                         <span className="chatbox__model-picker-balance">Balance: {balanceDisplay}</span>
                                         <button className="chatbox__model-picker-close" onClick={() => setShowModelPicker(false)}>×</button>
                                     </div>
-                                    {is_free_tier && (
+                                    {!user_id && (
                                         <div className="chatbox__model-picker-free-notice">
-                                            Free trial · {free_messages_remaining} message{free_messages_remaining !== 1 ? 's' : ''} left.{' '}
+                                            <a href="#" onClick={e => { e.preventDefault(); }} className="chatbox__model-picker-free-link">Login</a> to select a model.
+                                        </div>
+                                    )}
+                                    {is_free_tier && user_id && (
+                                        <div className="chatbox__model-picker-free-notice">
+                                            Free trial · {messagesLeft} message{messagesLeft !== 1 ? 's' : ''} left.{' '}
                                             <a href="/credits" className="chatbox__model-picker-free-link">Buy credits</a> to unlock all models.
                                         </div>
                                     )}
                                     <div className="chatbox__model-picker-list">
                                         {MODELS.map(m => {
-                                            const locked = is_free_tier && m.id !== 'openai/gpt-4o-mini';
+                                            const locked = !user_id || (is_free_tier && m.id !== 'openai/gpt-4o-mini');
                                             return (
                                                 <button
                                                     key={m.id}
@@ -415,6 +432,7 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
                                                         if (locked) return;
                                                         setCurrentModel(m.id);
                                                         setModelTier(m.tier);
+                                                        localStorage.setItem('selectedModel', m.id);
                                                         setShowModelPicker(false);
                                                     }}
                                                     disabled={locked}
@@ -460,7 +478,7 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
                                     onClick={() => setShowModelPicker(v => !v)}
                                 >
                                     {is_free_tier
-                                        ? <span className="chatbox__model-btn-count">{free_messages_remaining}</span>
+                                        ? <span className="chatbox__model-btn-count">{messagesLeft}</span>
                                         : <span className="chatbox__model-dot" />
                                     }
                                 </button>

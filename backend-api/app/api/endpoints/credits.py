@@ -39,7 +39,7 @@ def get_balance(
     balance_cents = current_user.credit_balance_cents
     return {
         "balance_cents": balance_cents,
-        "balance_display": f"${balance_cents / 100:.2f}",
+        "balance_display": f"${balance_cents / 100:.6f}",
         "transactions": [
             {
                 "id": t.id,

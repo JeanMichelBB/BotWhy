@@ -7,7 +7,9 @@ import time
 from fastapi import Header, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.models.models import User
+from app.models.models import User, CreditTransaction
+
+FREE_TRIAL_MESSAGES = 10
 
 
 def hash_token(token: str) -> str:
@@ -49,6 +51,15 @@ def get_current_user(authorization: str = Header(...), db: Session = Depends(get
 
 
 def require_credits(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> User:
+    has_purchased = db.query(CreditTransaction).filter_by(
+        user_id=current_user.user_id, type="purchase"
+    ).count() > 0
+
+    if not has_purchased:
+        if (current_user.message_count or 0) >= FREE_TRIAL_MESSAGES:
+            raise HTTPException(status_code=402, detail="Free trial exhausted. Buy credits to continue.")
+        return current_user
+
     if current_user.credit_balance_cents <= 0:
         raise HTTPException(status_code=402, detail="Insufficient credits")
     return current_user

@@ -56,7 +56,7 @@ def answer_question(
     )
     db.add(new_message)
 
-    if cost_cents > 0:
+    if cost_cents > 0 and has_purchased:
         current_user.credit_balance_cents -= cost_cents
         txn = models.CreditTransaction(
             user_id=current_user.user_id,

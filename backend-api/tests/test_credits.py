@@ -5,16 +5,16 @@ from unittest.mock import MagicMock, patch
 def make_openrouter_response(content="Answer", cost=0.0234):
     response = MagicMock()
     response.choices[0].message.content = content
-    response.usage.cost = cost
+    response.usage.model_extra = {"cost": cost}
     return response
 
 
 def test_cost_cents_rounding():
     from app.utils.ai import cost_to_cents
-    assert cost_to_cents(0.0234) == 2
-    assert cost_to_cents(0.005) == 1   # rounds up, not 0
-    assert cost_to_cents(0.0) == 0
-    assert cost_to_cents(0.01) == 1
+    assert cost_to_cents(0.0234) == pytest.approx(2.34)
+    assert cost_to_cents(0.005) == pytest.approx(0.5)
+    assert cost_to_cents(0.0) == 0.0
+    assert cost_to_cents(0.01) == pytest.approx(1.0)
 
 
 def test_call_openrouter_returns_content_and_cost(monkeypatch):
@@ -27,30 +27,20 @@ def test_call_openrouter_returns_content_and_cost(monkeypatch):
     from app.utils.ai import call_openrouter
     content, cost_cents = call_openrouter(messages=[{"role": "user", "content": "hi"}])
     assert content == "Hello"
-    assert cost_cents == 1
+    assert cost_cents == pytest.approx(1.0)
 
 
-def test_new_user_gets_free_credits(db):
-    from app.models.models import User, CreditTransaction
-    import os
-    os.environ["FREE_CREDITS_CENTS"] = "500"
-
+def test_new_user_starts_with_zero_balance(db):
     from app.api.endpoints.user import _create_user_with_grant
     user = _create_user_with_grant(db, email="new@example.com", given_name="Alice", token_hash="abc123")
 
-    assert user.credit_balance_cents == 500
-    txn = db.query(CreditTransaction).filter_by(user_id=user.user_id).first()
-    assert txn is not None
-    assert txn.type == "free_grant"
-    assert txn.amount_cents == 500
+    assert user.credit_balance_cents == 0
 
 
-def test_reactivated_user_gets_no_second_grant(db):
-    from app.models.models import User, CreditTransaction
-    import os
-    os.environ["FREE_CREDITS_CENTS"] = "500"
-
+def test_reactivated_user_gets_no_grant(db):
+    from app.models.models import CreditTransaction
     from app.api.endpoints.user import _create_user_with_grant, _reactivate_user
+
     user = _create_user_with_grant(db, email="old@example.com", given_name="Bob", token_hash="hash1")
     user.is_deleted = True
     db.commit()
@@ -58,8 +48,7 @@ def test_reactivated_user_gets_no_second_grant(db):
     _reactivate_user(db, user, given_name="Bob", token_hash="hash2")
 
     txns = db.query(CreditTransaction).filter_by(user_id=user.user_id).all()
-    grant_txns = [t for t in txns if t.type == "free_grant"]
-    assert len(grant_txns) == 1
+    assert len(txns) == 0
     assert user.is_deleted is False
 
 
@@ -87,15 +76,42 @@ def test_delete_preserves_balance(db, make_user):
 
 def test_require_credits_passes_with_balance(db, make_user):
     from app.api.dependencies import require_credits
+    from app.models.models import CreditTransaction
     user = make_user(balance=10)
+    # give them a purchase so they're paid-tier
+    txn = CreditTransaction(user_id=user.user_id, amount_cents=10, type="purchase", description="test")
+    db.add(txn)
+    db.commit()
     result = require_credits(current_user=user, db=db)
     assert result.user_id == user.user_id
 
 
-def test_require_credits_raises_402_when_zero(db, make_user):
+def test_require_credits_free_tier_passes_during_trial(db, make_user):
+    from app.api.dependencies import require_credits
+    user = make_user(balance=0)  # no purchase → free tier, 0 messages used
+    result = require_credits(current_user=user, db=db)
+    assert result.user_id == user.user_id
+
+
+def test_require_credits_raises_402_when_paid_tier_empty(db, make_user):
+    from app.api.dependencies import require_credits
+    from app.models.models import CreditTransaction
+    from fastapi import HTTPException
+    user = make_user(balance=0)
+    txn = CreditTransaction(user_id=user.user_id, amount_cents=0, type="purchase", description="test")
+    db.add(txn)
+    db.commit()
+    with pytest.raises(HTTPException) as exc:
+        require_credits(current_user=user, db=db)
+    assert exc.value.status_code == 402
+
+
+def test_require_credits_raises_402_when_free_trial_exhausted(db, make_user):
     from app.api.dependencies import require_credits
     from fastapi import HTTPException
     user = make_user(balance=0)
+    user.message_count = 10
+    db.commit()
     with pytest.raises(HTTPException) as exc:
         require_credits(current_user=user, db=db)
     assert exc.value.status_code == 402
@@ -106,11 +122,15 @@ def test_deduct_credits_after_ai_call(db, make_user, monkeypatch):
     import app.utils.ai as ai_module
 
     user = make_user(balance=100)
+    # make paid-tier so deduction applies
+    txn = CreditTransaction(user_id=user.user_id, amount_cents=100, type="purchase", description="test")
+    db.add(txn)
+    db.commit()
 
     monkeypatch.setattr(
         ai_module,
         "call_openrouter",
-        lambda messages: ("Witty answer", 3),
+        lambda messages, model=None: ("Witty answer", 3),
     )
 
     conv = Conversation(user_id=user.user_id)
@@ -132,7 +152,7 @@ def test_zero_cost_inserts_no_spend_row(db, make_user, monkeypatch):
     import app.utils.ai as ai_module
 
     user = make_user(balance=100)
-    monkeypatch.setattr(ai_module, "call_openrouter", lambda messages: ("answer", 0))
+    monkeypatch.setattr(ai_module, "call_openrouter", lambda messages, model=None: ("answer", 0))
 
     conv = Conversation(user_id=user.user_id)
     db.add(conv)
@@ -160,7 +180,7 @@ def test_balance_endpoint_returns_balance(client, db, make_user):
     assert response.status_code == 200
     data = response.json()
     assert data["balance_cents"] == 750
-    assert data["balance_display"] == "$7.50"
+    assert data["balance_display"] == "$7.500000"
     assert len(data["transactions"]) == 1
 
 

@@ -89,7 +89,7 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-origins = os.getenv("ORIGIN_URLS")
+origins = [o.strip() for o in os.getenv("ORIGIN_URLS", "").split(",") if o.strip()]
 
 app.add_middleware(
     CORSMiddleware,

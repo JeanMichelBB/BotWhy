@@ -49,8 +49,8 @@ def create_message(conversation_id: str, message: str, db: Session = Depends(get
     if not existing_conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
     
-    # check if the user has reached the message limit
-    if existing_conversation.user.message_count >= 10:
+    # check if the user has reached the message limit (bypassed for users with credits)
+    if existing_conversation.user.message_count >= 10 and existing_conversation.user.credit_balance_cents <= 0:
         raise HTTPException(status_code=400, detail="Message limit reached")
     
     # Create a new message

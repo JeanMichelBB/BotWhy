@@ -17,25 +17,14 @@ router = APIRouter()
 CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
-FREE_CREDITS_CENTS = int(os.getenv("FREE_CREDITS_CENTS", "500"))
-
-
 def _create_user_with_grant(db: Session, email: str, given_name: str, token_hash: str) -> User:
     new_user = User(
         email=email,
         given_name=given_name,
         token=token_hash,
-        credit_balance_cents=FREE_CREDITS_CENTS,
+        credit_balance_cents=0,
     )
     db.add(new_user)
-    db.flush()  # get new_user.user_id before inserting transaction
-    txn = CreditTransaction(
-        user_id=new_user.user_id,
-        amount_cents=FREE_CREDITS_CENTS,
-        type="free_grant",
-        description="Welcome credits",
-    )
-    db.add(txn)
     db.commit()
     db.refresh(new_user)
     return new_user
