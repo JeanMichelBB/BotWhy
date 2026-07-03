@@ -4,6 +4,7 @@ import './Home.css';
 import axios from 'axios';
 import { validateMessage, validateTrendingConversation } from '../../utils/validation';
 import { apiUrl } from '../../api';
+import InsufficientCreditsModal from '../../components/InsufficientCreditsModal/InsufficientCreditsModal';
 
 const getAuthHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('authToken')}` });
 
@@ -18,6 +19,7 @@ const Home = ({ user_id }) => {
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [style, setStyle] = useState('');
+    const [showCreditsModal, setShowCreditsModal] = useState(false);
 
 
 
@@ -216,7 +218,10 @@ const Home = ({ user_id }) => {
 
             // Check for specific error response
             if (error.response) {
-                if (error.response.status === 400 && error.response.data.detail === 'Message limit reached') {
+                if (error.response.status === 402) {
+                    setShowCreditsModal(true);
+                    return;
+                } else if (error.response.status === 400 && error.response.data.detail === 'Message limit reached') {
                     setAlertMessage('You have reached the message limit.');
                     setStyle({ backgroundColor: '#ff4c4c' }); // Red for error
                 } else {
@@ -358,6 +363,9 @@ const Home = ({ user_id }) => {
                     </div>
                 </div>
             </div>
+            {showCreditsModal && (
+                <InsufficientCreditsModal onClose={() => setShowCreditsModal(false)} />
+            )}
         </div>
     );
 };
