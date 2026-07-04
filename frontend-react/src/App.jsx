@@ -99,21 +99,6 @@ const App = () => {
     handleTokenUpdate();
   }, []);
 
-  useEffect(() => {
-    const setHeight = () => {
-      const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-      document.documentElement.style.setProperty('--app-height', `${h}px`);
-    };
-    setHeight();
-    const vp = window.visualViewport;
-    if (vp) vp.addEventListener('resize', setHeight);
-    else window.addEventListener('resize', setHeight);
-    return () => {
-      if (vp) vp.removeEventListener('resize', setHeight);
-      else window.removeEventListener('resize', setHeight);
-    };
-  }, []);
-
   return (
     <GoogleOAuthProvider clientId={"1047061356868-t3oi24d1ckit51c7dne41i4fodfu9p1v.apps.googleusercontent.com"}>
       <Router>
