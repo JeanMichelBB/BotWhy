@@ -15,6 +15,22 @@ body, html {
   touch-action: none;
 }
 
+/* iOS Safari iPhone only: 100vh includes the address bar, -webkit-fill-available excludes it */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 768px) {
+    .app-layout {
+      height: -webkit-fill-available;
+    }
+  }
+}
+
+/* Chrome Android: dvh tracks the visual viewport correctly */
+@supports (height: 100dvh) and (not (-webkit-touch-callout: none)) {
+  .app-layout {
+    height: 100dvh;
+  }
+}
+
 footer {
   position: fixed;
   top: 0;
