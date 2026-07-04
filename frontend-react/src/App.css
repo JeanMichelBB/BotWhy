@@ -7,7 +7,6 @@ body, html {
 .app-layout {
   display: flex;
   height: 100vh;
-  height: var(--app-height, 100vh);
   overflow: hidden;
 }
 
