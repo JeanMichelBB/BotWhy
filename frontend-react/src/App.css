@@ -2,12 +2,17 @@ body, html {
   height: 100%;
   margin: 0;
   font-family: Arial, sans-serif;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
 }
 
 .app-layout {
   display: flex;
   height: 100vh;
   overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
 }
 
 footer {
