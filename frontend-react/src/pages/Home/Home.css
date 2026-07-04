@@ -30,6 +30,7 @@
     flex-direction: column;
     overflow: hidden;
     height: calc(100vh - 100px);
+    height: calc(var(--app-height, 100vh) - 100px);
 }
 
 .chatbox__messages__container {
@@ -468,7 +469,7 @@
 
 @media screen and (max-width: 600px) {
     .chatbox {
-        height: calc(100dvh - 100px);
+        height: calc(var(--app-height, 100dvh) - 100px);
         border: none;
     }
 
