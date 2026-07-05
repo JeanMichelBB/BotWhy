@@ -91,3 +91,30 @@ def get_user_detail(
             for t in recent_transactions
         ],
     }
+
+
+@router.post("/users/{user_id}/credit-adjustment")
+def adjust_user_credit(
+    user_id: str,
+    amount_cents: float,
+    reason: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    user = db.query(User).filter_by(user_id=user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not reason.strip():
+        raise HTTPException(status_code=400, detail="Reason is required")
+
+    user.credit_balance_cents += amount_cents
+    txn = CreditTransaction(
+        user_id=user_id,
+        amount_cents=amount_cents,
+        type="admin_adjustment",
+        description=reason,
+    )
+    db.add(txn)
+    db.commit()
+    db.refresh(user)
+    return {"balance_cents": user.credit_balance_cents}

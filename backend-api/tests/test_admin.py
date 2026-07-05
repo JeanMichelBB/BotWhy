@@ -84,3 +84,38 @@ def test_admin_user_detail_404_for_unknown_user(client, make_user):
         headers={"Authorization": f"Bearer {admin._raw_token}"},
     )
     assert response.status_code == 404
+
+
+def test_admin_credit_adjustment_updates_balance_and_creates_transaction(client, db, make_user):
+    from app.models.models import CreditTransaction
+
+    admin = make_user(email="admin@example.com", role="admin")
+    user = make_user(email="target@example.com", balance=500)
+
+    response = client.post(
+        f"/admin/users/{user.user_id}/credit-adjustment",
+        params={"amount_cents": 200, "reason": "Support credit"},
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json()["balance_cents"] == 700
+
+    db.refresh(user)
+    assert user.credit_balance_cents == 700
+
+    txn = db.query(CreditTransaction).filter_by(user_id=user.user_id).first()
+    assert txn.type == "admin_adjustment"
+    assert txn.amount_cents == 200
+    assert txn.description == "Support credit"
+
+
+def test_admin_credit_adjustment_requires_reason(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+    user = make_user(email="target@example.com")
+
+    response = client.post(
+        f"/admin/users/{user.user_id}/credit-adjustment",
+        params={"amount_cents": 100, "reason": ""},
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 400
