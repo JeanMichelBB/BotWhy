@@ -119,3 +119,65 @@ def test_admin_credit_adjustment_requires_reason(client, make_user):
         headers={"Authorization": f"Bearer {admin._raw_token}"},
     )
     assert response.status_code == 400
+
+
+def test_admin_credit_adjustment_allows_negative_amount(client, db, make_user):
+    from app.models.models import CreditTransaction
+
+    admin = make_user(email="admin@example.com", role="admin")
+    user = make_user(email="target@example.com", balance=500)
+
+    response = client.post(
+        f"/admin/users/{user.user_id}/credit-adjustment",
+        params={"amount_cents": -150, "reason": "Correcting overcredit"},
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json()["balance_cents"] == 350
+
+    db.refresh(user)
+    assert user.credit_balance_cents == 350
+
+    txn = db.query(CreditTransaction).filter_by(user_id=user.user_id).first()
+    assert txn.amount_cents == -150
+
+
+def test_admin_credit_adjustment_404_for_unknown_user(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+
+    response = client.post(
+        "/admin/users/does-not-exist/credit-adjustment",
+        params={"amount_cents": 100, "reason": "test"},
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 404
+
+
+def test_admin_credit_adjustment_rejects_non_admin(client, make_user):
+    user = make_user()
+    target = make_user(email="target@example.com")
+
+    response = client.post(
+        f"/admin/users/{target.user_id}/credit-adjustment",
+        params={"amount_cents": 100, "reason": "test"},
+        headers={"Authorization": f"Bearer {user._raw_token}"},
+    )
+    assert response.status_code == 403
+
+
+def test_admin_credit_adjustment_allows_zero_amount(client, db, make_user):
+    from app.models.models import CreditTransaction
+
+    admin = make_user(email="admin@example.com", role="admin")
+    user = make_user(email="target@example.com", balance=500)
+
+    response = client.post(
+        f"/admin/users/{user.user_id}/credit-adjustment",
+        params={"amount_cents": 0, "reason": "Note only, no balance change"},
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json()["balance_cents"] == 500
+
+    txn = db.query(CreditTransaction).filter_by(user_id=user.user_id).first()
+    assert txn.amount_cents == 0
