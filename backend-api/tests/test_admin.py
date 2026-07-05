@@ -15,3 +15,44 @@ def test_app_setting_helpers_roundtrip(db):
 
     set_active_model(db, "anthropic/claude-3-haiku")
     assert get_active_model(db, default="openai/gpt-4o-mini") == "anthropic/claude-3-haiku"
+
+
+def test_admin_users_rejects_non_admin(client, make_user):
+    user = make_user()
+    response = client.get("/admin/users", headers={"Authorization": f"Bearer {user._raw_token}"})
+    assert response.status_code == 403
+
+
+def test_admin_users_rejects_invalid_token(client):
+    response = client.get("/admin/users", headers={"Authorization": "Bearer garbage"})
+    assert response.status_code == 401
+
+
+def test_admin_users_lists_and_paginates(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+    for i in range(3):
+        make_user(email=f"user{i}@example.com")
+
+    response = client.get(
+        "/admin/users?page=1&page_size=2",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total"] == 4
+    assert len(data["items"]) == 2
+    assert data["page"] == 1
+
+
+def test_admin_users_search_filters_by_email(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+    make_user(email="alice@example.com")
+    make_user(email="bob@example.com")
+
+    response = client.get(
+        "/admin/users?search=alice",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    data = response.json()
+    assert data["total"] == 1
+    assert data["items"][0]["email"] == "alice@example.com"
