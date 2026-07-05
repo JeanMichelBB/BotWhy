@@ -56,3 +56,31 @@ def test_admin_users_search_filters_by_email(client, make_user):
     data = response.json()
     assert data["total"] == 1
     assert data["items"][0]["email"] == "alice@example.com"
+
+
+def test_admin_user_detail_includes_transactions(client, db, make_user):
+    from app.models.models import CreditTransaction
+
+    admin = make_user(email="admin@example.com", role="admin")
+    user = make_user(email="target@example.com", balance=750)
+    db.add(CreditTransaction(user_id=user.user_id, amount_cents=750, type="purchase", description="Starter pack"))
+    db.commit()
+
+    response = client.get(
+        f"/admin/users/{user.user_id}",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["email"] == "target@example.com"
+    assert len(data["recent_transactions"]) == 1
+    assert data["recent_transactions"][0]["type"] == "purchase"
+
+
+def test_admin_user_detail_404_for_unknown_user(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+    response = client.get(
+        "/admin/users/does-not-exist",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 404
