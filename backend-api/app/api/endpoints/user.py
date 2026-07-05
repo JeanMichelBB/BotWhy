@@ -39,6 +39,13 @@ def _reactivate_user(db: Session, user: User, given_name: str, token_hash: str) 
     return user
 
 
+def _admin_reactivate_user(db: Session, user: User) -> User:
+    user.is_deleted = False
+    user.deleted_at = None
+    db.commit()
+    return user
+
+
 def _soft_delete_user(db: Session, user: User) -> None:
     user.is_deleted = True
     user.deleted_at = sqlfunc.now()

@@ -181,3 +181,33 @@ def test_admin_credit_adjustment_allows_zero_amount(client, db, make_user):
 
     txn = db.query(CreditTransaction).filter_by(user_id=user.user_id).first()
     assert txn.amount_cents == 0
+
+
+def test_admin_soft_delete_preserves_balance(client, db, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+    user = make_user(email="target@example.com", balance=300)
+
+    response = client.post(
+        f"/admin/users/{user.user_id}/soft-delete",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+
+    db.refresh(user)
+    assert user.is_deleted is True
+    assert user.credit_balance_cents == 300
+
+
+def test_admin_reactivate_clears_deleted_flag(client, db, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+    user = make_user(email="target@example.com", is_deleted=True)
+
+    response = client.post(
+        f"/admin/users/{user.user_id}/reactivate",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+
+    db.refresh(user)
+    assert user.is_deleted is False
+    assert user.deleted_at is None

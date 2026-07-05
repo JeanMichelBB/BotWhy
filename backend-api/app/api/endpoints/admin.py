@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.api.dependencies import require_admin
 from app.models.models import User, CreditTransaction
+from app.api.endpoints.user import _soft_delete_user, _admin_reactivate_user
 
 router = APIRouter()
 
@@ -118,3 +119,29 @@ def adjust_user_credit(
     db.commit()
     db.refresh(user)
     return {"balance_cents": user.credit_balance_cents}
+
+
+@router.post("/users/{user_id}/soft-delete")
+def admin_soft_delete_user(
+    user_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    user = db.query(User).filter_by(user_id=user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    _soft_delete_user(db, user)
+    return {"message": "User soft-deleted"}
+
+
+@router.post("/users/{user_id}/reactivate")
+def admin_reactivate_user(
+    user_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    user = db.query(User).filter_by(user_id=user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    _admin_reactivate_user(db, user)
+    return {"message": "User reactivated"}
