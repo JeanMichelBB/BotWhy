@@ -85,3 +85,8 @@ def create_all_tables():
             conn.commit()
         except Exception:
             pass
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'user'"))
+            conn.commit()
+        except Exception:
+            pass
