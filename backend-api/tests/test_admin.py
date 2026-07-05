@@ -211,3 +211,21 @@ def test_admin_reactivate_clears_deleted_flag(client, db, make_user):
     db.refresh(user)
     assert user.is_deleted is False
     assert user.deleted_at is None
+
+
+def test_admin_soft_delete_404_for_unknown_user(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+    response = client.post(
+        "/admin/users/does-not-exist/soft-delete",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 404
+
+
+def test_admin_reactivate_404_for_unknown_user(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+    response = client.post(
+        "/admin/users/does-not-exist/reactivate",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 404

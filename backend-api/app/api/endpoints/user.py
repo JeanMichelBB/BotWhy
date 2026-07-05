@@ -31,6 +31,8 @@ def _create_user_with_grant(db: Session, email: str, given_name: str, token_hash
 
 
 def _reactivate_user(db: Session, user: User, given_name: str, token_hash: str) -> User:
+    """Login-triggered reactivation: always has a fresh token from the just-completed
+    Google login, unlike _admin_reactivate_user which has no token to set."""
     user.is_deleted = False
     user.deleted_at = None
     user.token = token_hash
@@ -40,8 +42,12 @@ def _reactivate_user(db: Session, user: User, given_name: str, token_hash: str) 
 
 
 def _admin_reactivate_user(db: Session, user: User) -> User:
+    """Admin-triggered reactivation: clears the deleted flags and forces a fresh
+    login (no token available here, unlike _reactivate_user which runs during
+    an actual Google login and always has a fresh token to set)."""
     user.is_deleted = False
     user.deleted_at = None
+    user.token = None
     db.commit()
     return user
 
