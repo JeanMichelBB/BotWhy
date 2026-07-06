@@ -460,3 +460,22 @@ def test_login_does_not_promote_unlisted_email(client, db, monkeypatch):
 
     user = db.query(User).filter_by(user_id=user_id).first()
     assert user.role == "user"
+
+
+def test_protected_includes_role_for_admin(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+    response = client.get(
+        "/user/protected",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json()["role"] == "admin"
+
+
+def test_protected_includes_role_for_regular_user(client, make_user):
+    user = make_user()
+    response = client.get(
+        "/user/protected",
+        headers={"Authorization": f"Bearer {user._raw_token}"},
+    )
+    assert response.json()["role"] == "user"

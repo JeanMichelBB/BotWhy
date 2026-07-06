@@ -113,6 +113,7 @@ def protected(current_user: User = Depends(get_current_user), db: Session = Depe
         "user_id": current_user.user_id,
         "is_free_tier": is_free_tier,
         "free_messages_remaining": free_messages_remaining,
+        "role": current_user.role,
     }
     
 # Delete user (soft delete — preserves row and balance)
