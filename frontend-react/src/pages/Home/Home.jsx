@@ -6,6 +6,9 @@ import { validateMessage, validateTrendingConversation } from '../../utils/valid
 import { apiUrl } from '../../api';
 import InsufficientCreditsModal from '../../components/InsufficientCreditsModal/InsufficientCreditsModal';
 import { useCredits } from '../../hooks/useCredits';
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
+import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
+import VoiceModeButton from '../../components/VoiceModeButton/VoiceModeButton';
 
 const getAuthHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('authToken')}` });
 
@@ -42,6 +45,36 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
     const [showModelPicker, setShowModelPicker] = useState(false);
     const modelPickerRef = useRef(null);
     const { balanceDisplay } = useCredits();
+    const voiceReplies = useSpeechSynthesis();
+    const speechRecognition = useSpeechRecognition({
+        onResult: (transcript) => {
+            setNewMessage((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        },
+        onError: (error) => {
+            if (error === 'not-allowed') {
+                setAlertMessage('Microphone access denied. Check your browser\'s site permissions.');
+                setStyle({ backgroundColor: 'rgb(130 130 130)' });
+                setShowAlert(true);
+            }
+        },
+    });
+
+    const handleVoiceModeTap = () => {
+        if (speechRecognition.isListening) {
+            speechRecognition.stop();
+            return;
+        }
+        if (!voiceReplies.enabled) {
+            voiceReplies.setEnabled(true);
+        }
+        speechRecognition.start();
+    };
+
+    const handleVoiceModeExit = () => {
+        speechRecognition.stop();
+        voiceReplies.setEnabled(false);
+        voiceReplies.stop();
+    };
 
     useEffect(() => {
         if (!showModelPicker) return;
@@ -255,6 +288,8 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
             // Fetch messages again to update the list with the bot's response
             await fetchMessages(conversation.id);
 
+            voiceReplies.speak(openAIResponse.data.answer);
+
             if (is_free_tier) {
                 setMessagesLeft(prev => Math.max(0, prev - 1));
             }
@@ -392,6 +427,14 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
                             </div>
                         )}
                         <div className="chatbox__input">
+                            {speechRecognition.isSupported && (
+                                <VoiceModeButton
+                                    isListening={speechRecognition.isListening}
+                                    voiceRepliesEnabled={voiceReplies.enabled}
+                                    onTap={handleVoiceModeTap}
+                                    onExit={handleVoiceModeExit}
+                                />
+                            )}
                             <input
                                 type="text"
                                 placeholder="Type a message..."
