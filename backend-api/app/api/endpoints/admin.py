@@ -145,3 +145,24 @@ def admin_reactivate_user(
         raise HTTPException(status_code=404, detail="User not found")
     _admin_reactivate_user(db, user)
     return {"message": "User reactivated"}
+
+
+@router.post("/users/{user_id}/role")
+def change_user_role(
+    user_id: str,
+    role: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    if role not in ("user", "admin"):
+        raise HTTPException(status_code=400, detail="role must be 'user' or 'admin'")
+    if user_id == admin.user_id:
+        raise HTTPException(status_code=400, detail="Cannot change your own role")
+
+    user = db.query(User).filter_by(user_id=user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.role = role
+    db.commit()
+    return {"user_id": user.user_id, "role": user.role}

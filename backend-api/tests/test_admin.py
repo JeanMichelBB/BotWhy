@@ -229,3 +229,38 @@ def test_admin_reactivate_404_for_unknown_user(client, make_user):
         headers={"Authorization": f"Bearer {admin._raw_token}"},
     )
     assert response.status_code == 404
+
+
+def test_admin_can_promote_user_to_admin(client, db, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+    user = make_user(email="target@example.com")
+
+    response = client.post(
+        f"/admin/users/{user.user_id}/role?role=admin",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+
+    db.refresh(user)
+    assert user.role == "admin"
+
+
+def test_admin_cannot_demote_self(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+
+    response = client.post(
+        f"/admin/users/{admin.user_id}/role?role=user",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 400
+
+
+def test_admin_role_change_rejects_invalid_role(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+    user = make_user(email="target@example.com")
+
+    response = client.post(
+        f"/admin/users/{user.user_id}/role?role=superuser",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 400
