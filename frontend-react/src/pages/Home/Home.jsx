@@ -55,6 +55,10 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
                 setAlertMessage('Microphone access denied. Check your browser\'s site permissions.');
                 setStyle({ backgroundColor: 'rgb(130 130 130)' });
                 setShowAlert(true);
+            } else if (error === 'network') {
+                setAlertMessage('Voice input needs a Google account signed into this browser with audio activity enabled. Check your Google Account activity settings.');
+                setStyle({ backgroundColor: 'rgb(130 130 130)' });
+                setShowAlert(true);
             }
         },
     });

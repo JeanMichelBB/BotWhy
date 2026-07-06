@@ -28,8 +28,12 @@ export function useSpeechRecognition({ onResult, onError }) {
     };
 
     recognitionRef.current = recognition;
-    recognition.start();
-    setIsListening(true);
+    try {
+      recognition.start();
+      setIsListening(true);
+    } catch (err) {
+      setIsListening(false);
+    }
   }, [isSupported, isListening, onResult, onError]);
 
   const stop = useCallback(() => {
