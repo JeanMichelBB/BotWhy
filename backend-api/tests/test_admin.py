@@ -381,3 +381,44 @@ def test_admin_transactions_filters_by_type(client, db, make_user):
     data = response.json()
     assert data["total"] == 1
     assert data["items"][0]["type"] == "spend"
+
+
+def test_admin_get_active_model_defaults_to_env(client, make_user, monkeypatch):
+    monkeypatch.setenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
+    admin = make_user(email="admin@example.com", role="admin")
+
+    response = client.get(
+        "/admin/settings/active-model",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["active_model"] == "openai/gpt-4o-mini"
+    assert "anthropic/claude-3-haiku" in data["available_models"]
+
+
+def test_admin_can_update_active_model(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+
+    response = client.put(
+        "/admin/settings/active-model?model=anthropic/claude-3-haiku",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json()["active_model"] == "anthropic/claude-3-haiku"
+
+    response = client.get(
+        "/admin/settings/active-model",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.json()["active_model"] == "anthropic/claude-3-haiku"
+
+
+def test_admin_rejects_unknown_model(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+
+    response = client.put(
+        "/admin/settings/active-model?model=not-a-real-model",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 400

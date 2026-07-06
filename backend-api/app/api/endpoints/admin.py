@@ -1,11 +1,13 @@
 # app/api/endpoints/admin.py
 
+import os
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.api.dependencies import require_admin
-from app.models.models import User, CreditTransaction, TrendingConversation
+from app.models.models import User, CreditTransaction, TrendingConversation, get_active_model, set_active_model
+from app.api.endpoints.config import FALLBACK_TIERS
 from app.api.endpoints.user import _soft_delete_user, _admin_reactivate_user
 
 router = APIRouter()
@@ -236,6 +238,30 @@ def list_transactions(
         "page": page,
         "page_size": page_size,
     }
+
+
+@router.get("/settings/active-model")
+def get_active_model_setting(
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    default_model = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
+    return {
+        "active_model": get_active_model(db, default=default_model),
+        "available_models": list(FALLBACK_TIERS.keys()),
+    }
+
+
+@router.put("/settings/active-model")
+def update_active_model_setting(
+    model: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    if model not in FALLBACK_TIERS:
+        raise HTTPException(status_code=400, detail=f"Unknown model '{model}'. Valid: {list(FALLBACK_TIERS.keys())}")
+    set_active_model(db, model)
+    return {"active_model": model}
 
 
 @router.delete("/trending/{trending_id}")
