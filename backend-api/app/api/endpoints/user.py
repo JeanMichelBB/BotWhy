@@ -80,10 +80,15 @@ def login(request: Request, token: str, db: Session = Depends(get_db)):
                 user.token = hashed_token
                 user.given_name = given_name
                 db.commit()
-            return {"user_id": user.user_id}
         else:
-            new_user = _create_user_with_grant(db, email=email, given_name=given_name, token_hash=hashed_token)
-            return {"user_id": new_user.user_id}
+            user = _create_user_with_grant(db, email=email, given_name=given_name, token_hash=hashed_token)
+
+        admin_emails = [e.strip() for e in os.getenv("ADMIN_EMAILS", "").split(",") if e.strip()]
+        if email in admin_emails and user.role != "admin":
+            user.role = "admin"
+            db.commit()
+
+        return {"user_id": user.user_id}
 
     except ValueError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")

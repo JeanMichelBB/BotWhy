@@ -422,3 +422,41 @@ def test_admin_rejects_unknown_model(client, make_user):
         headers={"Authorization": f"Bearer {admin._raw_token}"},
     )
     assert response.status_code == 400
+
+
+def test_login_promotes_configured_admin_email(client, db, monkeypatch):
+    from app.api.endpoints import user as user_module
+    from app.models.models import User
+
+    monkeypatch.setenv("ADMIN_EMAILS", "boss@example.com,other@example.com")
+    monkeypatch.setattr(
+        user_module.id_token,
+        "verify_oauth2_token",
+        lambda *args, **kwargs: {"email": "boss@example.com", "given_name": "Boss"},
+    )
+
+    response = client.post("/user/login?token=fake-jwt-token")
+    assert response.status_code == 200
+    user_id = response.json()["user_id"]
+
+    user = db.query(User).filter_by(user_id=user_id).first()
+    assert user.role == "admin"
+
+
+def test_login_does_not_promote_unlisted_email(client, db, monkeypatch):
+    from app.api.endpoints import user as user_module
+    from app.models.models import User
+
+    monkeypatch.setenv("ADMIN_EMAILS", "boss@example.com")
+    monkeypatch.setattr(
+        user_module.id_token,
+        "verify_oauth2_token",
+        lambda *args, **kwargs: {"email": "regular@example.com", "given_name": "Reg"},
+    )
+
+    response = client.post("/user/login?token=fake-jwt-token")
+    assert response.status_code == 200
+    user_id = response.json()["user_id"]
+
+    user = db.query(User).filter_by(user_id=user_id).first()
+    assert user.role == "user"
