@@ -264,3 +264,24 @@ def test_admin_role_change_rejects_invalid_role(client, make_user):
         headers={"Authorization": f"Bearer {admin._raw_token}"},
     )
     assert response.status_code == 400
+
+
+def test_admin_role_change_rejects_non_admin(client, make_user):
+    user = make_user()
+    target = make_user(email="target@example.com")
+
+    response = client.post(
+        f"/admin/users/{target.user_id}/role?role=admin",
+        headers={"Authorization": f"Bearer {user._raw_token}"},
+    )
+    assert response.status_code == 403
+
+
+def test_admin_role_change_404_for_unknown_user(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+
+    response = client.post(
+        "/admin/users/does-not-exist/role?role=admin",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 404
