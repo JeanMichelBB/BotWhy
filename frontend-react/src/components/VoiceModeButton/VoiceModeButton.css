@@ -11,6 +11,7 @@
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
+    font-size: 16px;
 }
 
 .voice-mode-button--off {

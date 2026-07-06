@@ -49,7 +49,7 @@ const VoiceModeButton = ({ isListening, voiceRepliesEnabled, onTap, onExit }) =>
             ? 'Voice mode on, tap to speak, press Escape to turn off'
             : 'Start voice mode';
 
-    const icon = isListening ? '🎤' : voiceRepliesEnabled ? '🔊' : '🎤';
+    const iconClass = voiceRepliesEnabled && !isListening ? 'ti ti-volume' : 'ti ti-microphone';
 
     return (
         <button
@@ -63,7 +63,7 @@ const VoiceModeButton = ({ isListening, voiceRepliesEnabled, onTap, onExit }) =>
             aria-label={label}
             title={label}
         >
-            <span aria-hidden="true">{icon}</span>
+            <i className={iconClass} aria-hidden="true"></i>
         </button>
     );
 };
