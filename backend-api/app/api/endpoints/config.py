@@ -4,6 +4,20 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
+FALLBACK_TIERS = {
+    "openai/gpt-4o-mini": 1,
+    "openai/gpt-4o": 2,
+    "openai/gpt-4": 2,
+    "anthropic/claude-3-haiku": 1,
+    "anthropic/claude-3-sonnet": 2,
+    "anthropic/claude-3-opus": 3,
+    "anthropic/claude-3-5-sonnet": 2,
+    "google/gemini-flash-1.5": 1,
+    "google/gemini-pro-1.5": 2,
+    "meta-llama/llama-3-8b-instruct": 1,
+    "meta-llama/llama-3-70b-instruct": 1,
+}
+
 def get_model_tier(prompt_price_per_token: float) -> int:
     """Return 1 (cheap), 2 (medium), or 3 (expensive) based on prompt price per token."""
     price_per_million = prompt_price_per_token * 1_000_000
@@ -18,20 +32,6 @@ def get_model_tier(prompt_price_per_token: float) -> int:
 def get_config():
     model = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
     tier = None
-
-    FALLBACK_TIERS = {
-        "openai/gpt-4o-mini": 1,
-        "openai/gpt-4o": 2,
-        "openai/gpt-4": 2,
-        "anthropic/claude-3-haiku": 1,
-        "anthropic/claude-3-sonnet": 2,
-        "anthropic/claude-3-opus": 3,
-        "anthropic/claude-3-5-sonnet": 2,
-        "google/gemini-flash-1.5": 1,
-        "google/gemini-pro-1.5": 2,
-        "meta-llama/llama-3-8b-instruct": 1,
-        "meta-llama/llama-3-70b-instruct": 1,
-    }
 
     try:
         api_key = os.getenv("OPENROUTER_API_KEY", "")
