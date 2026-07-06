@@ -196,6 +196,48 @@ def list_reported_trending(
     }
 
 
+@router.get("/transactions")
+def list_transactions(
+    user_id: str | None = None,
+    type: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    query = db.query(CreditTransaction)
+    if user_id:
+        query = query.filter(CreditTransaction.user_id == user_id)
+    if type:
+        query = query.filter(CreditTransaction.type == type)
+    query = query.order_by(CreditTransaction.created_at.desc())
+    items, total, page, page_size = _paginate(query, page, page_size)
+
+    user_ids = {t.user_id for t in items}
+    users_by_id = (
+        {u.user_id: u.email for u in db.query(User).filter(User.user_id.in_(user_ids)).all()}
+        if user_ids else {}
+    )
+
+    return {
+        "items": [
+            {
+                "id": t.id,
+                "user_id": t.user_id,
+                "user_email": users_by_id.get(t.user_id),
+                "amount_cents": t.amount_cents,
+                "type": t.type,
+                "description": t.description,
+                "created_at": t.created_at.isoformat() if t.created_at else None,
+            }
+            for t in items
+        ],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+    }
+
+
 @router.delete("/trending/{trending_id}")
 def admin_delete_trending(
     trending_id: str,

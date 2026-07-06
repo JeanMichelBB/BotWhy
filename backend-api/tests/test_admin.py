@@ -338,3 +338,46 @@ def test_admin_delete_trending_404_for_unknown_post(client, make_user):
         headers={"Authorization": f"Bearer {admin._raw_token}"},
     )
     assert response.status_code == 404
+
+
+def test_admin_transactions_lists_all_users(client, db, make_user):
+    from app.models.models import CreditTransaction
+
+    admin = make_user(email="admin@example.com", role="admin")
+    alice = make_user(email="alice@example.com")
+    bob = make_user(email="bob@example.com")
+    db.add_all([
+        CreditTransaction(user_id=alice.user_id, amount_cents=500, type="purchase", description="p"),
+        CreditTransaction(user_id=bob.user_id, amount_cents=-50, type="spend", description="s"),
+    ])
+    db.commit()
+
+    response = client.get(
+        "/admin/transactions",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total"] == 2
+    emails = {item["user_email"] for item in data["items"]}
+    assert emails == {"alice@example.com", "bob@example.com"}
+
+
+def test_admin_transactions_filters_by_type(client, db, make_user):
+    from app.models.models import CreditTransaction
+
+    admin = make_user(email="admin@example.com", role="admin")
+    alice = make_user(email="alice@example.com")
+    db.add_all([
+        CreditTransaction(user_id=alice.user_id, amount_cents=500, type="purchase", description="p"),
+        CreditTransaction(user_id=alice.user_id, amount_cents=-50, type="spend", description="s"),
+    ])
+    db.commit()
+
+    response = client.get(
+        "/admin/transactions?type=spend",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    data = response.json()
+    assert data["total"] == 1
+    assert data["items"][0]["type"] == "spend"
