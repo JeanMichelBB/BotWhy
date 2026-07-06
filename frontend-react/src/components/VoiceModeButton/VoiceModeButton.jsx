@@ -18,8 +18,22 @@ const VoiceModeButton = ({ isListening, voiceRepliesEnabled, onTap, onExit }) =>
 
     const handlePointerUp = () => {
         clearTimeout(pressTimer.current);
+    };
+
+    const handlePointerLeave = () => {
+        clearTimeout(pressTimer.current);
+        longPressed.current = false;
+    };
+
+    const handleClick = () => {
         if (!longPressed.current) {
             onTap();
+        }
+    };
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Escape' && (isListening || voiceRepliesEnabled)) {
+            onExit();
         }
     };
 
@@ -32,7 +46,7 @@ const VoiceModeButton = ({ isListening, voiceRepliesEnabled, onTap, onExit }) =>
     const label = isListening
         ? 'Listening... tap to stop'
         : voiceRepliesEnabled
-            ? 'Voice mode on, tap to speak, hold to turn off'
+            ? 'Voice mode on, tap to speak, press Escape to turn off'
             : 'Start voice mode';
 
     const icon = isListening ? '🎤' : voiceRepliesEnabled ? '🔊' : '🎤';
@@ -43,7 +57,9 @@ const VoiceModeButton = ({ isListening, voiceRepliesEnabled, onTap, onExit }) =>
             className={`voice-mode-button ${stateClass}`}
             onPointerDown={handlePointerDown}
             onPointerUp={handlePointerUp}
-            onPointerLeave={() => clearTimeout(pressTimer.current)}
+            onPointerLeave={handlePointerLeave}
+            onClick={handleClick}
+            onKeyDown={handleKeyDown}
             aria-label={label}
             title={label}
         >
