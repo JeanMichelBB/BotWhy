@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.api.dependencies import require_admin
-from app.models.models import User, CreditTransaction
+from app.models.models import User, CreditTransaction, TrendingConversation
 from app.api.endpoints.user import _soft_delete_user, _admin_reactivate_user
 
 router = APIRouter()
@@ -166,3 +166,45 @@ def change_user_role(
     user.role = role
     db.commit()
     return {"user_id": user.user_id, "role": user.role}
+
+
+@router.get("/trending/reported")
+def list_reported_trending(
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    posts = (
+        db.query(TrendingConversation)
+        .filter(TrendingConversation.reports.isnot(None))
+        .order_by(TrendingConversation.created_at.desc())
+        .all()
+    )
+    return {
+        "items": [
+            {
+                "id": p.id,
+                "title": p.title,
+                "description": p.description,
+                "user_id": p.user_id,
+                "reports": p.reports,
+                "likes": p.likes,
+                "created_at": p.created_at.isoformat() if p.created_at else None,
+            }
+            for p in posts
+            if p.reports
+        ]
+    }
+
+
+@router.delete("/trending/{trending_id}")
+def admin_delete_trending(
+    trending_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    post = db.query(TrendingConversation).filter_by(id=trending_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Trending post not found")
+    db.delete(post)
+    db.commit()
+    return {"message": "Trending post deleted"}

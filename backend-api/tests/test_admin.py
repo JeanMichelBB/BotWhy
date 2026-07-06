@@ -285,3 +285,56 @@ def test_admin_role_change_404_for_unknown_user(client, make_user):
         headers={"Authorization": f"Bearer {admin._raw_token}"},
     )
     assert response.status_code == 404
+
+
+def test_admin_lists_only_reported_trending_posts(client, db, make_user):
+    from app.models.models import TrendingConversation
+
+    admin = make_user(email="admin@example.com", role="admin")
+    author = make_user(email="author@example.com")
+
+    reported = TrendingConversation(
+        user_id=author.user_id, title="Reported", description="d",
+        reports=[{"reason": "spam"}],
+    )
+    clean = TrendingConversation(
+        user_id=author.user_id, title="Clean", description="d",
+        reports=[],
+    )
+    db.add_all([reported, clean])
+    db.commit()
+
+    response = client.get(
+        "/admin/trending/reported",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+    titles = [item["title"] for item in response.json()["items"]]
+    assert titles == ["Reported"]
+
+
+def test_admin_can_delete_trending_post(client, db, make_user):
+    from app.models.models import TrendingConversation
+
+    admin = make_user(email="admin@example.com", role="admin")
+    author = make_user(email="author@example.com")
+    post = TrendingConversation(user_id=author.user_id, title="Bad post", description="d", reports=[{"reason": "spam"}])
+    db.add(post)
+    db.commit()
+    post_id = post.id
+
+    response = client.delete(
+        f"/admin/trending/{post_id}",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+    assert db.query(TrendingConversation).filter_by(id=post_id).first() is None
+
+
+def test_admin_delete_trending_404_for_unknown_post(client, make_user):
+    admin = make_user(email="admin@example.com", role="admin")
+    response = client.delete(
+        "/admin/trending/does-not-exist",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 404
