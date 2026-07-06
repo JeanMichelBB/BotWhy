@@ -47,7 +47,7 @@ def make_user(db):
     from app.models.models import User
     import uuid
 
-    def _make_user(email="test@example.com", balance=500, is_deleted=False):
+    def _make_user(email="test@example.com", balance=500, is_deleted=False, role="user"):
         import hashlib
         token = str(uuid.uuid4())
         hashed = hashlib.sha256(token.encode()).hexdigest()
@@ -57,6 +57,7 @@ def make_user(db):
             token=hashed,
             credit_balance_cents=balance,
             is_deleted=is_deleted,
+            role=role,
         )
         db.add(user)
         db.commit()

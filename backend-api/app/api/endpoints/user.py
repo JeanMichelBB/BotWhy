@@ -31,10 +31,23 @@ def _create_user_with_grant(db: Session, email: str, given_name: str, token_hash
 
 
 def _reactivate_user(db: Session, user: User, given_name: str, token_hash: str) -> User:
+    """Login-triggered reactivation: always has a fresh token from the just-completed
+    Google login, unlike _admin_reactivate_user which has no token to set."""
     user.is_deleted = False
     user.deleted_at = None
     user.token = token_hash
     user.given_name = given_name
+    db.commit()
+    return user
+
+
+def _admin_reactivate_user(db: Session, user: User) -> User:
+    """Admin-triggered reactivation: clears the deleted flags and forces a fresh
+    login (no token available here, unlike _reactivate_user which runs during
+    an actual Google login and always has a fresh token to set)."""
+    user.is_deleted = False
+    user.deleted_at = None
+    user.token = None
     db.commit()
     return user
 
@@ -67,10 +80,15 @@ def login(request: Request, token: str, db: Session = Depends(get_db)):
                 user.token = hashed_token
                 user.given_name = given_name
                 db.commit()
-            return {"user_id": user.user_id}
         else:
-            new_user = _create_user_with_grant(db, email=email, given_name=given_name, token_hash=hashed_token)
-            return {"user_id": new_user.user_id}
+            user = _create_user_with_grant(db, email=email, given_name=given_name, token_hash=hashed_token)
+
+        admin_emails = [e.strip() for e in os.getenv("ADMIN_EMAILS", "").split(",") if e.strip()]
+        if email in admin_emails and user.role != "admin":
+            user.role = "admin"
+            db.commit()
+
+        return {"user_id": user.user_id}
 
     except ValueError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
@@ -95,6 +113,7 @@ def protected(current_user: User = Depends(get_current_user), db: Session = Depe
         "user_id": current_user.user_id,
         "is_free_tier": is_free_tier,
         "free_messages_remaining": free_messages_remaining,
+        "role": current_user.role,
     }
     
 # Delete user (soft delete — preserves row and balance)

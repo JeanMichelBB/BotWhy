@@ -8,7 +8,7 @@ import { useCredits } from '../../hooks/useCredits';
 
 const getAuthHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('authToken')}` });
 
-const Settings = ({ decodedToken, user_id, onLogout }) => {
+const Settings = ({ decodedToken, user_id, onLogout, role }) => {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [confirmationMessage, setConfirmationMessage] = useState('');
     const [onConfirmAction, setOnConfirmAction] = useState(() => () => {});
@@ -119,6 +119,11 @@ const Settings = ({ decodedToken, user_id, onLogout }) => {
                       <Link to="/usage" className="settings__credits-link">
                         View Usage →
                       </Link>
+                      {role === 'admin' && (
+                        <Link to="/admin" className="settings__credits-link">
+                          Admin Panel →
+                        </Link>
+                      )}
                     </div>
                     <button className="settings__delete-button" onClick={deleteAllChats}>
                         Delete all chats

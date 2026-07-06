@@ -18,6 +18,7 @@ class User(Base):
     credit_balance_cents = Column(Float, nullable=False, default=0.0)
     is_deleted = Column(Boolean, nullable=False, default=False)
     deleted_at = Column(TIMESTAMP, nullable=True)
+    role = Column(String(20), nullable=False, default="user")
 
     # Define relationships
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
@@ -79,3 +80,25 @@ class CreditTransaction(Base):
     created_at = Column(TIMESTAMP, server_default=func.now())
 
     user = relationship("User", back_populates="credit_transactions")
+
+
+class AppSetting(Base):
+    __tablename__ = "app_settings"
+
+    key = Column(String(64), primary_key=True)
+    value = Column(String(255), nullable=False)
+    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+
+def get_active_model(db, default: str) -> str:
+    setting = db.query(AppSetting).filter_by(key="active_model").first()
+    return setting.value if setting else default
+
+
+def set_active_model(db, value: str) -> None:
+    setting = db.query(AppSetting).filter_by(key="active_model").first()
+    if setting:
+        setting.value = value
+    else:
+        db.add(AppSetting(key="active_model", value=value))
+    db.commit()

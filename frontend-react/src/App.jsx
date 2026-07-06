@@ -16,6 +16,7 @@ import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
 import { apiUrl } from './api';
 import CookieConsent from './components/CookieConsent/CookieConsent';
+import AdminLayout from './pages/Admin/AdminLayout';
 
 const App = () => {
   const [isSidebarVisible, setSidebarVisible] = useState(true);
@@ -26,6 +27,7 @@ const App = () => {
   const [userId, setUserId] = useState(null);
   const [isFreeTier, setIsFreeTier] = useState(false);
   const [freeMessagesRemaining, setFreeMessagesRemaining] = useState(10);
+  const [role, setRole] = useState('user');
 
 
   const toggleSidebar = () => setSidebarVisible(!isSidebarVisible);
@@ -57,6 +59,7 @@ const App = () => {
           setUserId(response.data.user_id);
           setIsFreeTier(response.data.is_free_tier ?? false);
           setFreeMessagesRemaining(response.data.free_messages_remaining ?? 10);
+          setRole(response.data.role ?? 'user');
           setAuthChecked(true);
         })
         .catch(error => {
@@ -95,6 +98,11 @@ const App = () => {
     return isLoggedIn ? element : <Navigate to="/" />;
   };
 
+  const AdminRoute = ({ element }) => {
+    if (!authChecked) return null;
+    return (isLoggedIn && role === 'admin') ? element : <Navigate to="/" />;
+  };
+
   useEffect(() => {
     handleTokenUpdate();
   }, []);
@@ -112,9 +120,10 @@ const App = () => {
                   <Route path="/" element={<Home user_id={userId} is_free_tier={isFreeTier} free_messages_remaining={freeMessagesRemaining} />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/trending" element={<Trending user_id={userId} />} />
-                  <Route path="/settings" element={<ProtectedRoute element={<Settings decodedToken={isDecoded} user_id={userId} onLogout={handleLogout} />} />} />
+                  <Route path="/settings" element={<ProtectedRoute element={<Settings decodedToken={isDecoded} user_id={userId} onLogout={handleLogout} role={role} />} />} />
                   <Route path="/credits" element={<ProtectedRoute element={<Credits />} />} />
                   <Route path="/usage" element={<ProtectedRoute element={<Usage />} />} />
+                  <Route path="/admin/*" element={<AdminRoute element={<AdminLayout />} />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
