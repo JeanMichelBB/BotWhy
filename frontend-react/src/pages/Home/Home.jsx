@@ -66,18 +66,9 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
     const handleVoiceModeTap = () => {
         if (speechRecognition.isListening) {
             speechRecognition.stop();
-            return;
+        } else {
+            speechRecognition.start();
         }
-        if (!voiceReplies.enabled) {
-            voiceReplies.setEnabled(true);
-        }
-        speechRecognition.start();
-    };
-
-    const handleVoiceModeExit = () => {
-        speechRecognition.stop();
-        voiceReplies.setEnabled(false);
-        voiceReplies.stop();
     };
 
     useEffect(() => {
@@ -292,8 +283,6 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
             // Fetch messages again to update the list with the bot's response
             await fetchMessages(conversation.id);
 
-            voiceReplies.speak(openAIResponse.data.answer);
-
             if (is_free_tier) {
                 setMessagesLeft(prev => Math.max(0, prev - 1));
             }
@@ -413,6 +402,17 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
                                     <div className={`message message--${message.type}`}>
                                         {message.content}
                                     </div>
+                                    {message.type !== 'user' && voiceReplies.isSupported && (
+                                        <button
+                                            type="button"
+                                            className="message-read-aloud"
+                                            onClick={() => voiceReplies.speak(message.content)}
+                                            aria-label="Read message aloud"
+                                            title="Read message aloud"
+                                        >
+                                            <i className="ti ti-volume" aria-hidden="true"></i>
+                                        </button>
+                                    )}
                                     {editMode && (
                                         <input
                                             type="checkbox"
@@ -434,9 +434,7 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
                             {speechRecognition.isSupported && (
                                 <VoiceModeButton
                                     isListening={speechRecognition.isListening}
-                                    voiceRepliesEnabled={voiceReplies.enabled}
                                     onTap={handleVoiceModeTap}
-                                    onExit={handleVoiceModeExit}
                                 />
                             )}
                             <input

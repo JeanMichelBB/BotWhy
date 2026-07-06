@@ -1,17 +1,23 @@
 .voice-mode-button {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    margin: auto 8px auto 12px;
+    box-sizing: border-box;
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    min-height: 26px;
+    max-width: 26px;
+    max-height: 26px;
+    padding: 0;
     border-radius: 50%;
     border: 1px solid var(--color-muted);
     background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
+    align-self: center;
+    flex: none;
     cursor: pointer;
-    flex-shrink: 0;
-    font-size: 16px;
+    font-size: 13px;
+    line-height: 1;
 }
 
 .voice-mode-button--off {
@@ -23,12 +29,6 @@
     border-color: #d85a30;
     background: rgba(216, 90, 48, 0.1);
     animation: voice-mode-pulse 1.2s ease-in-out infinite;
-}
-
-.voice-mode-button--on {
-    color: #185fa5;
-    border-color: #185fa5;
-    background: rgba(24, 95, 165, 0.1);
 }
 
 @keyframes voice-mode-pulse {

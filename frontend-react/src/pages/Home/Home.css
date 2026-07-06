@@ -91,6 +91,24 @@
     background: var(--color-text);
 }
 
+.message-read-aloud {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border: none;
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.message-read-aloud:hover {
+    color: var(--color-text);
+}
+
 .message {
     padding: 8px 0;
     max-width: 68%;
@@ -140,7 +158,6 @@
 }
 
 .chatbox__input button {
-    padding: 0 20px;
     background-color: var(--color-action);
     color: var(--color-bg);
     border: none;
