@@ -131,7 +131,7 @@ def test_deduct_credits_after_ai_call(db, make_user, monkeypatch):
     monkeypatch.setattr(
         ai_module,
         "call_openrouter",
-        lambda messages, model=None: ("Witty answer", 3),
+        lambda messages, model=None, db=None: ("Witty answer", 3),
     )
     monkeypatch.setattr(Limiter, "_check_request_limit", lambda self, req, *a, **kw: setattr(req.state, "view_rate_limit", None))
 
@@ -157,7 +157,7 @@ def test_zero_cost_inserts_no_spend_row(db, make_user, monkeypatch):
     from slowapi import Limiter
 
     user = make_user(balance=100)
-    monkeypatch.setattr(ai_module, "call_openrouter", lambda messages, model=None: ("answer", 0))
+    monkeypatch.setattr(ai_module, "call_openrouter", lambda messages, model=None, db=None: ("answer", 0))
     monkeypatch.setattr(Limiter, "_check_request_limit", lambda self, req, *a, **kw: setattr(req.state, "view_rate_limit", None))
 
     conv = Conversation(user_id=user.user_id)
@@ -265,3 +265,35 @@ def test_webhook_invalid_signature(client, monkeypatch):
         headers={"stripe-signature": "badsig"},
     )
     assert response.status_code == 400
+
+
+def test_call_openrouter_uses_active_model_setting(db, monkeypatch):
+    from app.models.models import set_active_model
+    from app.utils import ai as ai_module
+
+    set_active_model(db, "anthropic/claude-3-haiku")
+
+    mock_response = make_openrouter_response(content="Hi", cost=0.0)
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = mock_response
+    monkeypatch.setattr(ai_module, "client", mock_client)
+
+    ai_module.call_openrouter(messages=[{"role": "user", "content": "hi"}], db=db)
+
+    called_model = mock_client.chat.completions.create.call_args.kwargs["model"]
+    assert called_model == "anthropic/claude-3-haiku"
+
+
+def test_call_openrouter_falls_back_to_env_when_no_setting(db, monkeypatch):
+    from app.utils import ai as ai_module
+
+    monkeypatch.setattr(ai_module, "MODEL", "openai/gpt-4o-mini")
+    mock_response = make_openrouter_response(content="Hi", cost=0.0)
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = mock_response
+    monkeypatch.setattr(ai_module, "client", mock_client)
+
+    ai_module.call_openrouter(messages=[{"role": "user", "content": "hi"}], db=db)
+
+    called_model = mock_client.chat.completions.create.call_args.kwargs["model"]
+    assert called_model == "openai/gpt-4o-mini"
