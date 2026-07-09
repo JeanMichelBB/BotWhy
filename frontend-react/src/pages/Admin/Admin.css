@@ -23,6 +23,21 @@
     margin: 0;
 }
 
+.admin__back {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 24px;
+    transition: color 0.15s;
+}
+
+.admin__back:hover {
+    color: var(--color-text);
+}
+
 .admin__reconcile-button {
     font-size: 11px;
     letter-spacing: 0.06em;

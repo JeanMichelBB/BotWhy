@@ -10,9 +10,9 @@ import './Credits.css';
 const getAuthHeader = () => ({ Authorization: `Bearer ${localStorage.getItem('authToken')}` });
 
 const PACKS = [
-  { id: 'starter',  label: 'Starter',  baseCents: 500,  baseDisplay: '$5.00'  },
-  { id: 'standard', label: 'Standard', baseCents: 1000, baseDisplay: '$10.00' },
-  { id: 'pro',      label: 'Pro',      baseCents: 2500, baseDisplay: '$25.00' },
+  { id: 'starter',  label: 'Starter',  baseCents: 100,  baseDisplay: '$1.00'  },
+  { id: 'standard', label: 'Standard', baseCents: 500, baseDisplay: '$5.00' },
+  { id: 'pro',      label: 'Pro',      baseCents: 1000, baseDisplay: '$10.00' },
 ];
 
 function calculateFee(baseCents) {

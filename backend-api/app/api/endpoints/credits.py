@@ -13,9 +13,9 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 CREDIT_PACKS = {
-    "starter":  {"base_cents": 500,  "label": "Starter"},
-    "standard": {"base_cents": 1000, "label": "Standard"},
-    "pro":      {"base_cents": 2500, "label": "Pro"},
+    "starter":  {"base_cents": 100,  "label": "Starter"},
+    "standard": {"base_cents": 500, "label": "Standard"},
+    "pro":      {"base_cents": 1000, "label": "Pro"},
 }
 
 

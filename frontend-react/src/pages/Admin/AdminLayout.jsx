@@ -1,6 +1,6 @@
 // src/pages/Admin/AdminLayout.jsx
 import React, { useState } from 'react';
-import { NavLink, Routes, Route, Navigate } from 'react-router-dom';
+import { NavLink, Routes, Route, Navigate, Link } from 'react-router-dom';
 import './Admin.css';
 import { apiUrl } from '../../api';
 import AdminUsers from './AdminUsers';
@@ -36,6 +36,8 @@ const AdminLayout = () => {
 
   return (
     <div className="admin">
+      {/* ← Back to Settings */}
+      <Link to="/settings" className="admin__back">← Back to Settings</Link>
       <div className="admin__header">
         <h1 className="admin__title">Admin</h1>
         <button
