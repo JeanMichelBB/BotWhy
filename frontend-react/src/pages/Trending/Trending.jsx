@@ -241,22 +241,6 @@ const Trending = ({ user_id }) => {
                                     )}
                                     <h2 className="conversation__title">
                                         {conversation.title}
-                                        {conversation.user_id === user_id && (
-                                            pendingDeletePostId === conversation.id ? (
-                                                <span className="conversation__delete-confirm" onClick={(e) => e.stopPropagation()}>
-                                                    <button className="conversation__delete-confirm-yes" onClick={() => handleDeletePost(conversation.id)}>Confirm</button>
-                                                    <button className="conversation__delete-confirm-no" onClick={() => setPendingDeletePostId(null)}>Cancel</button>
-                                                </span>
-                                            ) : (
-                                                <button
-                                                    className="conversation__delete-post"
-                                                    onClick={(e) => { e.stopPropagation(); setPendingDeletePostId(conversation.id); }}
-                                                    title="Delete this post"
-                                                >
-                                                    Delete
-                                                </button>
-                                            )
-                                        )}
                                     </h2>
                                     <p className="conversation__snippet">{conversation.description}</p>
                                     <div className="conversation__fullText" onClick={(e) => e.stopPropagation()}>
@@ -289,14 +273,32 @@ const Trending = ({ user_id }) => {
                                                     >
                                                         Comments ({comments.length})
                                                     </button>
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); openReportOverlay(conversation.id); }}
-                                                        className="three-dots-button conversation__report-button"
-                                                        aria-label="Report this post"
-                                                        title="Report this post"
-                                                    >
-                                                        <i className="ti ti-flag" aria-hidden="true"></i>
-                                                    </button>
+                                                    <span className="conversation__actions-right">
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); openReportOverlay(conversation.id); }}
+                                                            className="three-dots-button"
+                                                            aria-label="Report this post"
+                                                            title="Report this post"
+                                                        >
+                                                            <i className="ti ti-flag" aria-hidden="true"></i>
+                                                        </button>
+                                                        {conversation.user_id === user_id && (
+                                                            pendingDeletePostId === conversation.id ? (
+                                                                <span className="conversation__delete-confirm" onClick={(e) => e.stopPropagation()}>
+                                                                    <button className="conversation__delete-confirm-yes" onClick={() => handleDeletePost(conversation.id)}>Confirm</button>
+                                                                    <button className="conversation__delete-confirm-no" onClick={() => setPendingDeletePostId(null)}>Cancel</button>
+                                                                </span>
+                                                            ) : (
+                                                                <button
+                                                                    className="conversation__delete-post"
+                                                                    onClick={(e) => { e.stopPropagation(); setPendingDeletePostId(conversation.id); }}
+                                                                    title="Delete this post"
+                                                                >
+                                                                    Delete
+                                                                </button>
+                                                            )
+                                                        )}
+                                                    </span>
                                                 </div>
                                                 {commentsVisible === conversation.id && (
                                                     <div className="conversation__comments-wrapper">

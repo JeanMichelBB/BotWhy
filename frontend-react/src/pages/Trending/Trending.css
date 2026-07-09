@@ -163,7 +163,10 @@
     margin-top: 12px;
 }
 
-.conversation__report-button {
+.conversation__actions-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-left: auto;
 }
 
