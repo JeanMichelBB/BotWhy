@@ -158,8 +158,13 @@
 
 .conversation__likes {
     display: flex;
+    align-items: center;
     gap: 8px;
     margin-top: 12px;
+}
+
+.conversation__report-button {
+    margin-left: auto;
 }
 
 .like-button,

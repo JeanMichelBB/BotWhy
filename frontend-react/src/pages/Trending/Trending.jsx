@@ -241,14 +241,6 @@ const Trending = ({ user_id }) => {
                                     )}
                                     <h2 className="conversation__title">
                                         {conversation.title}
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); openReportOverlay(conversation.id); }}
-                                            className="three-dots-button"
-                                            aria-label="Report this post"
-                                            title="Report this post"
-                                        >
-                                            <i className="ti ti-flag" aria-hidden="true"></i>
-                                        </button>
                                         {conversation.user_id === user_id && (
                                             pendingDeletePostId === conversation.id ? (
                                                 <span className="conversation__delete-confirm" onClick={(e) => e.stopPropagation()}>
@@ -296,6 +288,14 @@ const Trending = ({ user_id }) => {
                                                         className={`comment-toggle-button ${commentsVisible === conversation.id ? 'comment-toggle-button--active' : ''}`}
                                                     >
                                                         Comments ({comments.length})
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); openReportOverlay(conversation.id); }}
+                                                        className="three-dots-button conversation__report-button"
+                                                        aria-label="Report this post"
+                                                        title="Report this post"
+                                                    >
+                                                        <i className="ti ti-flag" aria-hidden="true"></i>
                                                     </button>
                                                 </div>
                                                 {commentsVisible === conversation.id && (
