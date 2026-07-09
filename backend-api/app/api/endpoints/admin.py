@@ -170,17 +170,22 @@ def change_user_role(
     return {"user_id": user.user_id, "role": user.role}
 
 
-@router.get("/trending/reported")
-def list_reported_trending(
+@router.get("/trending")
+def list_all_trending(
+    page: int = 1,
+    page_size: int = 20,
     db: Session = Depends(get_db),
     admin: User = Depends(require_admin),
 ):
-    posts = (
-        db.query(TrendingConversation)
-        .filter(TrendingConversation.reports.isnot(None))
-        .order_by(TrendingConversation.created_at.desc())
-        .all()
+    query = db.query(TrendingConversation).order_by(TrendingConversation.created_at.desc())
+    items, total, page, page_size = _paginate(query, page, page_size)
+
+    user_ids = {p.user_id for p in items}
+    users_by_id = (
+        {u.user_id: u.email for u in db.query(User).filter(User.user_id.in_(user_ids)).all()}
+        if user_ids else {}
     )
+
     return {
         "items": [
             {
@@ -188,13 +193,18 @@ def list_reported_trending(
                 "title": p.title,
                 "description": p.description,
                 "user_id": p.user_id,
+                "user_email": users_by_id.get(p.user_id),
                 "reports": p.reports,
+                "report_count": len(p.reports) if p.reports else 0,
                 "likes": p.likes,
+                "comment_count": len(p.comments) if p.comments else 0,
                 "created_at": p.created_at.isoformat() if p.created_at else None,
             }
-            for p in posts
-            if p.reports
-        ]
+            for p in items
+        ],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
     }
 
 

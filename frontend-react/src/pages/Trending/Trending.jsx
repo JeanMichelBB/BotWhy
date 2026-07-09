@@ -1,6 +1,7 @@
 // src/pages/Trending/Trending.jsx
 
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import './Trending.css';
 import { apiUrl } from '../../api';
 import { jwtDecode } from 'jwt-decode';
@@ -27,6 +28,7 @@ const Trending = ({ user_id }) => {
     const [commentLoading, setCommentLoading] = useState(false);
     const [pendingDelete, setPendingDelete] = useState(null);
     const [pendingDeletePostId, setPendingDeletePostId] = useState(null);
+    const [searchParams] = useSearchParams();
 
     const authToken = localStorage.getItem('authToken');
     const decoded = authToken ? jwtDecode(authToken) : null;
@@ -78,6 +80,20 @@ const Trending = ({ user_id }) => {
         }
         setCommentsVisible(null);
     };
+
+    // Deep-link support: open and scroll to a specific post via ?post=<id>
+    useEffect(() => {
+        const postId = searchParams.get('post');
+        if (!postId || conversations.length === 0) return;
+        if (!conversations.some(c => c.id === postId)) return;
+
+        setExpandedConversationId(postId);
+        if (!messages[postId]) fetchMessages(postId);
+
+        const el = document.getElementById(`conversation-${postId}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conversations, searchParams]);
 
     const handleLike = async (id) => {
         if (!authToken) return;
@@ -227,6 +243,7 @@ const Trending = ({ user_id }) => {
                             return (
                                 <div
                                     key={conversation.id}
+                                    id={`conversation-${conversation.id}`}
                                     className={`conversation ${isExpanded ? 'expanded' : ''}`}
                                     onClick={!isExpanded ? () => toggleConversation(conversation.id) : undefined}
                                     style={!isExpanded ? { cursor: 'pointer' } : undefined}

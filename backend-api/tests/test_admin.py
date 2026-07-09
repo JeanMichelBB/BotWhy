@@ -287,7 +287,7 @@ def test_admin_role_change_404_for_unknown_user(client, make_user):
     assert response.status_code == 404
 
 
-def test_admin_lists_only_reported_trending_posts(client, db, make_user):
+def test_admin_lists_all_trending_posts_with_report_counts(client, db, make_user):
     from app.models.models import TrendingConversation
 
     admin = make_user(email="admin@example.com", role="admin")
@@ -295,7 +295,7 @@ def test_admin_lists_only_reported_trending_posts(client, db, make_user):
 
     reported = TrendingConversation(
         user_id=author.user_id, title="Reported", description="d",
-        reports=[{"reason": "spam"}],
+        reports=[{"user_id": "someone", "reason": "spam"}],
     )
     clean = TrendingConversation(
         user_id=author.user_id, title="Clean", description="d",
@@ -305,12 +305,16 @@ def test_admin_lists_only_reported_trending_posts(client, db, make_user):
     db.commit()
 
     response = client.get(
-        "/admin/trending/reported",
+        "/admin/trending",
         headers={"Authorization": f"Bearer {admin._raw_token}"},
     )
     assert response.status_code == 200
-    titles = [item["title"] for item in response.json()["items"]]
-    assert titles == ["Reported"]
+    data = response.json()
+    assert data["total"] == 2
+    items_by_title = {item["title"]: item for item in data["items"]}
+    assert items_by_title["Reported"]["report_count"] == 1
+    assert items_by_title["Reported"]["user_email"] == "author@example.com"
+    assert items_by_title["Clean"]["report_count"] == 0
 
 
 def test_admin_can_delete_trending_post(client, db, make_user):
