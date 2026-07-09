@@ -234,3 +234,42 @@ def delete_comment(trending_conversation_id: str, index: int, db: Session = Depe
     db.commit()
 
     return {"comments": existing_trending_conversation.comments}
+
+# Report a trending conversation
+@router.post("/trending_conversation/{trending_conversation_id}/report")
+def report_trending_conversation(trending_conversation_id: str, reason: str = "", db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    existing = db.query(models.TrendingConversation).filter_by(id=trending_conversation_id).first()
+    if not existing:
+        raise HTTPException(status_code=404, detail="Trending conversation not found")
+
+    reports = list(existing.reports or [])
+    if any(r.get("user_id") == current_user.user_id for r in reports):
+        raise HTTPException(status_code=400, detail="Already reported")
+
+    reports.append({"user_id": current_user.user_id, "reason": reason})
+    existing.reports = reports
+
+    from sqlalchemy.orm.attributes import flag_modified
+    flag_modified(existing, "reports")
+    db.commit()
+
+    return {"message": "Reported"}
+
+# Delete a trending conversation (author only)
+@router.delete("/trending_conversation/{trending_conversation_id}")
+def delete_trending_conversation(trending_conversation_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    existing = db.query(models.TrendingConversation).filter_by(id=trending_conversation_id).first()
+    if not existing:
+        raise HTTPException(status_code=404, detail="Trending conversation not found")
+
+    if existing.user_id != current_user.user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this trending conversation")
+
+    owner = db.query(models.User).filter_by(user_id=existing.user_id).first()
+    if owner and owner.trending_conversation_count > 0:
+        owner.trending_conversation_count -= 1
+
+    db.delete(existing)
+    db.commit()
+
+    return {"message": "Trending conversation deleted"}

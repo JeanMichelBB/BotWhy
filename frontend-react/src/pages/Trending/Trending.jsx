@@ -26,6 +26,7 @@ const Trending = ({ user_id }) => {
     const [conversationComments, setConversationComments] = useState({});
     const [commentLoading, setCommentLoading] = useState(false);
     const [pendingDelete, setPendingDelete] = useState(null);
+    const [pendingDeletePostId, setPendingDeletePostId] = useState(null);
 
     const authToken = localStorage.getItem('authToken');
     const decoded = authToken ? jwtDecode(authToken) : null;
@@ -166,8 +167,39 @@ const Trending = ({ user_id }) => {
         setSelectedConversationId(null);
     };
 
-    const handleReportSubmit = () => {
-        closeReportOverlay();
+    const handleReportSubmit = async () => {
+        if (!authToken || !selectedConversationId) {
+            closeReportOverlay();
+            return;
+        }
+
+        try {
+            await fetch(`${apiUrl}/chatbox/trending_conversation/${selectedConversationId}/report`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${authToken}` },
+            });
+        } catch (error) {
+            console.error('Error reporting conversation:', error);
+        } finally {
+            closeReportOverlay();
+        }
+    };
+
+    const handleDeletePost = async (id) => {
+        if (!authToken) return;
+
+        try {
+            const response = await fetch(`${apiUrl}/chatbox/trending_conversation/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${authToken}` },
+            });
+            if (!response.ok) return;
+            setConversations(prev => prev.filter(c => c.id !== id));
+        } catch (error) {
+            console.error('Error deleting trending conversation:', error);
+        } finally {
+            setPendingDeletePostId(null);
+        }
     };
 
     return (
@@ -212,6 +244,22 @@ const Trending = ({ user_id }) => {
                                         <button onClick={(e) => { e.stopPropagation(); openReportOverlay(conversation.id); }} className="three-dots-button">
                                             <div className="test"></div>
                                         </button>
+                                        {conversation.user_id === user_id && (
+                                            pendingDeletePostId === conversation.id ? (
+                                                <span className="conversation__delete-confirm" onClick={(e) => e.stopPropagation()}>
+                                                    <button className="conversation__delete-confirm-yes" onClick={() => handleDeletePost(conversation.id)}>Confirm</button>
+                                                    <button className="conversation__delete-confirm-no" onClick={() => setPendingDeletePostId(null)}>Cancel</button>
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    className="conversation__delete-post"
+                                                    onClick={(e) => { e.stopPropagation(); setPendingDeletePostId(conversation.id); }}
+                                                    title="Delete this post"
+                                                >
+                                                    Delete
+                                                </button>
+                                            )
+                                        )}
                                     </h2>
                                     <p className="conversation__snippet">{conversation.description}</p>
                                     <div className="conversation__fullText" onClick={(e) => e.stopPropagation()}>
