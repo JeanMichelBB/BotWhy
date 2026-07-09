@@ -39,6 +39,10 @@ class CommentBase(BaseModel):
     user: str
     text: str
 
+class ReportBase(BaseModel):
+    user_id: str
+    reason: str = ""
+
 class TrendingConversationBase(BaseModel):
     id: UUID
     user_id: UUID
@@ -48,7 +52,7 @@ class TrendingConversationBase(BaseModel):
     likes: Optional[int] = 0
     liked_by: Optional[List[str]] = []
     comments: Optional[List[CommentBase]] = []
-    reports: Optional[List[str]] = []
+    reports: Optional[List[ReportBase]] = []
     content: Optional[List[UUID]] = []  # Expecting UUIDs for content
 
     class Config:
