@@ -77,6 +77,7 @@ class CreditTransaction(Base):
     type = Column(String(20), nullable=False)  # 'purchase' | 'spend' | 'free_grant'
     description = Column(String(255), nullable=True)
     stripe_payment_id = Column(String(255), nullable=True)
+    provider_generation_id = Column(String(255), nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
     user = relationship("User", back_populates="credit_transactions")

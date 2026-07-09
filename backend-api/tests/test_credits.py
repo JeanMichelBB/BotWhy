@@ -25,7 +25,7 @@ def test_call_openrouter_returns_content_and_cost(monkeypatch):
     monkeypatch.setattr(ai_module, "client", mock_client)
 
     from app.utils.ai import call_openrouter
-    content, cost_cents = call_openrouter(messages=[{"role": "user", "content": "hi"}])
+    content, cost_cents, generation_id = call_openrouter(messages=[{"role": "user", "content": "hi"}])
     assert content == "Hello"
     assert cost_cents == pytest.approx(1.0)
 
@@ -131,7 +131,7 @@ def test_deduct_credits_after_ai_call(db, make_user, monkeypatch):
     monkeypatch.setattr(
         ai_module,
         "call_openrouter",
-        lambda messages, model=None, db=None: ("Witty answer", 3),
+        lambda messages, model=None, db=None: ("Witty answer", 3, "gen-abc123"),
     )
     monkeypatch.setattr(Limiter, "_check_request_limit", lambda self, req, *a, **kw: setattr(req.state, "view_rate_limit", None))
 
@@ -157,7 +157,7 @@ def test_zero_cost_inserts_no_spend_row(db, make_user, monkeypatch):
     from slowapi import Limiter
 
     user = make_user(balance=100)
-    monkeypatch.setattr(ai_module, "call_openrouter", lambda messages, model=None, db=None: ("answer", 0))
+    monkeypatch.setattr(ai_module, "call_openrouter", lambda messages, model=None, db=None: ("answer", 0, "gen-def456"))
     monkeypatch.setattr(Limiter, "_check_request_limit", lambda self, req, *a, **kw: setattr(req.state, "view_rate_limit", None))
 
     conv = Conversation(user_id=user.user_id)

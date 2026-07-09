@@ -483,3 +483,78 @@ def test_protected_includes_role_for_regular_user(client, make_user):
         headers={"Authorization": f"Bearer {user._raw_token}"},
     )
     assert response.json()["role"] == "user"
+
+
+def test_reconcile_spend_flags_mismatch(client, db, make_user, monkeypatch):
+    from unittest.mock import MagicMock
+    from app.models.models import CreditTransaction
+    from app.api.endpoints import admin as admin_module
+
+    admin = make_user(email="admin@example.com", role="admin")
+    user = make_user(email="target@example.com")
+    txn = CreditTransaction(
+        user_id=user.user_id,
+        amount_cents=-10,
+        type="spend",
+        description="AI response",
+        provider_generation_id="gen-123",
+    )
+    db.add(txn)
+    db.commit()
+
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {"data": {"total_cost": 0.15}}  # 15 cents vs stored 10
+    monkeypatch.setattr(admin_module.httpx, "get", lambda *a, **kw: mock_response)
+
+    response = client.post(
+        "/admin/reconcile-spend",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["checked"] == 1
+    assert len(data["mismatches"]) == 1
+    assert data["mismatches"][0]["stored_cents"] == 10
+    assert data["mismatches"][0]["openrouter_cents"] == 15
+
+
+def test_reconcile_spend_matches_when_cost_agrees(client, db, make_user, monkeypatch):
+    from unittest.mock import MagicMock
+    from app.models.models import CreditTransaction
+    from app.api.endpoints import admin as admin_module
+
+    admin = make_user(email="admin@example.com", role="admin")
+    user = make_user(email="target@example.com")
+    txn = CreditTransaction(
+        user_id=user.user_id,
+        amount_cents=-10,
+        type="spend",
+        description="AI response",
+        provider_generation_id="gen-456",
+    )
+    db.add(txn)
+    db.commit()
+
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {"data": {"total_cost": 0.10}}
+    monkeypatch.setattr(admin_module.httpx, "get", lambda *a, **kw: mock_response)
+
+    response = client.post(
+        "/admin/reconcile-spend",
+        headers={"Authorization": f"Bearer {admin._raw_token}"},
+    )
+    data = response.json()
+    assert data["checked"] == 1
+    assert data["mismatches"] == []
+    assert data["errors"] == []
+
+
+def test_reconcile_spend_rejects_non_admin(client, make_user):
+    user = make_user()
+    response = client.post(
+        "/admin/reconcile-spend",
+        headers={"Authorization": f"Bearer {user._raw_token}"},
+    )
+    assert response.status_code == 403

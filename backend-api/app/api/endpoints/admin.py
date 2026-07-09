@@ -1,6 +1,7 @@
 # app/api/endpoints/admin.py
 
 import os
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -286,3 +287,65 @@ def admin_delete_trending(
     db.delete(post)
     db.commit()
     return {"message": "Trending post deleted"}
+
+
+@router.post("/reconcile-spend")
+def reconcile_spend(
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+    txns = (
+        db.query(CreditTransaction)
+        .filter(
+            CreditTransaction.type == "spend",
+            CreditTransaction.provider_generation_id.isnot(None),
+        )
+        .order_by(CreditTransaction.created_at.desc())
+        .limit(max(1, min(limit, 200)))
+        .all()
+    )
+
+    results = []
+    for t in txns:
+        try:
+            response = httpx.get(
+                "https://openrouter.ai/api/v1/generation",
+                params={"id": t.provider_generation_id},
+                headers={"Authorization": f"Bearer {api_key}"},
+                timeout=10.0,
+            )
+            if response.status_code != 200:
+                results.append({
+                    "transaction_id": t.id,
+                    "status": "error",
+                    "detail": f"OpenRouter returned {response.status_code}",
+                })
+                continue
+
+            payload = response.json()
+            data = payload.get("data", payload)
+            openrouter_cents = round(float(data.get("total_cost", 0.0) or 0.0) * 100, 4)
+            stored_cents = round(abs(t.amount_cents), 4)
+            diff_cents = round(openrouter_cents - stored_cents, 4)
+
+            results.append({
+                "transaction_id": t.id,
+                "status": "match" if abs(diff_cents) < 0.01 else "mismatch",
+                "stored_cents": stored_cents,
+                "openrouter_cents": openrouter_cents,
+                "diff_cents": diff_cents,
+            })
+        except Exception as e:
+            results.append({
+                "transaction_id": t.id,
+                "status": "error",
+                "detail": str(e),
+            })
+
+    return {
+        "checked": len(results),
+        "mismatches": [r for r in results if r["status"] == "mismatch"],
+        "errors": [r for r in results if r["status"] == "error"],
+    }

@@ -90,3 +90,8 @@ def create_all_tables():
             conn.commit()
         except Exception:
             pass
+        try:
+            conn.execute(text("ALTER TABLE credit_transactions ADD COLUMN provider_generation_id VARCHAR(255)"))
+            conn.commit()
+        except Exception:
+            pass

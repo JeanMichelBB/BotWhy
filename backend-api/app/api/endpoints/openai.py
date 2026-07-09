@@ -56,7 +56,7 @@ def answer_question(
         messages.append({"role": role, "content": m.content})
     messages.append({"role": "user", "content": question})
 
-    message_content, cost_cents = ai_module.call_openrouter(messages=messages, model=model, db=db)
+    message_content, cost_cents, generation_id = ai_module.call_openrouter(messages=messages, model=model, db=db)
 
     new_message = models.Message(
         conversation_id=user_conversation.id,
@@ -72,6 +72,7 @@ def answer_question(
             amount_cents=-cost_cents,
             type="spend",
             description="AI response",
+            provider_generation_id=generation_id,
         )
         db.add(txn)
 

@@ -87,7 +87,7 @@ def test_openai_answer_allows_gpt4o_mini_for_free_tier():
     app.dependency_overrides[get_current_user] = lambda: user
     app.dependency_overrides[get_db] = lambda: db
     try:
-        with patch("app.utils.ai.call_openrouter", return_value=("reply", 0.001)):
+        with patch("app.utils.ai.call_openrouter", return_value=("reply", 0.001, "gen-xyz789")):
             response = client.post(
                 "/openai/answer",
                 params={"question": "hi", "user_id": "test-user-id", "model": "openai/gpt-4o-mini"},

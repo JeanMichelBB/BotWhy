@@ -20,7 +20,7 @@ def cost_to_cents(cost_usd: float) -> float:
     return cost_usd * 100
 
 
-def call_openrouter(messages: list, model: str | None = None, db=None) -> tuple[str, int]:
+def call_openrouter(messages: list, model: str | None = None, db=None) -> tuple[str, int, str | None]:
     resolved_model = model or (get_active_model(db, default=MODEL) if db is not None else MODEL)
     try:
         response = client.chat.completions.create(
@@ -32,4 +32,5 @@ def call_openrouter(messages: list, model: str | None = None, db=None) -> tuple[
     content = response.choices[0].message.content
     cost_usd = (response.usage.model_extra or {}).get("cost", 0.0) or 0.0
     cost_cents = cost_to_cents(cost_usd)
-    return content, cost_cents
+    generation_id = getattr(response, "id", None)
+    return content, cost_cents, generation_id
