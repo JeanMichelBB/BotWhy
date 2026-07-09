@@ -191,7 +191,12 @@
     color: var(--color-text);
 }
 
-.like-button--active,
+.like-button--active {
+    border-color: var(--color-text);
+    background: var(--color-text);
+    color: #ffffff;
+}
+
 .comment-toggle-button--active {
     border-color: var(--color-text);
     color: var(--color-text);

@@ -282,7 +282,7 @@ const Trending = ({ user_id }) => {
                                                         disabled={!authToken}
                                                         title={!authToken ? 'Sign in to like' : ''}
                                                     >
-                                                        {liked ? `👎 ${conversation.likes ?? 0} Unlike` : `👍 ${conversation.likes ?? 0} ${conversation.likes === 1 ? 'Like' : 'Likes'}`}
+                                                        {liked ? `Liked (${conversation.likes ?? 0})` : `Like (${conversation.likes ?? 0})`}
                                                     </button>
                                                     <button
                                                         onClick={() => toggleComments(conversation.id)}
