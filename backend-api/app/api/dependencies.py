@@ -51,8 +51,9 @@ def get_current_user(authorization: str = Header(...), db: Session = Depends(get
 
 
 def require_credits(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> User:
-    has_purchased = db.query(CreditTransaction).filter_by(
-        user_id=current_user.user_id, type="purchase"
+    has_purchased = db.query(CreditTransaction).filter(
+        CreditTransaction.user_id == current_user.user_id,
+        CreditTransaction.type.in_(("purchase", "admin_adjustment")),
     ).count() > 0
 
     if not has_purchased:

@@ -26,9 +26,10 @@ def answer_question(
     if len(question) > 500:
         raise HTTPException(status_code=400, detail="Message too long. Maximum 500 characters.")
 
-    # Free-tier enforcement: no purchase transactions → must use gpt-4o-mini
-    has_purchased = db.query(models.CreditTransaction).filter_by(
-        user_id=current_user.user_id, type="purchase"
+    # Free-tier enforcement: no purchase/admin-granted credit → must use gpt-4o-mini
+    has_purchased = db.query(models.CreditTransaction).filter(
+        models.CreditTransaction.user_id == current_user.user_id,
+        models.CreditTransaction.type.in_(("purchase", "admin_adjustment")),
     ).count() > 0
     if not has_purchased and model and model != "openai/gpt-4o-mini":
         raise HTTPException(

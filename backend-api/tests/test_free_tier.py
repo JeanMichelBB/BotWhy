@@ -22,7 +22,7 @@ def make_user(message_count=0):
 def test_protected_returns_free_tier_for_new_user():
     user = make_user(message_count=3)
     db = MagicMock()
-    db.query.return_value.filter_by.return_value.count.return_value = 0
+    db.query.return_value.filter.return_value.count.return_value = 0
 
     app.dependency_overrides[get_current_user] = lambda: user
     app.dependency_overrides[get_db] = lambda: db
@@ -39,7 +39,7 @@ def test_protected_returns_free_tier_for_new_user():
 def test_protected_returns_paid_tier_after_purchase():
     user = make_user(message_count=5)
     db = MagicMock()
-    db.query.return_value.filter_by.return_value.count.return_value = 1
+    db.query.return_value.filter.return_value.count.return_value = 1
 
     app.dependency_overrides[get_current_user] = lambda: user
     app.dependency_overrides[get_db] = lambda: db
@@ -57,7 +57,7 @@ def test_openai_answer_blocks_non_free_model_for_free_tier():
     user = make_user(message_count=2)
     user.credit_balance_cents = 500.0
     db = MagicMock()
-    db.query.return_value.filter_by.return_value.count.return_value = 0  # no purchases
+    db.query.return_value.filter.return_value.count.return_value = 0  # no purchases
 
     app.dependency_overrides[get_current_user] = lambda: user
     app.dependency_overrides[get_db] = lambda: db
@@ -80,7 +80,7 @@ def test_openai_answer_allows_gpt4o_mini_for_free_tier():
     conv.id = "conv-id"
     conv.user_id = "test-user-id"
     db = MagicMock()
-    db.query.return_value.filter_by.return_value.count.return_value = 0  # no purchases
+    db.query.return_value.filter.return_value.count.return_value = 0  # no purchases
     db.query.return_value.filter.return_value.first.return_value = conv
     db.query.return_value.filter.return_value.all.return_value = []
 

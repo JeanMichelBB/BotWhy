@@ -104,8 +104,9 @@ def logout(current_user: User = Depends(get_current_user), db: Session = Depends
 # Protected route
 @router.get("/protected")
 def protected(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    has_purchased = db.query(CreditTransaction).filter_by(
-        user_id=current_user.user_id, type="purchase"
+    has_purchased = db.query(CreditTransaction).filter(
+        CreditTransaction.user_id == current_user.user_id,
+        CreditTransaction.type.in_(("purchase", "admin_adjustment")),
     ).count() > 0
     is_free_tier = not has_purchased
     free_messages_remaining = max(0, 10 - (current_user.message_count or 0))
