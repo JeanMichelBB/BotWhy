@@ -241,8 +241,13 @@ const Trending = ({ user_id }) => {
                                     )}
                                     <h2 className="conversation__title">
                                         {conversation.title}
-                                        <button onClick={(e) => { e.stopPropagation(); openReportOverlay(conversation.id); }} className="three-dots-button">
-                                            <div className="test"></div>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); openReportOverlay(conversation.id); }}
+                                            className="three-dots-button"
+                                            aria-label="Report this post"
+                                            title="Report this post"
+                                        >
+                                            <i className="ti ti-flag" aria-hidden="true"></i>
                                         </button>
                                         {conversation.user_id === user_id && (
                                             pendingDeletePostId === conversation.id ? (

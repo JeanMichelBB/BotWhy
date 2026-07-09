@@ -17,8 +17,10 @@
 
 .admin__nav {
     display: flex;
+    flex-wrap: wrap;
     gap: 16px;
     margin-bottom: 24px;
+    overflow-x: auto;
 }
 
 .admin__nav-link {
@@ -27,6 +29,7 @@
     font-size: 13px;
     font-weight: 600;
     padding-bottom: 4px;
+    white-space: nowrap;
 }
 
 .admin__nav-link--active {
