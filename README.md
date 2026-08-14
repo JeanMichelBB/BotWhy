@@ -16,6 +16,8 @@
 | Deployment | Docker, Kubernetes (k3s) |
 | CI/CD | GitHub Actions |
 
+In production, this app connects to a shared MySQL instance — see [`shared-mysql`](https://github.com/JeanMichelBB/shared-mysql). It doesn't run its own database in k3s.
+
 ## Features
 
 ### Free Trial
