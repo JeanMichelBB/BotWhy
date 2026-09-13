@@ -9,7 +9,7 @@ resources:
 
 images:
   - name: jeanmichelbb/oci-frontend
-    newTag: 2a928f4e34968bd83ba8480aeb43ff4945652dc6
+    newTag: e409324b19dc10d0d61ebb0dd2e4e926494cd9eb
     newName: jeanmichelbb/oci-frontend
   - name: jeanmichelbb/oci-backend
     newTag: 2a928f4e34968bd83ba8480aeb43ff4945652dc6
