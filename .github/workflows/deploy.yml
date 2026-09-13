@@ -31,7 +31,9 @@ jobs:
           context: ./frontend-react
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: jeanmichelbb/oci-frontend:latest
+          tags: |
+            jeanmichelbb/oci-frontend:latest
+            jeanmichelbb/oci-frontend:${{ github.sha }}
           build-args: VITE_API_URL=${{ secrets.VITE_API_URL }}
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
@@ -67,7 +69,9 @@ jobs:
           context: ./backend-api
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: jeanmichelbb/oci-backend:latest
+          tags: |
+            jeanmichelbb/oci-backend:latest
+            jeanmichelbb/oci-backend:${{ github.sha }}
           cache-from: type=gha,scope=backend
           cache-to: type=gha,mode=max,scope=backend
 
