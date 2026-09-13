@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: botwhy-backend
+  annotations:
+    secrets.doppler.com/reload: "true"
 spec:
   replicas: 1
   selector:
