@@ -1,10 +1,13 @@
 # app/main.py
 
+from datetime import datetime, timedelta
+
 from fastapi import Depends, FastAPI, Request, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.openapi.utils import get_openapi
 from app.api.endpoints import chatbox, user, openai, credits, config, admin
-from app.core.database import engine, Base
+from app.core.database import engine, Base, SessionLocal
+from app.models.models import CreditTransaction
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -19,10 +22,51 @@ from app.core.database import wait_for_db, create_all_tables, get_db, provision_
 import logging
 import subprocess
 import pathlib
+from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_client.core import GaugeMetricFamily
+from prometheus_client.registry import REGISTRY
 
 logger = logging.getLogger(__name__)
 from sqlalchemy.orm import Session
+from sqlalchemy import func as sql_func
 from sqlalchemy.exc import OperationalError
+
+
+class CreditTransactionCollector:
+    """Credit ledger transactions created in the last hour, by type.
+
+    A silently broken Stripe webhook stops 'purchase' rows from ever being
+    created -- no error, no crashed pod, just revenue nobody recorded. This
+    is invisible to infra-level health/replica checks.
+    """
+
+    def collect(self):
+        gauge = GaugeMetricFamily(
+            "botwhy_credit_transactions_last_hour",
+            "Credit ledger transactions created in the last hour, by type",
+            labels=["type"],
+        )
+        counts = {"purchase": 0, "spend": 0, "free_grant": 0}
+        try:
+            db = SessionLocal()
+            try:
+                one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+                rows = (
+                    db.query(CreditTransaction.type, sql_func.count(CreditTransaction.id))
+                    .filter(CreditTransaction.created_at >= one_hour_ago)
+                    .group_by(CreditTransaction.type)
+                    .all()
+                )
+                for tx_type, count in rows:
+                    if tx_type in counts:
+                        counts[tx_type] = count
+            finally:
+                db.close()
+        except Exception:
+            logger.exception("credit transaction metrics query failed")
+        for tx_type, count in counts.items():
+            gauge.add_metric([tx_type], count)
+        yield gauge
 
 
 # Load environment variables from .env
@@ -60,6 +104,15 @@ def health():
     if not app.state.db_ready:
         raise HTTPException(status_code=503, detail="Database not ready")
     return {"status": "ok"}
+
+
+@app.get("/api/health", tags=["health"])
+def api_health():
+    return health()
+
+
+Instrumentator().instrument(app).expose(app, include_in_schema=False)
+REGISTRY.register(CreditTransactionCollector())
     
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 

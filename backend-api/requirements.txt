@@ -16,3 +16,4 @@ openai
 stripe
 slowapi
 logging
+prometheus-fastapi-instrumentator
