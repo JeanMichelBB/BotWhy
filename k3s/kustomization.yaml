@@ -5,3 +5,10 @@ resources:
   - backend-deployment.yaml
   - frontend-deployment.yaml
   - ingress.yaml
+  - image-updater.yaml
+
+images:
+  - name: jeanmichelbb/oci-frontend
+    newTag: latest
+  - name: jeanmichelbb/oci-backend
+    newTag: latest
