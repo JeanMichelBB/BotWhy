@@ -7,6 +7,7 @@ pymysql
 alembic
 python-dotenv
 requests
+httpx
 oauthlib
 starlette-authlib
 google-auth
