@@ -25,6 +25,8 @@ import pathlib
 from prometheus_fastapi_instrumentator import Instrumentator
 from prometheus_client.core import GaugeMetricFamily
 from prometheus_client.registry import REGISTRY
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from app.tracing import setup_tracing
 
 logger = logging.getLogger(__name__)
 from sqlalchemy.orm import Session
@@ -113,6 +115,9 @@ def api_health():
 
 Instrumentator().instrument(app).expose(app, include_in_schema=False)
 REGISTRY.register(CreditTransactionCollector())
+
+setup_tracing("botwhy", engine=engine)
+FastAPIInstrumentor.instrument_app(app)
     
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
