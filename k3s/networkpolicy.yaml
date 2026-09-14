@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traefik-to-botwhy-frontend
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: botwhy-frontend
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 80
+---
+# /metrics shares the API port (8000) with the main app, and Prometheus's NodePort scrape
+# needs to reach it. Scoping ingress to Traefik + node flannel-gateway IPs broke real Prometheus
+# scraping in the homelab-dashboard pilot (kube-router's enforcement likely evaluates the
+# connection at a different point in the iptables chain than where the app sees the post-NAT
+# source), so this port is left unrestricted rather than ship a rule that silently breaks
+# monitoring.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-botwhy-backend
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: botwhy-backend
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8000

@@ -6,6 +6,7 @@ resources:
   - frontend-deployment.yaml
   - ingress.yaml
   - image-updater.yaml
+  - networkpolicy.yaml
 
 images:
   - name: jeanmichelbb/oci-frontend
