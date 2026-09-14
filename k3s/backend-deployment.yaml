@@ -18,6 +18,13 @@ spec:
         - name: wait-for-mysql
           image: busybox
           command: ['sh', '-c', 'until nc -z mysql 3306; do echo "Waiting for MySQL..."; sleep 3; done']
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
       containers:
         - name: botwhy-backend
           image: jeanmichelbb/oci-backend:latest
@@ -27,6 +34,13 @@ spec:
           envFrom:
             - secretRef:
                 name: botwhy-backend-secret
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
           readinessProbe:
             httpGet:
               path: /health
