@@ -25,6 +25,25 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
+      - name: Build image for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend-react
+          platforms: linux/amd64
+          load: true
+          tags: oci-frontend:scan
+          build-args: VITE_API_URL=${{ secrets.VITE_API_URL }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+      - name: Scan image for critical vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: oci-frontend:scan
+          severity: CRITICAL
+          exit-code: "1"
+          ignore-unfixed: true
+
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
         with:
@@ -52,6 +71,24 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build image for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend-api
+          platforms: linux/amd64
+          load: true
+          tags: oci-backend:scan
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Scan image for critical vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: oci-backend:scan
+          severity: CRITICAL
+          exit-code: "1"
+          ignore-unfixed: true
 
       - name: Build and push backend image
         uses: docker/build-push-action@v6
