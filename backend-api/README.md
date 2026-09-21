@@ -1,6 +1,6 @@
 # Backend API
 
-FastAPI backend with MySQL, Google OAuth, and OpenAI integration.
+FastAPI backend with MySQL, Google-token auth, and multi-model AI via OpenRouter. See the [root README](../README.md) for the full feature set (credits, admin panel, observability, deployment).
 
 ## Requirements
 
@@ -24,7 +24,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Create a `.env` file at the root of `backend-api/`
+4. Create a `.env` file at the root of `backend-api/` (see `.env.example` for the full list, including Stripe and `ADMIN_EMAILS`)
 
 ```env
 DB_USER=user
@@ -37,11 +37,13 @@ ORIGIN_URLS=http://localhost:80
 
 SQLALCHEMY_DATABASE_URL=mysql+pymysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}
 
-OPENAI_API_KEY=your_openai_key
+OPENROUTER_API_KEY=your_openrouter_key
+OPENROUTER_MODEL=openai/gpt-4o-mini
 
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+
+ADMIN_EMAILS=you@example.com
 ```
 
 ## Development
@@ -69,11 +71,13 @@ Available at `http://localhost:8000/docs` (disabled in production).
 
 ```
 app/
-  api/endpoints/   # Route handlers (user, chatbox, openai)
+  api/endpoints/   # Route handlers (user, chatbox, openai, credits, config, admin)
+  api/dependencies.py  # Auth, credit-gating, and admin-role dependencies
   core/            # Database connection and config
   models/          # SQLAlchemy models, schemas, seed data
-  utils/           # AI utilities
-tests/             # Test suite
+  utils/           # AI utilities (OpenRouter client)
+  tracing.py       # OpenTelemetry setup (exports to Tempo)
+tests/             # Test suite (62 tests)
 dev.sh             # Local MySQL setup script
 dockerfile         # Container image
 ```

@@ -47,15 +47,19 @@ npm run lint
 |---|---|
 | `/` | Home |
 | `/about` | About |
-| `/trending` | Trending |
+| `/trending` | Trending — browse/like/comment on shared conversations |
 | `/settings` | Settings (protected, requires login) |
+| `/credits` | Buy credit packs via Stripe (protected) |
+| `/usage` | Usage/transaction history (protected) |
+| `/admin/*` | Admin panel — users, credits, trending moderation, model settings (protected, requires `role = "admin"`) |
 
 ## Project Structure
 
 ```
 src/
-  components/   # Reusable UI components (Header, Footer, Login, etc.)
-  pages/        # Route-level pages (Home, Trending, NotFound, etc.)
+  components/   # Reusable UI components (Header, Footer, Login, Settings, InsufficientCreditsModal, etc.)
+  pages/        # Route-level pages (Home, Trending, Credits, Usage, Admin, NotFound)
+  hooks/        # Data hooks (e.g. useCredits)
   utils/        # Validation helpers
   api.jsx       # API base URL config
   App.jsx       # App entry, routing, auth state
