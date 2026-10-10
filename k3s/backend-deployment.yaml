@@ -20,8 +20,8 @@ spec:
           command: ['sh', '-c', 'until nc -z mysql 3306; do echo "Waiting for MySQL..."; sleep 3; done']
           resources:
             requests:
-              cpu: 10m
-              memory: 16Mi
+              cpu: 50m
+              memory: 32Mi
             limits:
               cpu: 50m
               memory: 32Mi
@@ -36,8 +36,8 @@ spec:
                 name: botwhy-backend-secret
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 500m
+              memory: 256Mi
             limits:
               cpu: 500m
               memory: 256Mi
