@@ -16,6 +16,8 @@ RUN npm run build
 
 FROM nginx:1.30.4-alpine
 
+RUN apk upgrade --no-cache brotli-libs
+
 COPY --from=build /app/dist /usr/share/nginx/html
 
 COPY default.conf /etc/nginx/conf.d/default.conf
