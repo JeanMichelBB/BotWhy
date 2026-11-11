@@ -17,9 +17,7 @@
 
 .trending__title {
     font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
+    font-weight: 500;
     margin-bottom: 24px;
     color: var(--color-text);
     text-align: left;
@@ -104,8 +102,6 @@
 
 .conversation__toggleButton {
     font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--color-muted);
     background: transparent;
     border: none;
@@ -178,8 +174,6 @@
     border: 1px solid var(--color-muted);
     padding: 4px 16px;
     font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     cursor: pointer;
     transition: border-color 0.15s, color 0.15s;
 }
@@ -262,7 +256,6 @@
 
 .comment__user {
     font-size: 11px;
-    letter-spacing: 0.05em;
     color: var(--color-text);
 }
 
@@ -290,9 +283,7 @@
 .comment__confirm-no {
     background: none;
     border: 1px solid var(--color-muted);
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-size: 11px;
     cursor: pointer;
     padding: 2px 8px;
     transition: border-color 0.15s, color 0.15s;
@@ -345,7 +336,6 @@
     background: none;
     border: none;
     font-size: 12px;
-    letter-spacing: 0.04em;
     cursor: pointer;
     color: var(--color-muted);
     margin-left: 10px;
@@ -366,9 +356,7 @@
 .conversation__delete-confirm-no {
     background: none;
     border: 1px solid var(--color-muted);
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-size: 11px;
     cursor: pointer;
     padding: 2px 8px;
     transition: border-color 0.15s, color 0.15s;
@@ -412,8 +400,6 @@
 .report-cancel-button {
     padding: 8px 18px;
     font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     border: 1px solid var(--color-muted);
     cursor: pointer;
     transition: border-color 0.15s, background 0.15s, color 0.15s;
@@ -443,7 +429,6 @@
 .no-conversations {
     text-align: center;
     font-size: 13px;
-    letter-spacing: 0.05em;
     color: var(--color-muted);
     padding: 40px 0;
 }

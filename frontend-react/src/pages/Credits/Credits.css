@@ -9,8 +9,6 @@
 
 .credits__back {
   font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--color-muted);
   text-decoration: none;
   display: inline-block;
@@ -24,9 +22,7 @@
 
 .credits__title {
   font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
+  font-weight: 500;
   color: var(--color-text);
   border-bottom: 1px solid var(--color-muted);
   padding-bottom: 12px;
@@ -43,14 +39,12 @@
 
 .credits__balance-label {
   font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--color-muted);
 }
 
 .credits__balance-amount {
   font-size: 32px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--color-text);
 }
 
@@ -60,9 +54,7 @@
 
 .credits__section-title {
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
+  font-weight: 500;
   color: var(--color-muted);
   border-bottom: 1px solid var(--color-muted);
   padding-bottom: 8px;
@@ -100,15 +92,13 @@
 
 .credits__pack-label {
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-weight: 500;
   color: var(--color-text);
 }
 
 .credits__pack-price {
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--color-text);
 }
 
@@ -140,8 +130,6 @@
   color: var(--color-bg);
   border: 1px solid var(--color-text);
   font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
@@ -185,9 +173,7 @@
 
 .credits__table th {
   text-align: left;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 11px;
   color: var(--color-muted);
   padding-bottom: 8px;
   border-bottom: 1px solid var(--color-muted);

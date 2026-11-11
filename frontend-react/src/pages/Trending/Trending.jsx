@@ -226,12 +226,8 @@ const Trending = ({ user_id }) => {
                     <div className="trending__list">
                         {conversations.length === 0 &&
                             <div className="no-conversations">
-                                <h2>No Trending Conversations</h2>
-                                <p>No trending conversations available at the moment.</p>
-                                <p>It looks like the community is quiet right now. But don't worry, you can be the one to get things started!</p>
-                                <p>Consider sharing your thoughts or starting a discussion on a topic that interests you. Your conversation could be the next big thing that everyone talks about!</p>
-                                <p>Or, if you're just browsing, check back later. New trending conversations are always just around the corner.</p>
-                                <p>Happy chatting!</p>
+                                <h2>No trending conversations</h2>
+                                <p>Nothing is trending yet. Start a conversation to get things going.</p>
                             </div>
                         }
                         {conversations.map(conversation => {

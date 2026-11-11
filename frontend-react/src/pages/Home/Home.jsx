@@ -491,7 +491,7 @@ const Home = ({ user_id, is_free_tier = false, free_messages_remaining = 10 }) =
                                                     </span>
                                                     <span className="chatbox__model-option-meta">
                                                         {locked ? (
-                                                            <span className="chatbox__model-option-locked-label">🔒 Upgrade</span>
+                                                            <span className="chatbox__model-option-locked-label">Upgrade</span>
                                                         ) : (
                                                             <>
                                                                 <span className="chatbox__model-tier">

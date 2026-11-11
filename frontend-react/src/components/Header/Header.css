@@ -17,9 +17,7 @@
 
 .header__logo {
     font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    font-weight: 500;
     padding-left: 15px;
 }
 
@@ -27,9 +25,7 @@
     background: none;
     border: none;
     font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    font-weight: 500;
     cursor: pointer;
     color: var(--color-text);
 }
@@ -37,9 +33,7 @@
 .header__logo-link {
     text-decoration: none;
     color: var(--color-text);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .header__nav {
@@ -52,8 +46,6 @@
     text-decoration: none;
     color: var(--color-muted);
     font-size: 12px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
     transition: color 0.15s;
 }
 
@@ -78,8 +70,6 @@
 .header__link_login {
     text-decoration: none;
     font-size: 12px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
     color: var(--color-bg);
     background-color: var(--color-action);
     border: 1px solid var(--color-text);
@@ -109,7 +99,7 @@
 
 .profile__name {
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
     display: block;
     margin-bottom: 8px;
 }
@@ -142,8 +132,6 @@
     text-decoration: none;
     color: var(--color-muted);
     font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     transition: color 0.15s;
 }
 
@@ -172,8 +160,6 @@
     border: 1px solid var(--color-muted);
     padding: 6px 14px;
     font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     cursor: pointer;
     transition: border-color 0.15s, color 0.15s;
 }
@@ -189,8 +175,6 @@
     border: 1px solid var(--color-muted);
     padding: 6px 14px;
     font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     cursor: pointer;
     transition: border-color 0.15s, color 0.15s;
 }
@@ -203,8 +187,6 @@
     text-decoration: none;
     color: var(--color-muted);
     font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     transition: color 0.15s;
 }
 

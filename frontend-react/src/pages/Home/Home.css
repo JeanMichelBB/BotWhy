@@ -164,9 +164,7 @@
     border-left: 1px solid var(--color-muted);
     cursor: pointer;
     font-size: 14px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    font-weight: 600;
+    font-weight: 500;
     transition: background 0.15s, color 0.15s;
 }
 
@@ -186,7 +184,6 @@
 .chatbox__model-label {
     font-size: 11px;
     color: var(--color-muted);
-    letter-spacing: 0.05em;
     white-space: nowrap;
 }
 
@@ -248,8 +245,7 @@
 .chatbox__model-picker-balance {
     font-size: 11px;
     color: var(--color-muted);
-    letter-spacing: 0.05em;
-}
+    }
 
 .chatbox__model-picker-close {
     background: none;
@@ -310,8 +306,7 @@
 .chatbox__model-option-label {
     flex: 1;
     font-size: 12px;
-    letter-spacing: 0.03em;
-}
+    }
 
 .chatbox__model-option-meta {
     display: flex;
@@ -320,14 +315,12 @@
 }
 
 .chatbox__model-option-price {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--color-muted);
-    letter-spacing: 0.03em;
-}
+    }
 
 .chatbox__model-option-label {
     font-size: 12px;
-    letter-spacing: 0.03em;
     flex: 1;
 }
 
@@ -338,10 +331,9 @@
 }
 
 .chatbox__model-option-price {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--color-muted);
-    letter-spacing: 0.03em;
-}
+    }
 
 .chatbox__model-btn {
     width: 30px;
@@ -385,8 +377,6 @@
     border: 1px solid var(--color-muted);
     cursor: pointer;
     font-size: 13px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     transition: border-color 0.15s, color 0.15s;
 }
 
@@ -401,9 +391,7 @@
     border: 1px solid var(--color-text);
     cursor: pointer;
     font-size: 13px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-weight: 600;
+    font-weight: 500;
     transition: background 0.15s, color 0.15s;
     white-space: nowrap;
 }
@@ -463,8 +451,7 @@
     justify-content: space-between;
     align-items: center;
     font-size: 15px;
-    letter-spacing: 0.02em;
-}
+    }
 
 .chatbox__alert-close {
     background: none;
@@ -515,20 +502,20 @@
 /* Free tier model button */
 .chatbox__model-btn--free {
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--color-text);
 }
 
 .chatbox__model-btn-count {
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 500;
     line-height: 1;
 }
 
 /* Free tier picker notice */
 .chatbox__model-picker-free-notice {
     padding: 8px 14px;
-    font-size: 10px;
+    font-size: 11px;
     color: var(--color-muted);
     border-bottom: 1px solid var(--color-border, var(--color-muted));
     line-height: 1.4;
@@ -547,7 +534,7 @@
 }
 
 .chatbox__model-option-locked-label {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--color-muted);
 }
 
@@ -555,9 +542,7 @@
 .chatbox__model-option-free-badge {
     margin-left: 6px;
     font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-weight: 500;
     color: var(--color-muted);
     border: 1px solid var(--color-muted);
     padding: 1px 4px;

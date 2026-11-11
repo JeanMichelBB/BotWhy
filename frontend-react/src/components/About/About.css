@@ -51,8 +51,8 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    text-transform: uppercase; /* Capitalize text */
-    font-weight: bold; /* Bold text */
+    /* Capitalize text */
+    font-weight: 500; /* Bold text */
 }
 
 .about__button:hover {
