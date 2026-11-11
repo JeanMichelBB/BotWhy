@@ -13,5 +13,5 @@ images:
     newTag: 96d50d0bbe4c2bab14e7342537464364e7d3c503
     newName: jeanmichelbb/oci-frontend
   - name: jeanmichelbb/oci-backend
-    newTag: 31886795d147d7801c23f3b5963210cdbe455ce3
+    newTag: 0ba8234921e6e48d771f705abf0438745a5eca97
     newName: jeanmichelbb/oci-backend
